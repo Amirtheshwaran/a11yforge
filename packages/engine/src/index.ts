@@ -172,6 +172,14 @@ export {
   type RepairTypecheck,
 } from "./verify/repair-fixture.js";
 export {
+  RunArtifactError,
+  buildRunViewModel,
+  findDemoRunId,
+  listRunSummaries,
+  resolveRunDir,
+  type ArtifactUrlFor,
+} from "./runview/read-model.js";
+export {
   cleanRepairWorkspace,
   createRepairWorkspace,
   defaultWorkspacesDir,

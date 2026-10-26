@@ -71,6 +71,27 @@ export {
   ScreenshotRefSchema,
 } from "./interaction.js";
 export {
+  AttemptViewSchema,
+  CriticViewSchema,
+  FocusTraceStepSchema,
+  PipelineStageSchema,
+  RunSummarySchema,
+  RunViewModelSchema,
+  VerificationViewSchema,
+  containsNoSecrets,
+  isAllowedArtifactName,
+  toDisplayPath,
+} from "./runview.js";
+export type {
+  AttemptView,
+  CriticView,
+  FocusTraceStep,
+  PipelineStage,
+  RunSummary,
+  RunViewModel,
+  VerificationView,
+} from "./runview.js";
+export {
   AssertionSnapshotSchema,
   CriticDecisionSchema,
   CriticInputSchema,

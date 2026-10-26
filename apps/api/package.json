@@ -2,14 +2,18 @@
   "name": "@a11yforge/api",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "tsx --watch src/index.ts",
     "build": "tsc -p tsconfig.build.json",
+    "pretest": "pnpm build",
+    "test": "node --test --test-concurrency=1 \"dist/**/*.test.js\"",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ."
   },
   "dependencies": {
+    "@a11yforge/engine": "workspace:*",
     "@a11yforge/shared": "workspace:*",
     "fastify": "^5.6.2"
   },

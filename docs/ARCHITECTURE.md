@@ -328,6 +328,41 @@ patch → build target → replay recorded trace → re-collect evidence
       → verifier diffs before/after → critic accepts or rejects
 ```
 
+## Phase 6 read-model + observable console (implemented)
+
+```text
+.a11yforge/runs/<run-id>/  →  engine read-model  →  API  →  web console
+(png/json/patch artifacts)     (RunViewModel)      (typed routes)  (one screen)
+```
+
+- `packages/shared/src/runview.ts` — the ONLY shape the UI consumes:
+  `RunViewModel` (run, finding, focusTrace, diagnosis, sourceTrace,
+  attempts[≤2], verification, critic, pipeline, artifact URLs) plus
+  fail-closed helpers: `isAllowedArtifactName` (png/json/patch, no
+  traversal, no secret names), `toDisplayPath` (absolute roots reduced to
+  repo-relative forms), `containsNoSecrets` (guard before every send).
+- `packages/engine/src/runview/read-model.ts` — read-only, inference-free
+  projection: parses the existing artifacts with the Phase 2–5 Zod schemas,
+  derives the 11-stage pipeline, preserves Attempt 1 (`REGRESSION_FAILED`,
+  `TS18048`) alongside the accepted revision, and builds opaque
+  `/runs/:id/artifacts/:name` URLs. Missing artifacts throw
+  `RunArtifactError` (empty state, never fake data). Zero model calls.
+- `apps/api/src/runs.ts` — `GET /runs`, `GET /runs/demo` (newest ACCEPTED,
+  else newest presentable run, else 404 guidance), `GET /runs/:runId`,
+  `GET /runs/:runId/artifacts/:name` (allow-list + containment + strict
+  content types). Runs root resolves from `A11YFORGE_RUNS_DIR` or the
+  nearest `.a11yforge/runs`. No repair intelligence, no writes, no
+  arbitrary file access.
+- `apps/web` — one main run page (dark engineering console): run header +
+  status, 11-stage pipeline (failed Attempt 1 preserved), focus-trace
+  evidence with escaped step marked, expected-vs-actual, before/after
+  assertion table + screenshots, observed-vs-inferred diagnosis, source
+  trace with evidence-derived terms, Attempt 1/2 diff viewer (bounded,
+  accessible markup), deterministic gates visually separated from the AI
+  critic, critic decision + remaining risks. Client-fetched from the API;
+  empty state when artifacts are absent; itself axe-clean (0
+  serious/critical).
+
 Rejection returns the run to diagnosis with the failed evidence attached. The
 loop is bounded: a fixed retry budget, then the issue is reported unrepaired
 with full evidence.

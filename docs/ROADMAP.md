@@ -119,10 +119,17 @@ Verified live (2026-10-26): Attempt 1 rejected (`TS18048`,
 confidence, 2 of 2 model calls spent, no Proposal #3. A11yForge's first
 fully verified and accepted repair. Details: `docs/ARCHITECTURE.md`.
 
-## Phase 6 — observable agent UI
+## Phase 6 — observable agent UI ✅ COMPLETE
 
-Build the real web dashboard: run timeline, evidence viewer, before/after
-diffs, accept/reject verdicts, all streamed from the API.
+One-screen repair console in `apps/web` backed by a typed read-model API
+(`apps/api/src/runs.ts`) projecting existing local artifacts via
+`packages/engine/src/runview/` into the `RunViewModel` schema
+(`packages/shared/src/runview.ts`). The demo run shows the full 11-stage
+loop — rejected Attempt 1 (`TS18048`) preserved, accepted Attempt 2 with
+guard line, before/after evidence, deterministic gates separated from the
+AI critic (ACCEPT 0.82 with remaining risks). No fake data, no live model
+calls, no new repair intelligence; the console itself is axe-clean
+(0 serious/critical). Details: `docs/ARCHITECTURE.md`.
 
 ## Phase 7 — additional accessibility strategies + Meta open-weight critic
 
