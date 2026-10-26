@@ -70,6 +70,26 @@ export {
   ScenarioStepSchema,
   ScreenshotRefSchema,
 } from "./interaction.js";
+export {
+  AssertionSnapshotSchema,
+  CriticDecisionSchema,
+  CriticInputSchema,
+  REPAIR_LIFECYCLE_TRANSITIONS,
+  RepairLifecycleSchema,
+  RepairLifecycleStateSchema,
+  RepairLifecycleTransitionSchema,
+  RepairVerificationResultSchema,
+  isRepairLifecycleTerminal,
+} from "./verify.js";
+export type {
+  AssertionSnapshot,
+  CriticDecision,
+  CriticInput,
+  RepairLifecycle,
+  RepairLifecycleState,
+  RepairLifecycleTransition,
+  RepairVerificationResult,
+} from "./verify.js";
 export type {
   EvidenceType,
   FocusObservation,

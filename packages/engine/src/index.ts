@@ -116,3 +116,68 @@ export {
   type ProposeFixtureDeps,
   type ProposeFixtureResult,
 } from "./repair/propose.js";
+export {
+  RepairApplyError,
+  applyRepairProposal,
+  buildLineDiff,
+  countAnchorOccurrences,
+  resolveWorkspacePath,
+  type AppliedEdit,
+  type ApplyRepairResult,
+} from "./verify/apply.js";
+export {
+  buildWorkspace,
+  MAX_BUILD_OUTPUT_CHARS,
+  type BuildResult,
+  type BuildWorkspaceDeps,
+} from "./verify/build.js";
+export {
+  assertCriticEvidenceKnown,
+  buildCriticInput,
+  CriticEvidenceError,
+  requestCriticDecision,
+  type RequestCriticDeps,
+  type RequestCriticResult,
+} from "./verify/critic.js";
+export {
+  IllegalLifecycleTransitionError,
+  newRepairLifecycle,
+  transitionRepairLifecycle,
+} from "./verify/lifecycle.js";
+export {
+  compareAxeScans,
+  axeRuleIdsOf,
+  compareScenarioAssertions,
+  evaluateAcceptanceGate,
+  snapshotTargetAssertion,
+  type AcceptanceGateInput,
+  type AcceptanceGateResult,
+  type AxeComparison,
+  type VerificationComparison,
+} from "./verify/regression.js";
+export {
+  FOCUS_CONTAINED_AFTER_SCREENSHOT,
+  replayCheckoutScenario,
+  scanRepairedTarget,
+  startStaticServer,
+  type ReplayRepairedDeps,
+  type StaticServer,
+} from "./verify/replay.js";
+export {
+  formatRepairSummary,
+  runRepairFixture,
+  type RepairDrivers,
+  type RepairFixtureDeps,
+  type RepairFixtureResult,
+  type RepairTypecheck,
+} from "./verify/repair-fixture.js";
+export {
+  cleanRepairWorkspace,
+  createRepairWorkspace,
+  defaultWorkspacesDir,
+  REPAIR_WORKSPACE_BASE_CONFIG,
+  REPAIR_WORKSPACE_ENTRIES,
+  REPAIR_WORKSPACE_FIXTURE_DIR,
+  REPAIR_WORKSPACES_DIRNAME,
+  type RepairWorkspace,
+} from "./verify/workspace.js";

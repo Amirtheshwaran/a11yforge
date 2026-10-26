@@ -55,6 +55,26 @@ export const DIAGNOSIS_OPERATION = "accessibility-diagnosis";
 /** Operation label for the repair-proposal request (telemetry-distinct). */
 export const REPAIR_OPERATION = "accessibility-repair-proposal";
 
+/** Operation label for the repair-critic request (telemetry-distinct). */
+export const CRITIC_OPERATION = "repair-critic-review";
+
+/**
+ * Completion budget for a single structured critic decision.
+ *
+ * A verdict is smaller than a proposal (no source text carried), so 2048
+ * is the starting budget — a maximum, not a target.
+ */
+export const CRITIC_MAX_OUTPUT_TOKENS = 2048;
+
+/**
+ * Reasoning effort for the critic request.
+ *
+ * Adjudicating supplied evidence against a fixed schema is bounded work,
+ * not open-ended reasoning, so `"low"` leaves the completion budget for
+ * the visible structured verdict.
+ */
+export const CRITIC_REASONING_EFFORT: DiagnosisReasoningEffort = "low";
+
 /**
  * Completion budget for a single structured repair proposal.
  *

@@ -194,6 +194,60 @@ Shared shapes (`RepairProposal`, `RepairEdit`, `RepairContextBundle`,
 repair provider call lives in `packages/meta`; locator, trace, context,
 validation, and both CLIs live in `packages/engine`.
 
+## Phase 5 autonomous repair loop (implemented)
+
+```text
+pnpm repair:fixture (at most ONE paid request, only after the gate passes)
+  → engine selects the latest run holding scenario + diagnosis +
+    source-trace + repair-proposal.json (never regenerates any of them)
+  → re-validates the proposal against its exact context (refusal → REJECTED)
+  → creates an isolated workspace `.a11yforge/workspaces/<repair-id>/`
+    (copies only fixture entries needed to build; node_modules symlinked;
+    retained as artifact, never auto-deleted)
+  → applies every edit inside the workspace only (path containment,
+    file exists, originalText exactly once — ambiguous/missing refused)
+  → records a deterministic diff (`repair-diff.patch`)
+  → runs the real fixture build in the workspace (command, exit, duration,
+    bounded output captured; failure → BUILD_FAILED, no second model call)
+  → serves the built `dist/` over a local static server and replays the
+    EXACT `checkout-modal-keyboard` scenario (failure → VERIFY_FAILED)
+  → fresh baseline axe scan of the main fixture vs repaired scan, rule-set
+    diffed (new serious/critical or removed baseline defect → REGRESSION_FAILED)
+  → fixture typecheck (`tsc --noEmit`) in the workspace
+  → deterministic acceptance gate (pure conjunction — no AI): applied
+    safely, build passed, same scenario replayed, target assertion flips
+    to passing, no new serious/critical axe regressions, typecheck clean
+  → ONLY if the gate passes: exactly ONE Meta critic request
+    (model muse-spark-1.3-contributor, low reasoning, 2048 tokens,
+    bounded CriticInput — measured artifacts only, never the repository)
+  → local Zod + evidence-ID validation of the verdict
+  → ACCEPTED on critic ACCEPT, REJECTED otherwise
+  → terminal report + artifacts in the source run dir
+```
+
+Two-level trust model:
+
+1. The deterministic verifier is authoritative. Build outcome, replayed
+   assertion, and axe comparison decide eligibility; any failure REJECTS
+   without spending the critic call.
+2. The AI critic adjudicates ONLY an otherwise passing repair. It cannot
+   override deterministic failure — it is never called when the gate
+   fails, and a REJECT verdict still rejects.
+
+Lifecycle states (`packages/shared` `RepairLifecycleState`, persisted in
+`repair-lifecycle.json`): PROPOSED → APPLYING → APPLIED →
+BUILD_FAILED / VERIFY_FAILED / REGRESSION_FAILED / VERIFIED →
+ACCEPTED / REJECTED. Failure states and verdicts are terminal; VERIFIED
+is transient (gate passed, critic pending). The main fixture source is
+never mutated: the accepted workspace stays an artifact and the
+intentionally broken fixture remains the before-state baseline.
+
+Shared shapes (`RepairLifecycle`, `RepairVerificationResult`,
+`CriticInput`, `CriticDecision`) live in `packages/shared`; the critic
+provider call lives in `packages/meta` (`critiqueRepairWithMeta`); the
+workspace/apply/build/replay/regression/gate/orchestrator modules and
+the CLI live in `packages/engine/src/verify/`.
+
 ## Future browser evidence flow
 
 ```text

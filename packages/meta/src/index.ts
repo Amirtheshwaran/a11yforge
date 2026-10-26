@@ -9,6 +9,9 @@
 export const META_PROVIDER_NAME = "a11yforge-meta";
 
 export {
+  CRITIC_MAX_OUTPUT_TOKENS,
+  CRITIC_OPERATION,
+  CRITIC_REASONING_EFFORT,
   DEFAULT_META_MODEL,
   DIAGNOSIS_MAX_OUTPUT_TOKENS,
   DIAGNOSIS_OPERATION,
@@ -25,13 +28,24 @@ export {
   requireApiKey,
 } from "./config.js";
 export type { DiagnosisReasoningEffort } from "./config.js";
-export { DIAGNOSIS_SYSTEM_PROMPT, REPAIR_SYSTEM_PROMPT } from "./prompt.js";
+export {
+  CRITIC_SYSTEM_PROMPT,
+  DIAGNOSIS_SYSTEM_PROMPT,
+  REPAIR_SYSTEM_PROMPT,
+} from "./prompt.js";
 export {
   ACCESSIBILITY_DIAGNOSIS_JSON_SCHEMA,
+  CRITIC_DECISION_JSON_SCHEMA,
+  CRITIC_DECISION_JSON_SCHEMA_NAME,
   DIAGNOSIS_JSON_SCHEMA_NAME,
   REPAIR_PROPOSAL_JSON_SCHEMA,
   REPAIR_PROPOSAL_JSON_SCHEMA_NAME,
 } from "./jsonschema.js";
+export { critiqueRepairWithMeta } from "./critic.js";
+export type {
+  CritiqueRepairOptions,
+  CritiqueRepairResult,
+} from "./critic.js";
 export type { JsonSchemaDocument } from "./jsonschema.js";
 export { ModelCallBudget, ModelCallBudgetExhaustedError } from "./budget.js";
 export { assertRepairEvidenceKnown, proposeRepairWithMeta } from "./repair.js";

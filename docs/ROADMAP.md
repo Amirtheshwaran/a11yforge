@@ -77,11 +77,29 @@ Proposals are NOT trusted or applied until Phase 5 verification: no fixture
 source was modified, nothing was rebuilt, and no post-repair replay ran.
 Details: `docs/ARCHITECTURE.md`.
 
-## Phase 5 — build/replay/verifier/critic
+## Phase 5 — build/replay/verifier/critic ✅ COMPLETE
 
-Rebuild the fixture with the patch, replay the recorded trace, diff
-before/after evidence, and let a critic accept or reject the repair. Bounded
-retries, then report unrepaired with evidence.
+Closed autonomous repair loop in `packages/engine/src/verify/` plus a
+bounded Meta critic in `packages/meta` (`repair-critic-review`, 1 call,
+2048 tokens, low reasoning). Single entry point `pnpm repair:fixture`
+consumes the existing scenario/diagnosis/trace/proposal and executes:
+validate proposal → isolated workspace (`.a11yforge/workspaces/`,
+retained as artifact) → safe apply (exact anchors, deterministic diff)
+→ real build → replay of the EXACT `checkout-modal-keyboard` scenario →
+fresh baseline vs repaired axe comparison → fixture typecheck →
+deterministic acceptance gate → critic ONLY if the gate passes →
+ACCEPTED/REJECTED.
+
+First live run (`pnpm repair:fixture`, 2026-10-26): the proposed focus
+trap functionally resolved the escape — the replayed scenario cycled 11
+Tab presses inside `#checkout-modal` and `focus-contained-in-modal`
+flipped to passing with the 4-rule axe baseline preserved — but the
+deterministic gate REJECTED the repair (`REGRESSION_FAILED`) because the
+proposed handler fails strict `tsc --noEmit` (`TS18048` under
+`noUncheckedIndexedAccess`). Per the two-level trust model the critic
+was correctly NOT called (1 of 2 model calls spent, on the proposal).
+The critic path itself is implemented and covered by mocked tests. The
+main fixture source was never mutated. Details: `docs/ARCHITECTURE.md`.
 
 ## Phase 6 — observable agent UI
 

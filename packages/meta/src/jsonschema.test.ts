@@ -2,10 +2,13 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   AccessibilityDiagnosisSchema,
+  CriticDecisionSchema,
   RepairProposalSchema,
 } from "@a11yforge/shared";
 import {
   ACCESSIBILITY_DIAGNOSIS_JSON_SCHEMA,
+  CRITIC_DECISION_JSON_SCHEMA,
+  CRITIC_DECISION_JSON_SCHEMA_NAME,
   DIAGNOSIS_JSON_SCHEMA_NAME,
   REPAIR_PROPOSAL_JSON_SCHEMA,
   REPAIR_PROPOSAL_JSON_SCHEMA_NAME,
@@ -106,5 +109,39 @@ describe("repair proposal JSON schema (constrained decoding shape)", () => {
     assert.equal(properties["edits"]?.["maxItems"], 4);
     assert.equal(properties["targetFiles"]?.["maxItems"], 2);
     assert.equal(properties["verificationPlan"]?.["minItems"], 1);
+  });
+});
+
+describe("critic decision JSON schema (constrained decoding shape)", () => {
+  it("names the schema and forbids extra properties", () => {
+    assert.equal(CRITIC_DECISION_JSON_SCHEMA_NAME, "repair-critic-decision");
+    assert.equal(CRITIC_DECISION_JSON_SCHEMA.type, "object");
+    assert.equal(CRITIC_DECISION_JSON_SCHEMA.additionalProperties, false);
+  });
+
+  it("requires exactly the fields the Zod schema validates", () => {
+    const probe = {
+      decision: "ACCEPT",
+      confidence: 0.9,
+      summary: "s",
+      evidenceIds: ["ev-focus-escape"],
+      verificationConcerns: [],
+      remainingRisks: [],
+    };
+    const parsed = CriticDecisionSchema.parse(probe);
+    assert.deepEqual(
+      [...CRITIC_DECISION_JSON_SCHEMA.required].sort(),
+      Object.keys(parsed).sort(),
+    );
+  });
+
+  it("constrains the verdict and confidence bounds on the wire", () => {
+    const properties = CRITIC_DECISION_JSON_SCHEMA.properties as Record<
+      string,
+      Record<string, unknown>
+    >;
+    assert.deepEqual(properties["decision"]?.["enum"], ["ACCEPT", "REJECT"]);
+    assert.equal(properties["confidence"]?.["minimum"], 0);
+    assert.equal(properties["confidence"]?.["maximum"], 1);
   });
 });

@@ -10,6 +10,44 @@
 
 export const DIAGNOSIS_JSON_SCHEMA_NAME = "accessibility-diagnosis";
 
+export const CRITIC_DECISION_JSON_SCHEMA_NAME = "repair-critic-decision";
+
+/**
+ * Wire schema for the critic verdict. Mirrors `CriticDecisionSchema` in
+ * `@a11yforge/shared`; drift is covered by a unit test.
+ */
+export const CRITIC_DECISION_JSON_SCHEMA: JsonSchemaDocument = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  type: "object",
+  properties: {
+    decision: { type: "string", enum: ["ACCEPT", "REJECT"] },
+    confidence: { type: "number", minimum: 0, maximum: 1 },
+    summary: { type: "string", minLength: 1, maxLength: 1000 },
+    evidenceIds: {
+      type: "array",
+      minItems: 1,
+      items: { type: "string", minLength: 1 },
+    },
+    verificationConcerns: {
+      type: "array",
+      items: { type: "string" },
+    },
+    remainingRisks: {
+      type: "array",
+      items: { type: "string" },
+    },
+  },
+  required: [
+    "decision",
+    "confidence",
+    "summary",
+    "evidenceIds",
+    "verificationConcerns",
+    "remainingRisks",
+  ],
+  additionalProperties: false,
+};
+
 export const REPAIR_PROPOSAL_JSON_SCHEMA_NAME = "accessibility-repair-proposal";
 
 /**

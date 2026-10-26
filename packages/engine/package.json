@@ -17,7 +17,8 @@
     "scenario:fixture": "node dist/scenario-fixture.js",
     "diagnose:fixture": "node dist/diagnose-fixture.js",
     "trace:fixture": "node dist/trace-fixture.js",
-    "propose:fixture": "node dist/propose-fixture.js"
+    "propose:fixture": "node dist/propose-fixture.js",
+    "repair:fixture": "node dist/repair-fixture.js"
   },
   "dependencies": {
     "@a11yforge/meta": "workspace:*",
