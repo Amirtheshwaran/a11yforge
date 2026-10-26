@@ -42,9 +42,9 @@ RUN pnpm --filter @a11yforge/engine exec playwright install --with-deps chromium
 
 # Writable runtime root for live-run artifacts and repair workspaces.
 # The committed demo/accepted-run bundle stays read-only inside the image.
-RUN mkdir -p /data/a11yforge /ms-playwright && \
-    groupadd -r appuser && useradd -r -g appuser appuser && \
-    chown -R appuser:appuser /app /data/a11yforge /ms-playwright
+RUN groupadd -r appuser && useradd -r -m -d /home/appuser -g appuser appuser && \
+    mkdir -p /data/a11yforge /ms-playwright /home/appuser/.cache/node/corepack && \
+    chown -R appuser:appuser /app /data/a11yforge /ms-playwright /home/appuser
 
 USER appuser
 EXPOSE 3000 3001
