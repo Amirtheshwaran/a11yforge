@@ -14,6 +14,8 @@
     "scan:fixture": "pnpm --filter @a11yforge/engine scan:fixture",
     "scenario:fixture": "pnpm --filter @a11yforge/engine scenario:fixture",
     "diagnose:fixture": "pnpm --filter @a11yforge/engine diagnose:fixture",
+    "trace:fixture": "pnpm --filter @a11yforge/engine trace:fixture",
+    "propose:fixture": "pnpm --filter @a11yforge/engine propose:fixture",
     "test:engine": "pnpm --filter @a11yforge/engine test",
     "test:meta": "pnpm --filter @a11yforge/meta test"
   },

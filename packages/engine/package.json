@@ -15,7 +15,9 @@
     "scan": "node dist/cli.js",
     "scan:fixture": "node dist/scan-fixture.js",
     "scenario:fixture": "node dist/scenario-fixture.js",
-    "diagnose:fixture": "node dist/diagnose-fixture.js"
+    "diagnose:fixture": "node dist/diagnose-fixture.js",
+    "trace:fixture": "node dist/trace-fixture.js",
+    "propose:fixture": "node dist/propose-fixture.js"
   },
   "dependencies": {
     "@a11yforge/meta": "workspace:*",

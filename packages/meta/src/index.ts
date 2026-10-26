@@ -17,18 +17,28 @@ export {
   META_API_BASE_URL,
   META_MODEL_ENV,
   MODEL_API_KEY_ENV,
+  REPAIR_MAX_OUTPUT_TOKENS,
+  REPAIR_OPERATION,
+  REPAIR_REASONING_EFFORT,
   getMaxModelCallsPerRun,
   getMetaModel,
   requireApiKey,
 } from "./config.js";
 export type { DiagnosisReasoningEffort } from "./config.js";
-export { DIAGNOSIS_SYSTEM_PROMPT } from "./prompt.js";
+export { DIAGNOSIS_SYSTEM_PROMPT, REPAIR_SYSTEM_PROMPT } from "./prompt.js";
 export {
   ACCESSIBILITY_DIAGNOSIS_JSON_SCHEMA,
   DIAGNOSIS_JSON_SCHEMA_NAME,
+  REPAIR_PROPOSAL_JSON_SCHEMA,
+  REPAIR_PROPOSAL_JSON_SCHEMA_NAME,
 } from "./jsonschema.js";
 export type { JsonSchemaDocument } from "./jsonschema.js";
 export { ModelCallBudget, ModelCallBudgetExhaustedError } from "./budget.js";
+export { assertRepairEvidenceKnown, proposeRepairWithMeta } from "./repair.js";
+export type {
+  ProposeRepairOptions,
+  ProposeRepairResult,
+} from "./repair.js";
 export {
   MetaApiError,
   MetaMalformedResultError,

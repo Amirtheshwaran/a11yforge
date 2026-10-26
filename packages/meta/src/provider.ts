@@ -163,11 +163,12 @@ function describeEmptyContent(args: {
   return message;
 }
 
-function extractUsage(
+export function extractUsage(
   body: ChatCompletionsResponse,
   model: string,
   latencyMs: number,
   timestamp: string,
+  operation: string = DIAGNOSIS_OPERATION,
 ): ModelUsage {
   const usage = asRecord(body.usage) ?? {};
   const promptDetails =
@@ -178,7 +179,7 @@ function extractUsage(
     typeof body.id === "string" && body.id !== "" ? body.id : null;
   return {
     model,
-    operation: DIAGNOSIS_OPERATION,
+    operation,
     inputTokens: asNonNegativeIntOrNull(usage["prompt_tokens"]),
     cachedInputTokens: asNonNegativeIntOrNull(
       promptDetails["cached_tokens"],

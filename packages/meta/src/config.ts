@@ -52,6 +52,29 @@ export const DIAGNOSIS_REASONING_EFFORT: DiagnosisReasoningEffort = "low";
 /** Operation label recorded in usage telemetry and terminal output. */
 export const DIAGNOSIS_OPERATION = "accessibility-diagnosis";
 
+/** Operation label for the repair-proposal request (telemetry-distinct). */
+export const REPAIR_OPERATION = "accessibility-repair-proposal";
+
+/**
+ * Completion budget for a single structured repair proposal.
+ *
+ * A small code-repair proposal needs more visible output than a diagnosis
+ * (structured edits carry full replacement text), so 4096 is the starting
+ * budget — a maximum, not a target. Reasoning models consume hidden
+ * reasoning tokens from the same `max_completion_tokens` pool, and `"low"`
+ * effort keeps that share small.
+ */
+export const REPAIR_MAX_OUTPUT_TOKENS = 4096;
+
+/**
+ * Reasoning effort for the repair-proposal request.
+ *
+ * Proposing a minimal anchored edit is bounded work, not open-ended
+ * reasoning, so `"low"` leaves the completion budget for the visible
+ * structured proposal.
+ */
+export const REPAIR_REASONING_EFFORT: DiagnosisReasoningEffort = "low";
+
 /** Active model: override env or the default. */
 export function getMetaModel(
   env: NodeJS.ProcessEnv = process.env,
@@ -94,7 +117,7 @@ export function requireApiKey(
   if (key === undefined || key === "") {
     throw new Error(
       `Missing ${MODEL_API_KEY_ENV}: export it in your shell before running ` +
-        `a live diagnosis (e.g. \`export ${MODEL_API_KEY_ENV}=<your-key>\`). ` +
+        `a live model request (e.g. \`export ${MODEL_API_KEY_ENV}=<your-key>\`). ` +
         `No request was attempted and no test runs one.`,
     );
   }

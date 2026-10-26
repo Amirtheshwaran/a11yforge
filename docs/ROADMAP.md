@@ -50,10 +50,32 @@ Wire the Meta provider: bounded, schema-validated calls that turn evidence
 envelopes into structured diagnoses (issue, location, probable cause). Models
 interpret evidence; they never replace it.
 
-## Phase 4 — source tracing + patch generation
+## Phase 4 — source tracing + patch generation ✅ COMPLETE
 
-Map failing DOM nodes back to the fixture components that render them and
-generate minimum safe patches against that source.
+Deterministic source locator in `packages/engine` (evidence-derived search
+terms, ranked candidates, bounded snippets, sufficiency gate) plus a
+schema-constrained Meta repair-proposal call in `packages/meta`
+(`accessibility-repair-proposal`, 1 call, 4096 tokens, low reasoning) with
+local source-context validation. Shared `RepairProposal` /
+`RepairContextBundle` schemas in `packages/shared` (edits anchored by exact
+source text, ≤ 2 files / ≤ 4 edits).
+
+Verified with `pnpm trace:fixture` — deterministic, zero model calls:
+
+- search terms from evidence facts (checkout-modal, checkout-modal-close,
+  checkout-modal-email, checkout-modal-continue, background-control, …)
+- top candidate `src/App.tsx` (score 915, 8 terms), runner-up
+  `src/styles.css`; selected context `src/App.tsx` lines 117-187 plus
+  `src/styles.css` lines 108-145 (3.3 KB total)
+- artifact `.a11yforge/runs/<run-id>/source-trace.json`
+
+`pnpm propose:fixture` consumes that trace with exactly one request; without
+`MODEL_API_KEY` it fails before any network attempt (verified). No live
+repair-proposal call was made in this phase.
+
+Proposals are NOT trusted or applied until Phase 5 verification: no fixture
+source was modified, nothing was rebuilt, and no post-repair replay ran.
+Details: `docs/ARCHITECTURE.md`.
 
 ## Phase 5 — build/replay/verifier/critic
 

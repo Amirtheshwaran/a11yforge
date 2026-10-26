@@ -64,3 +64,55 @@ export type {
   DiagnoseFixtureResult,
 } from "./diagnosis/diagnose.js";
 export { formatDiagnosisSummary } from "./diagnosis/report.js";
+export { extractSearchTerms } from "./trace/search-terms.js";
+export {
+  MAX_SNIPPET_CHARS,
+  MAX_SNIPPETS_PER_FILE,
+  MAX_SNIPPET_LINES,
+  MAX_SOURCE_FILES_SCANNED,
+  MAX_SOURCE_FILE_BYTES,
+  SNIPPET_CONTEXT_LINES,
+  TRACE_IGNORED_DIRS,
+  TRACE_IGNORED_FILES,
+  TRACE_SOURCE_EXTENSIONS,
+  collectSourceFiles,
+  countOccurrences,
+  extractSnippets,
+  rankFileContent,
+  searchSourceTree,
+  type SourceCandidate,
+  type SourceSnippet,
+} from "./trace/locator.js";
+export {
+  MAX_TOTAL_CONTEXT_CHARS,
+  MAX_TRACE_CONTEXT_FILES,
+  MIN_TRACE_MATCHED_TERMS,
+  MIN_TRACE_MATCH_COUNT,
+  SourceCandidateSchema,
+  SourceSnippetSchema,
+  SourceTraceResultSchema,
+  buildSourceTrace,
+  defaultFixtureSourceRoot,
+  findLatestDiagnosedRun,
+  formatTraceSummary,
+  isTraceSufficient,
+  runTraceFixture,
+  type BuildSourceTraceArgs,
+  type DiagnosedRunSelection,
+  type SourceTraceResult,
+  type TraceFixtureDeps,
+  type TraceFixtureResult,
+} from "./trace/trace.js";
+export { buildRepairContextBundle } from "./trace/repair-context.js";
+export {
+  RepairProposalValidationError,
+  validateRepairProposal,
+  type ValidateProposalArgs,
+} from "./trace/validate-proposal.js";
+export {
+  formatProposalSummary,
+  proposePreamble,
+  runProposeFixture,
+  type ProposeFixtureDeps,
+  type ProposeFixtureResult,
+} from "./repair/propose.js";

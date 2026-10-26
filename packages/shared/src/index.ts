@@ -42,6 +42,24 @@ export type {
   ModelUsage,
 } from "./diagnosis.js";
 export {
+  MAX_REPAIR_EDITS,
+  MAX_REPAIR_FILES,
+  RepairContextBundleSchema,
+  RepairEditSchema,
+  RepairProposalSchema,
+  RepairSourceFileSchema,
+  RepairSourceSnippetSchema,
+  repairEvidenceIdsOf,
+  repairSourceFilesOf,
+} from "./repair.js";
+export type {
+  RepairContextBundle,
+  RepairEdit,
+  RepairProposal,
+  RepairSourceFile,
+  RepairSourceSnippet,
+} from "./repair.js";
+export {
   EvidenceTypeSchema,
   FocusObservationSchema,
   InteractionAssertionSchema,

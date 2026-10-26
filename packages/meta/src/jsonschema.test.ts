@@ -1,9 +1,14 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { AccessibilityDiagnosisSchema } from "@a11yforge/shared";
+import {
+  AccessibilityDiagnosisSchema,
+  RepairProposalSchema,
+} from "@a11yforge/shared";
 import {
   ACCESSIBILITY_DIAGNOSIS_JSON_SCHEMA,
   DIAGNOSIS_JSON_SCHEMA_NAME,
+  REPAIR_PROPOSAL_JSON_SCHEMA,
+  REPAIR_PROPOSAL_JSON_SCHEMA_NAME,
 } from "./jsonschema.js";
 
 describe("diagnosis JSON schema (constrained decoding shape)", () => {
@@ -54,5 +59,52 @@ describe("diagnosis JSON schema (constrained decoding shape)", () => {
     ]);
     assert.equal(properties["confidence"]?.["minimum"], 0);
     assert.equal(properties["confidence"]?.["maximum"], 1);
+  });
+});
+
+describe("repair proposal JSON schema (constrained decoding shape)", () => {
+  it("names the schema and forbids extra properties", () => {
+    assert.equal(
+      REPAIR_PROPOSAL_JSON_SCHEMA_NAME,
+      "accessibility-repair-proposal",
+    );
+    assert.equal(REPAIR_PROPOSAL_JSON_SCHEMA.type, "object");
+    assert.equal(REPAIR_PROPOSAL_JSON_SCHEMA.additionalProperties, false);
+  });
+
+  it("requires exactly the fields the Zod schema validates", () => {
+    const probe = {
+      proposalId: "prop-1",
+      diagnosisId: "diag-1",
+      summary: "s",
+      rationale: "r",
+      evidenceIds: ["ev-focus-escape"],
+      targetFiles: ["src/App.tsx"],
+      edits: [
+        {
+          filePath: "src/App.tsx",
+          originalText: "a",
+          replacementText: "b",
+          reason: "why",
+        },
+      ],
+      risks: [],
+      verificationPlan: ["rebuild project"],
+    };
+    const parsed = RepairProposalSchema.parse(probe);
+    assert.deepEqual(
+      [...REPAIR_PROPOSAL_JSON_SCHEMA.required].sort(),
+      Object.keys(parsed).sort(),
+    );
+  });
+
+  it("bounds edits and target files on the wire", () => {
+    const properties = REPAIR_PROPOSAL_JSON_SCHEMA.properties as Record<
+      string,
+      Record<string, unknown>
+    >;
+    assert.equal(properties["edits"]?.["maxItems"], 4);
+    assert.equal(properties["targetFiles"]?.["maxItems"], 2);
+    assert.equal(properties["verificationPlan"]?.["minItems"], 1);
   });
 });

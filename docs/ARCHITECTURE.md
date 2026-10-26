@@ -130,6 +130,70 @@ construction and the CLI live in `packages/engine`. No live call runs in
 tests or builds — `pnpm diagnose:fixture` without `MODEL_API_KEY` fails
 before any network attempt.
 
+## Phase 4 source-trace + repair-proposal flow (implemented)
+
+```text
+pnpm trace:fixture (free, deterministic — ZERO model calls)
+  → engine selects the latest run holding diagnosis.json + scenario.json
+    (deterministic lexical order; scan-only and pre-diagnosis runs skipped)
+  → search terms derived ONLY from known facts: `#id` tokens in the
+    evidence selectors/HTML plus ids restated in the diagnosis text
+    (packages/engine/src/trace/search-terms.ts — the model is never asked
+    which files to search)
+  → local walk of fixtures/broken-shop (local trees only; a future
+    repository-adapter seam can add remote sources without changing the
+    ranking contract): only .ts/.tsx/.js/.jsx/.css/.html, skipping
+    node_modules, dist, .next, coverage, .a11yforge, .git, playwright
+    artifacts, lockfiles, binaries, and files over 256 KB; trees beyond
+    500 readable files are refused, never silently truncated
+  → rank: score = distinctTerms * 100 + occurrences * 5 (ties: matchCount
+    desc, filePath asc); the file rendering `#checkout-modal` rises to the
+    top without any hard-coded filename
+  → bounded snippets (15 context lines, merged windows, at most 3 per file,
+    100 lines / 8000 chars each, 24 KB total) with deterministic line
+    numbers as evidence references
+  → sufficiency gate: top candidate needs ≥ 2 distinct terms, ≥ 3
+    occurrences, and ≥ 1 selected snippet — otherwise STOP, no model call
+  → terminal rank report printed; SourceTraceResult written to
+    .a11yforge/runs/<run-id>/source-trace.json (useful even with no model
+    request ever made)
+
+pnpm propose:fixture (exactly ONE paid request, manual, never in tests)
+  → loads the existing source-trace artifact; rejects a missing/invalid
+    trace ("run pnpm trace:fixture first") or an INSUFFICIENT trace
+  → builds the compact RepairContextBundle (diagnosis id, citable evidence
+    ids, observed failure, repair strategy, file metadata, bounded
+    snippets — no repo, no screenshots, no event history, no secrets)
+  → prints the credit notice (model, operation, diagnosis, source counts,
+    call budget) and fails BEFORE any network attempt without MODEL_API_KEY
+  → meta provider makes EXACTLY ONE request to
+    https://api.meta.ai/v1/chat/completions (model muse-spark-1.3-contributor
+    unless A11YFORGE_META_MODEL overrides; max_completion_tokens 4096,
+    reasoning_effort low; key from MODEL_API_KEY only)
+  → response_format.json_schema constrains decoding to the
+    accessibility-repair-proposal schema (exact-text anchors, never bare
+    prose or line-number-only edits)
+  → local validation: Zod parse + evidence-ID grounding + source-context
+    validation (target/edit files ⊆ supplied context, originalText inside
+    the supplied snippets, non-empty, replacement differs, ≤ 2 files /
+    ≤ 4 edits, confined in-root paths, on-disk existence)
+  → persists repair-proposal.json + repair-model-usage.json next to the
+    source artifacts; prints the compact proposal ending in
+    STATUS: PROPOSED — NOT APPLIED
+```
+
+Four validation layers for repair: Meta constrained decoding, local Zod
+validation, evidence-reference grounding, source-context validation. Budget:
+`ModelCallBudget` capped by `A11YFORGE_MAX_MODEL_CALLS_PER_RUN` (default 1);
+no retry loop — transport errors report, malformed results fail, rejected
+proposals fail. A proposal is never applied, rebuilt, or verified here:
+Phase 5 owns application, replay, and the accept/reject verdict.
+
+Shared shapes (`RepairProposal`, `RepairEdit`, `RepairContextBundle`,
+`MAX_REPAIR_FILES`, `MAX_REPAIR_EDITS`) live in `packages/shared`; the
+repair provider call lives in `packages/meta`; locator, trace, context,
+validation, and both CLIs live in `packages/engine`.
+
 ## Future browser evidence flow
 
 ```text
