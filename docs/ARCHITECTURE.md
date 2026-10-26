@@ -366,3 +366,58 @@ patch → build target → replay recorded trace → re-collect evidence
 Rejection returns the run to diagnosis with the failed evidence attached. The
 loop is bounded: a fixed retry budget, then the issue is reported unrepaired
 with full evidence.
+
+## Phase 6.5 live orchestration (implemented)
+
+`POST /runs` starts one controlled autonomous repair against the fixture
+(`packages/engine/src/autorun/pipeline.ts` — scan → keyboard → diagnosis →
+trace → proposal → verify → critic with real stage timeouts) and returns
+immediately; `GET /runs/:runId/status` is pollable and
+`GET /runs/:runId/events` streams the real pipeline events over SSE
+(`apps/api/src/live-runs.ts`, shapes in `packages/shared/src/live-run.ts`).
+No database: the artifact directory stays the source of truth, one run at a
+time (second start → 409), missing `MODEL_API_KEY` → 503 with guidance.
+The console renders progressive evidence honestly — instant stages display
+as instant — and settles finished live runs through the full recorded
+console. Recorded and live are never mixed: `LIVE RUN` vs `RECORDED` badges.
+
+## Phase 7 deployment + recorded demo (implemented)
+
+```text
+.a11yforge/runs/<accepted-id>/  →  pnpm demo:export  →  demo/accepted-run/
+(sanitized: no abs paths,          (manifest: mode=recorded,
+ no request IDs, no secrets)        source=real-a11yforge-run, sha256)
+        ↓
+API read path: local runs when present, else the committed bundle
+        ↓
+console lands on the RECORDED accepted run with no key, no browser, no disk
+```
+
+- `packages/engine/src/demo/bundle.ts` — exporter + validator: requires an
+  explicitly named ACCEPTED revision lifecycle, schema-validates every
+  artifact the read model consumes, keeps evidence/diffs/usage/before-after
+  screenshots, strips request IDs to null and the machine-local source root
+  to `fixtures/broken-shop`, and refuses on any absolute path, secret-like
+  value, or banned key. Nothing is written unless every check passes;
+  `pnpm demo:validate` re-verifies schemas, integrity hashes, evidence
+  completeness, and cleanliness. Zero model calls.
+- `apps/api/src/runs.ts` — `A11YFORGE_DATA_DIR` runtime root,
+  `resolveLiveRunsDir()` for writes, `resolveRunsDirWithSource()` for reads
+  (local artifacts when a run exists, else the committed bundle). Live
+  `POST /runs` writes only to the writable dir — never into `demo/`.
+- `apps/api/src/index.ts` — safe `GET /health` (status/service/version plus
+  `modelConfigured`, `demoMode`, `dataDirWritable` booleans; never keys,
+  paths, or env values), `A11YFORGE_CORS_ORIGIN`, and startup validation
+  that warns but never crashes without credentials.
+- `apps/web` — health-driven notices: the exact
+  `Live Meta execution unavailable — MODEL_API_KEY not configured` banner
+  plus a bundled-recorded explainer; the recorded console is the landing
+  state after a clean clone/build.
+- `Dockerfile` + `.dockerignore` — pinned Node 20, workspace install and
+  build, Playwright Chromium with system deps, non-root user, writable
+  `/data/a11yforge` volume, healthcheck on `/health`, no baked secrets.
+  `pnpm start` launches web + API in production mode.
+
+Trust model, unchanged: the verifier stays authoritative, the critic stays
+advisory on passing repairs, and recorded evidence is never presented as
+a live run.

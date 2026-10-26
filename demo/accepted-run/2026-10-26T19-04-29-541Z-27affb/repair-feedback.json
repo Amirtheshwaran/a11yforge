@@ -1,0 +1,36 @@
+{
+  "proposalId": "prop-checkout-modal-focus-trap-1",
+  "repairId": "repair-checkout-modal-focus-trap-1",
+  "previousLifecycleResult": "TYPECHECK_FAILED",
+  "failedStage": "typecheck",
+  "compilerCommand": "node <workspace>/typescript/bin/tsc --noEmit",
+  "exitStatus": 2,
+  "stderrTail": "tsc exited 2: src/App.tsx(152,21): error TS18048: 'last' is possibly 'undefined'.\nsrc/App.tsx(155,21): error TS18048: 'first' is possibly 'undefined'.",
+  "diagnosticCodes": [
+    "TS18048"
+  ],
+  "affectedSourceRegion": "src/App.tsx(152,21); src/App.tsx(155,21)",
+  "originalProposedEdit": {
+    "filePath": "src/App.tsx",
+    "originalText": "              <div\n                role=\"dialog\"\n                aria-modal=\"true\"\n                aria-labelledby=\"checkout-modal-title\"\n                data-testid=\"checkout-modal\"\n                id=\"checkout-modal\"\n                className=\"checkout-modal\"\n              >",
+    "replacementText": "              <div\n                role=\"dialog\"\n                aria-modal=\"true\"\n                aria-labelledby=\"checkout-modal-title\"\n                data-testid=\"checkout-modal\"\n                id=\"checkout-modal\"\n                className=\"checkout-modal\"\n                onKeyDown={(e) => {\n                  if (e.key !== \"Tab\") return;\n                  const container = e.currentTarget;\n                  const focusable = Array.from(\n                    container.querySelectorAll<HTMLElement>(\n                      'button, [href], input, select, textarea, [tabindex]:not([tabindex=\"-1\"])'\n                    )\n                  ).filter((el) => !el.hasAttribute(\"disabled\"));\n                  if (focusable.length === 0) {\n                    e.preventDefault();\n                    return;\n                  }\n                  const first = focusable[0];\n                  const last = focusable[focusable.length - 1];\n                  if (e.shiftKey && document.activeElement === first) {\n                    e.preventDefault();\n                    last.focus();\n                  } else if (!e.shiftKey && document.activeElement === last) {\n                    e.preventDefault();\n                    first.focus();\n                  }\n                }}\n              >",
+    "reason": "Add Tab/Shift+Tab containment on the dialog element so focus cycles among Close, Email, and Continue instead of escaping to background controls."
+  },
+  "originalDiagnosis": {
+    "diagnosisId": "diag-checkout-modal-keyboard-focus-escape",
+    "observedFailure": "While #checkout-modal remained open, pressing Tab at step 3 moved focus from #checkout-modal-continue inside the modal to #background-control outside the modal, failing assertion focus-contained-in-modal which expected focus inside #checkout-modal.",
+    "repairStrategy": "Implement a focus containment strategy that keeps Tab and Shift+Tab cycling within #checkout-modal while it is open, prevents focus from moving to background content, and restores management of initial focus and close behavior."
+  },
+  "originalEvidenceIds": [
+    "ev-modal-open",
+    "ev-focus-step-1",
+    "ev-focus-step-2",
+    "ev-focus-escape",
+    "ev-assertion-failed"
+  ],
+  "originalRepairRationale": "Observed evidence shows Tab from #checkout-modal-continue escapes to #background-control while modal stays open. Handling Tab/Shift+Tab on the dialog and wrapping first-to-last/last-to-first keeps focus inside #checkout-modal without changing markup semantics, close behavior, or background content.",
+  "suppliedSourceFiles": [
+    "src/App.tsx",
+    "src/styles.css"
+  ]
+}

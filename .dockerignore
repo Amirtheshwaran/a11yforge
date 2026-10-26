@@ -1,0 +1,27 @@
+# Build/runtime artifacts that must never enter the image.
+.git
+.gitignore
+.a11yforge
+.playwright-browsers
+node_modules
+apps/*/node_modules
+packages/*/node_modules
+fixtures/*/node_modules
+apps/*/.next
+apps/*/out
+apps/*/dist
+packages/*/dist
+fixtures/*/dist
+coverage
+*.tsbuildinfo
+.next
+out
+dist
+.DS_Store
+*.local
+.env
+.env.*
+# Local caches and OS state.
+npm-debug.log*
+pnpm-debug.log*
+.docker

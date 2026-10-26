@@ -1,0 +1,159 @@
+{
+  "runId": "2026-10-26T19-05-04-967Z-ed8b36",
+  "scenarioId": "checkout-modal-keyboard-reverse",
+  "targetUrl": "http://127.0.0.1:37187",
+  "startedAt": "2026-10-26T19:05:04.998Z",
+  "completedAt": "2026-10-26T19:05:05.098Z",
+  "observations": [
+    {
+      "seq": 0,
+      "action": "modal-open",
+      "key": null,
+      "timestamp": "2026-10-26T19:05:05.067Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-close",
+      "tagName": "button",
+      "role": "button",
+      "accessibleName": "Close",
+      "text": "Close",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    },
+    {
+      "seq": 1,
+      "action": "press",
+      "key": "Shift+Tab",
+      "timestamp": "2026-10-26T19:05:05.093Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-continue",
+      "tagName": "button",
+      "role": "button",
+      "accessibleName": "Continue",
+      "text": "Continue",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    },
+    {
+      "seq": 2,
+      "action": "press",
+      "key": "Shift+Tab",
+      "timestamp": "2026-10-26T19:05:05.095Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-email",
+      "tagName": "input",
+      "role": "textbox",
+      "accessibleName": "Email for receipt",
+      "text": "",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    },
+    {
+      "seq": 3,
+      "action": "press",
+      "key": "Shift+Tab",
+      "timestamp": "2026-10-26T19:05:05.097Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-close",
+      "tagName": "button",
+      "role": "button",
+      "accessibleName": "Close",
+      "text": "Close",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    }
+  ],
+  "assertions": [
+    {
+      "assertion": "focus-contained-in-modal",
+      "passed": true,
+      "step": 3,
+      "pressedKey": "Shift+Tab",
+      "expectedRegion": "#checkout-modal",
+      "actualFocus": "#checkout-modal-close",
+      "actualHtml": "<button type=\"button\" id=\"checkout-modal-close\" class=\"checkout-modal-close\">Close</button>"
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "reverse-modal-open.png",
+      "type": "screenshot",
+      "capturedAt": "2026-10-26T19:05:05.093Z"
+    }
+  ],
+  "events": [
+    {
+      "seq": 0,
+      "type": "scenario-started",
+      "timestamp": "2026-10-26T19:05:04.998Z",
+      "detail": "checkout-modal-keyboard-reverse against http://127.0.0.1:37187"
+    },
+    {
+      "seq": 1,
+      "type": "page-loaded",
+      "timestamp": "2026-10-26T19:05:05.038Z",
+      "detail": "http://127.0.0.1:37187"
+    },
+    {
+      "seq": 2,
+      "type": "modal-opened",
+      "timestamp": "2026-10-26T19:05:05.068Z",
+      "detail": "#checkout-modal visible, focus on #checkout-modal-close"
+    },
+    {
+      "seq": 3,
+      "type": "screenshot-captured",
+      "timestamp": "2026-10-26T19:05:05.093Z",
+      "detail": "reverse-modal-open.png"
+    },
+    {
+      "seq": 4,
+      "type": "key-pressed",
+      "timestamp": "2026-10-26T19:05:05.093Z",
+      "detail": "pressed Shift+Tab"
+    },
+    {
+      "seq": 5,
+      "type": "focus-changed",
+      "timestamp": "2026-10-26T19:05:05.094Z",
+      "detail": "#checkout-modal-close -> #checkout-modal-continue"
+    },
+    {
+      "seq": 6,
+      "type": "key-pressed",
+      "timestamp": "2026-10-26T19:05:05.095Z",
+      "detail": "pressed Shift+Tab"
+    },
+    {
+      "seq": 7,
+      "type": "focus-changed",
+      "timestamp": "2026-10-26T19:05:05.096Z",
+      "detail": "#checkout-modal-continue -> #checkout-modal-email"
+    },
+    {
+      "seq": 8,
+      "type": "key-pressed",
+      "timestamp": "2026-10-26T19:05:05.097Z",
+      "detail": "pressed Shift+Tab"
+    },
+    {
+      "seq": 9,
+      "type": "focus-changed",
+      "timestamp": "2026-10-26T19:05:05.098Z",
+      "detail": "#checkout-modal-email -> #checkout-modal-close"
+    },
+    {
+      "seq": 10,
+      "type": "scenario-completed",
+      "timestamp": "2026-10-26T19:05:05.098Z",
+      "detail": "focus-contained-in-modal passed"
+    }
+  ]
+}

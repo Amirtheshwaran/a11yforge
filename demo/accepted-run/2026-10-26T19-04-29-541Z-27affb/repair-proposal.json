@@ -1,0 +1,34 @@
+{
+  "proposalId": "prop-checkout-modal-focus-trap-1",
+  "diagnosisId": "diag-checkout-modal-keyboard-focus-escape",
+  "summary": "Propose Tab trap on #checkout-modal to cycle focus within the dialog and prevent escape to background while open.",
+  "rationale": "Observed evidence shows Tab from #checkout-modal-continue escapes to #background-control while modal stays open. Handling Tab/Shift+Tab on the dialog and wrapping first-to-last/last-to-first keeps focus inside #checkout-modal without changing markup semantics, close behavior, or background content.",
+  "evidenceIds": [
+    "ev-modal-open",
+    "ev-focus-step-1",
+    "ev-focus-step-2",
+    "ev-focus-escape",
+    "ev-assertion-failed"
+  ],
+  "targetFiles": [
+    "src/App.tsx"
+  ],
+  "edits": [
+    {
+      "filePath": "src/App.tsx",
+      "originalText": "              <div\n                role=\"dialog\"\n                aria-modal=\"true\"\n                aria-labelledby=\"checkout-modal-title\"\n                data-testid=\"checkout-modal\"\n                id=\"checkout-modal\"\n                className=\"checkout-modal\"\n              >",
+      "replacementText": "              <div\n                role=\"dialog\"\n                aria-modal=\"true\"\n                aria-labelledby=\"checkout-modal-title\"\n                data-testid=\"checkout-modal\"\n                id=\"checkout-modal\"\n                className=\"checkout-modal\"\n                onKeyDown={(e) => {\n                  if (e.key !== \"Tab\") return;\n                  const container = e.currentTarget;\n                  const focusable = Array.from(\n                    container.querySelectorAll<HTMLElement>(\n                      'button, [href], input, select, textarea, [tabindex]:not([tabindex=\"-1\"])'\n                    )\n                  ).filter((el) => !el.hasAttribute(\"disabled\"));\n                  if (focusable.length === 0) {\n                    e.preventDefault();\n                    return;\n                  }\n                  const first = focusable[0];\n                  const last = focusable[focusable.length - 1];\n                  if (e.shiftKey && document.activeElement === first) {\n                    e.preventDefault();\n                    last.focus();\n                  } else if (!e.shiftKey && document.activeElement === last) {\n                    e.preventDefault();\n                    first.focus();\n                  }\n                }}\n              >",
+      "reason": "Add Tab/Shift+Tab containment on the dialog element so focus cycles among Close, Email, and Continue instead of escaping to background controls."
+    }
+  ],
+  "risks": [
+    "Initial focus placement and focus return on close are not changed by this edit; separate handling may still be needed for full dialog pattern.",
+    "Query selector list must stay in sync if new focusable types are added to dialog."
+  ],
+  "verificationPlan": [
+    "Rebuild the app.",
+    "Open #checkout-modal and Tab/Shift+Tab through all focusable elements, verifying focus stays inside #checkout-modal.",
+    "Rescan focus-contained-in-modal assertion.",
+    "Run existing tests."
+  ]
+}

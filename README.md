@@ -1,104 +1,151 @@
 # A11yForge
 
-Autonomous accessibility engineering for web applications. Hackathon build.
+An autonomous accessibility engineer that reproduces accessibility failures, traces them into source code, repairs them, and proves the repair worked.
 
-A11yForge does not merely report accessibility issues. It experiences them
-(keyboard replays against the real app), traces them to source, patches the
-source, rebuilds, replays the exact interaction, and accepts the repair only
-when deterministic evidence proves it — rejecting its own work otherwise. See
-[docs/PROJECT_SPEC.md](docs/PROJECT_SPEC.md),
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), and [docs/ROADMAP.md](docs/ROADMAP.md).
+## Why A11yForge
 
-## Why the first rejected repair matters
+Scanners report failures and stop. The hard engineering work — reproducing the issue like a user would, finding the offending code, writing a safe fix, rebuilding, and confirming the fix actually worked — is left to the developer. A11yForge closes that loop: it experiences the failure (real keyboard replays against the real app), diagnoses it, traces it to source, patches it in an isolated workspace, replays the exact interaction, and accepts the repair only when deterministic evidence proves it. When the evidence does not prove it, A11yForge rejects its own repair.
 
-The demo run's Attempt 1 functionally fixed the focus escape but failed strict
-TypeScript (`TS18048`). The deterministic verifier rejected it — no critic
-call was spent on a failing repair — and a bounded revision added one guard
-line that passed every gate. That rejection is preserved in the console: an
-engine that hides its failed repair cannot be trusted with its accepted one.
-
-## How deterministic verification constrains the AI
-
-Two-level trust model: the deterministic verifier is authoritative (build,
-replayed assertion, axe regression comparison decide eligibility; any failure
-rejects without spending the critic call). The AI critic adjudicates ONLY an
-otherwise passing repair — it can never override deterministic failure.
-
-## Quick start
-
-Requires Node.js >= 20 and pnpm.
-
-```sh
-pnpm install
-pnpm build
-```
-
-For a live autonomous repair, export a Meta Model API key (server-side only —
-never committed, never sent to the browser):
-
-```sh
-export MODEL_API_KEY=<your-key>
-```
-
-Then:
-
-```sh
-pnpm dev
-```
-
-- Web console: http://localhost:3000 (not running until you start it)
-- API health: http://localhost:3001/health (not running until you start it)
-
-Open [http://localhost:3000](http://localhost:3000) in a browser and click
-**Start Autonomous Repair**. The backend runs the real pipeline against the
-Broken Shop fixture (scan → keyboard test → diagnosis → source trace →
-proposal → isolated verify → critic) and streams live events to the console:
-stages progress, evidence appears as each artifact lands, and the final
-verdict becomes ACCEPTED or REJECTED. At most 4 live Meta calls per run
-(diagnosis, proposal, at most one bounded revision, critic if eligible);
-usage is shown after the run, and no cost is computed. Without
-`MODEL_API_KEY` the button explains the missing key instead of crashing.
-
-## Scripts
-
-| Script            | What it does                              |
-| ----------------- | ----------------------------------------- |
-| `pnpm dev`        | Run web + API dev servers in parallel     |
-| `pnpm build`      | Build every workspace package             |
-| `pnpm typecheck`  | Strict `tsc --noEmit` in every workspace  |
-| `pnpm lint`       | ESLint across the repo                    |
-
-## Local demo
-
-Two views, clearly labeled:
-
-- **LIVE** — start a real autonomous run with the button (requires
-  `MODEL_API_KEY`; at most 4 live Meta calls, usage shown afterwards).
-- **RECORDED** — the previously completed accepted run (`GET /runs/demo`):
-  pipeline, focus evidence, before/after, diagnosis, source trace, both
-  diffs, deterministic gates, and the critic verdict. The recorded run stays
-  available even if a live attempt hits a transient failure, and it is never
-  presented as a current live run.
-
-```sh
-pnpm install
-pnpm build
-pnpm dev          # web on :3000, API on :3001
-```
-
-With no local artifacts the recorded view shows an empty state, never
-placeholder data. Run artifacts live under `.a11yforge/` (git-ignored).
-
-## Layout
+## What it does
 
 ```text
-apps/
-  web/        Next.js console: live autonomous runs + recorded demo run
-  api/        Fastify API: run orchestration (POST /runs, SSE events)
-packages/
-  engine/     Autonomous repair loop + live-run pipeline orchestration
-  meta/       Bounded Meta model caller (diagnosis, proposal, critic)
-  shared/     Shared schemas and types (incl. live-run stream shapes)
-fixtures/     Controlled broken-accessibility targets (Broken Shop)
-docs/         Project spec, architecture, roadmap
+Explore / Scan
+  → Evidence (axe findings + keyboard focus trace)
+  → Diagnose (Meta model, evidence-grounded, 1 call)
+  → Trace Source (deterministic, 0 calls)
+  → Repair (Meta proposal, exact-text anchors, 1 call)
+  → Verify (isolated workspace: typecheck, build, replay, axe regression)
+  → Reject or Accept (bounded revision on verifier feedback, then critic)
 ```
+
+One controlled target ships with the repo: **Broken Shop** (`fixtures/broken-shop`), a checkout flow with a deliberately trap-less modal. The keyboard scenario opens the modal, presses Tab, and watches focus escape onto a background control while the dialog stays open.
+
+## Why the verifier matters
+
+The strongest moment in the recorded demo is a rejection. Attempt 1's AI-generated focus trap fixed the browser behavior — the replayed scenario stayed inside the modal — but it failed strict TypeScript (`TS18048`: possibly-`undefined` indexing under `noUncheckedIndexedAccess`). The deterministic verifier rejected its own AI-generated repair without spending the critic call. Verifier feedback drove exactly one bounded revision: a two-line `undefined` guard. Attempt 2 then passed typecheck, build, the exact keyboard replay, reverse Shift+Tab traversal, and the 4-rule axe baseline — and only then did the critic accept it (confidence 0.86). An engine that hides its failed repair cannot be trusted with its accepted one, so both attempts are preserved in the console.
+
+## Architecture
+
+```mermaid
+flowchart TB
+    broken[Broken App<br/>fixtures/broken-shop] --> evidence[Browser + axe evidence<br/>Playwright + axe-core]
+    evidence --> diag[Muse Diagnosis<br/>evidence-grounded, 1 call]
+    diag --> trace[Deterministic Source Trace<br/>ranked candidates, 0 calls]
+    trace --> proposal[Muse Repair Proposal<br/>exact-text anchors, 1 call]
+    proposal --> workspace[Isolated Repair Workspace<br/>fixture source never mutated]
+    workspace --> verifier{Deterministic Verifier<br/>typecheck + build + replay<br/>+ reverse traversal + axe}
+    verifier -->|PASS| critic[Muse Critic<br/>adjudicates passing repairs only]
+    verifier -->|FAIL| feedback[Verifier feedback]
+    feedback --> revision[Bounded revision<br/>at most one]
+    revision --> workspace
+    critic --> accepted[ACCEPT]
+    critic --> rejected[REJECT]
+    verifier -->|FAIL, no revision left| rejected
+    accepted --> ui[Observable Console<br/>RECORDED vs LIVE]
+    rejected --> ui
+```
+
+- `apps/web` — Next.js console. Renders engine state; runs no repairs.
+- `apps/api` — Fastify service. Validates, serves run views and artifacts, orchestrates live runs, exposes `GET /health`.
+- `packages/engine` — the autonomous repair loop and all deterministic tooling (scanner, keyboard replayer, tracer, isolated applier, verifier, read model, demo exporter).
+- `packages/meta` — the only Meta model caller. Bounded, schema-constrained calls.
+- `packages/shared` — cross-boundary Zod schemas and types.
+- `fixtures/broken-shop` — the controlled broken target.
+- `demo/accepted-run/` — the committed, sanitized, real ACCEPTED run.
+- `docs/` — spec, architecture, roadmap.
+
+## Safety / trust model
+
+- **AI proposes. Deterministic systems verify.** Build outcome, replayed assertions, and the axe comparison decide eligibility; any failure rejects without spending the critic call.
+- **AI cannot override deterministic failure.** The critic is consulted only on an otherwise passing repair, and a REJECT verdict still rejects.
+- **Autonomy is bounded.** At most 4 model calls per live run (diagnosis, proposal, at most one revision, critic if eligible). No open-ended agents, no models with shell access, no unbounded retries.
+- **Minimum safe patches.** Exact-text anchors, at most 2 files / 4 edits, confined paths. The fixture source is never mutated — repairs land in isolated workspaces retained as artifacts.
+- **Recorded is never live.** The bundled demo is labeled `RECORDED` everywhere; nothing replays historical events pretending they are newly executing.
+
+## Meta technology
+
+| Where | Model | Job |
+|---|---|---|
+| Development | Muse Code | Built this repository |
+| Diagnosis | Muse Spark 1.3 | Evidence-grounded structured diagnosis (1 call) |
+| Repair proposal | Muse Spark 1.3 | Exact-anchor patch proposal (1 call) |
+| Bounded revision | Muse Spark 1.3 | Verifier-feedback-grounded fix-forward (at most 1) |
+| Critic | Muse Spark 1.3 | Accept/reject verdict on passing repairs only |
+
+No other Meta functionality is used or claimed.
+
+## Demo
+
+**No API key needed.** Clone, install, build, start — the console lands on a real previously completed ACCEPTED run bundled with the checkout:
+
+```sh
+pnpm install
+pnpm build
+pnpm start
+```
+
+Open [http://localhost:3000](http://localhost:3000): the recorded run shows the pipeline, focus evidence, before/after screenshots, diagnosis, source trace, both diffs, deterministic gates, and the critic verdict under a `RECORDED` badge.
+
+**Live run (optional).** With `MODEL_API_KEY` exported on the API server, **Start Autonomous Repair** executes the real pipeline against Broken Shop and streams its events (at most 4 Meta calls; usage shown afterwards, no cost computed). Without the key, the console says so explicitly — `Live Meta execution unavailable — MODEL_API_KEY not configured` — and the recorded run stays fully inspectable.
+
+```sh
+pnpm demo:validate   # verify the committed bundle (schemas, evidence, sanitization)
+pnpm demo:export -- --run <run-id>   # re-export one explicitly named ACCEPTED run
+```
+
+## Local setup
+
+Requires Node.js ≥ 20 and pnpm 10.
+
+```sh
+pnpm install
+pnpm build
+pnpm dev        # web on :3000, API on :3001 (development)
+pnpm start      # web + API in production mode (after build)
+```
+
+Configuration (see [.env.example](.env.example); never commit real values):
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `MODEL_API_KEY` | Live Meta model calls (server-side only) | unset → recorded mode only |
+| `PORT` / `HOST` | API listen address | `3001` / `127.0.0.1` |
+| `NEXT_PUBLIC_API_URL` | API base the browser calls (build-time) | `http://127.0.0.1:3001` |
+| `A11YFORGE_DATA_DIR` | Writable runtime root (production) | working tree |
+| `A11YFORGE_RUNS_DIR` | Live-run artifact dir override | `<data-dir>/.a11yforge/runs` |
+| `A11YFORGE_CORS_ORIGIN` | API CORS origin | `*` |
+| `A11YFORGE_VERSION` | Release label in `/health` | `0.7.0` |
+
+`GET /health` reports `status`, `service`, `version`, `modelConfigured`, `demoMode`, and `dataDirWritable` — booleans and labels only, never keys, paths, or environment values.
+
+## Container
+
+```sh
+docker build -t a11yforge .
+docker run --rm -p 3000:3000 -p 3001:3001 a11yforge
+```
+
+The image pins Node 20, installs the workspace, builds it, provisions Playwright Chromium, and runs web + API as a non-root user with a writable `/data/a11yforge` volume. No `MODEL_API_KEY` is baked in — pass it at runtime only when live runs are wanted:
+
+```sh
+docker run --rm -p 3000:3000 -p 3001:3001 -e MODEL_API_KEY="$MODEL_API_KEY" a11yforge
+```
+
+## Tests
+
+Suites run with zero live model calls (deterministic fixtures and synthesized artifacts only):
+
+- Engine: scanner normalization, keyboard runner and assertions, diagnosis/trace/proposal validation, isolated workspace safety, verifier gates, revision safety, read-model projection, and the demo-bundle sanitizer/validator.
+- API: run routes and artifact allow-listing, live-run orchestration with a mock pipeline, and deployment behavior (data-dir resolution, recorded fallback, safe health, missing-key refusal, traversal rejection).
+- Fixture and console: strict typecheck, lint, and an axe-clean UI.
+
+```sh
+pnpm typecheck
+pnpm lint
+pnpm test:engine
+pnpm --filter @a11yforge/api test
+```
+
+## Hackathon scope
+
+This repository was built during the Meta Global AI Developer Hackathon. The autonomous repair loop (scan → evidence → diagnose → trace → repair → verify → revise → critic) is complete and feature-frozen; this phase hardened it for demo and deployment: a committed recorded ACCEPTED run, production startup, container packaging, and judge-ready documentation. No new AI capabilities were added.

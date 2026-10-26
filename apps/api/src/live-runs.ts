@@ -22,7 +22,7 @@ import {
   type ModelSpendSummary,
 } from "@a11yforge/shared";
 import { MODEL_API_KEY_ENV } from "@a11yforge/meta";
-import { resolveRunsDir } from "./runs.js";
+import { resolveLiveRunsDir } from "./runs.js";
 
 /**
  * Phase 6.5 live-run orchestration API.
@@ -294,7 +294,9 @@ export function registerLiveRunRoutes(
           "Meta Model API key is not configured. Export MODEL_API_KEY on the API server, then start a run.",
       });
     }
-    const runsDir = resolveRunsDir();
+    // Live runs always write to the writable runtime directory — never
+    // into the committed recorded-demo bundle.
+    const runsDir = resolveLiveRunsDir();
     const runId = newRunId();
     const record: LiveRunRecord = {
       runId,

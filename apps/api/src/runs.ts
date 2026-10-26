@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join, resolve, sep } from "node:path";
 import type { FastifyInstance } from "fastify";
@@ -34,19 +34,72 @@ const ARTIFACT_CONTENT_TYPES: Record<string, string> = {
   ".patch": "text/plain; charset=utf-8",
 };
 
-/** Local runs root: explicit env override, else nearest `.a11yforge/runs`. */
-export function resolveRunsDir(): string {
+/**
+ * Runtime data directory: `A11YFORGE_DATA_DIR` when set (production), else
+ * the repository working tree (local development). Repair workspaces and
+ * live-run artifacts are always written under this root — never into
+ * immutable application source.
+ */
+export function resolveDataDir(): string {
+  const override = process.env["A11YFORGE_DATA_DIR"];
+  if (override !== undefined && override !== "") return resolve(override);
+  return process.cwd();
+}
+
+/** Writable runs root for LIVE runs (created on demand by the pipeline). */
+export function resolveLiveRunsDir(): string {
   const override = process.env["A11YFORGE_RUNS_DIR"];
   if (override !== undefined && override !== "") return resolve(override);
+  return join(resolveDataDir(), ".a11yforge", "runs");
+}
+
+/**
+ * Committed recorded-demo bundle (`demo/accepted-run/`): the versioned,
+ * sanitized ACCEPTED run that ships with the repository. Found by walking
+ * up from the working directory; null when absent (e.g. partial checkout).
+ */
+export function findBundledDemoDir(): string | null {
   let dir = process.cwd();
-  for (let depth = 0; depth < 5; depth += 1) {
-    const candidate = join(dir, ".a11yforge", "runs");
-    if (existsSync(candidate)) return candidate;
+  for (let depth = 0; depth < 6; depth += 1) {
+    const candidate = join(dir, "demo", "accepted-run");
+    if (
+      existsSync(candidate) &&
+      existsSync(join(candidate, "manifest.json"))
+    ) {
+      return candidate;
+    }
     const parent = resolve(dir, "..");
     if (parent === dir) break;
     dir = parent;
   }
-  return join(process.cwd(), ".a11yforge", "runs");
+  return null;
+}
+
+export type RunsSource = "local" | "bundled-recorded";
+
+/**
+ * Effective read root for run views: local artifacts when a run exists,
+ * else the committed recorded-demo bundle so the console stays useful
+ * without `.a11yforge/`, without credentials, and without a browser.
+ * Recorded views are always labeled RECORDED by the UI — never live.
+ */
+export function resolveRunsDirWithSource(): { dir: string; source: RunsSource } {
+  const local = resolveLiveRunsDir();
+  try {
+    if (existsSync(local) && readdirSync(local).length > 0) {
+      return { dir: local, source: "local" };
+    }
+  } catch {
+    /* fall through to the bundled demo */
+  }
+  const bundled = findBundledDemoDir();
+  if (bundled !== null) return { dir: bundled, source: "bundled-recorded" };
+  return { dir: local, source: "local" };
+}
+
+/** Local runs root: live artifacts, else the bundled recorded demo. */
+export function resolveRunsDir(): string {
+  return resolveRunsDirWithSource().dir;
 }
 
 function artifactUrlFor(runId: string, fileName: string): string {

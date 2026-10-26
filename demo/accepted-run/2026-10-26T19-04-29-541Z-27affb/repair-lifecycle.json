@@ -1,0 +1,25 @@
+{
+  "repairId": "repair-checkout-modal-focus-trap-1",
+  "proposalId": "prop-checkout-modal-focus-trap-1",
+  "state": "TYPECHECK_FAILED",
+  "transitions": [
+    {
+      "from": "PROPOSED",
+      "to": "APPLYING",
+      "at": "2026-10-26T19:04:51.697Z",
+      "reason": "validated proposal; creating isolated workspace"
+    },
+    {
+      "from": "APPLYING",
+      "to": "APPLIED",
+      "at": "2026-10-26T19:04:51.709Z",
+      "reason": "exact anchors verified; diff recorded"
+    },
+    {
+      "from": "APPLIED",
+      "to": "TYPECHECK_FAILED",
+      "at": "2026-10-26T19:04:54.010Z",
+      "reason": "deterministic gate failed: required regression tests did not pass; fixture typecheck failed: tsc exited 2: src/App.tsx(152,21): error TS18048: 'last' is possibly 'undefined'.\nsrc/App.tsx(155,21): error TS18048: 'first' is possibly 'undefined'.\n"
+    }
+  ]
+}

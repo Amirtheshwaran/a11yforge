@@ -1,0 +1,56 @@
+{
+  "scanId": "2026-10-26T19-04-52-419Z-141d0a",
+  "pageUrl": "http://127.0.0.1:44335/",
+  "startedAt": "2026-10-26T19:04:52.419Z",
+  "completedAt": "2026-10-26T19:04:52.625Z",
+  "findings": [
+    {
+      "id": "button-name#0",
+      "ruleId": "button-name",
+      "impact": "critical",
+      "description": "Ensure buttons have discernible text",
+      "help": "Buttons must have discernible text",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/button-name?application=axeAPI",
+      "pageUrl": "http://127.0.0.1:44335/",
+      "selector": ".quantity-decrement",
+      "html": "<button type=\"button\" class=\"quantity-decrement\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><rect x=\"2\" y=\"7\" width=\"12\" height=\"2\" fill=\"currentColor\"></rect></svg></button>",
+      "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+    },
+    {
+      "id": "color-contrast#0",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+      "pageUrl": "http://127.0.0.1:44335/",
+      "selector": ".fine-print",
+      "html": "<p class=\"fine-print\">Shipping is calculated at checkout and may take up to 10 days.</p>",
+      "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #999999, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+    },
+    {
+      "id": "image-alt#0",
+      "ruleId": "image-alt",
+      "impact": "critical",
+      "description": "Ensure <img> elements have alternative text or a role of none or presentation",
+      "help": "Images must have alternative text",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/image-alt?application=axeAPI",
+      "pageUrl": "http://127.0.0.1:44335/",
+      "selector": "img",
+      "html": "<img class=\"product-image\" src=\"/product.svg\">",
+      "failureSummary": "Fix any of the following:\n  Element does not have an alt attribute\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+    },
+    {
+      "id": "label#0",
+      "ruleId": "label",
+      "impact": "critical",
+      "description": "Ensure every form element has a label",
+      "help": "Form elements must have labels",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/label?application=axeAPI",
+      "pageUrl": "http://127.0.0.1:44335/",
+      "selector": "#email",
+      "html": "<input id=\"email\" autocomplete=\"email\" type=\"email\" name=\"email\">",
+      "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+    }
+  ]
+}

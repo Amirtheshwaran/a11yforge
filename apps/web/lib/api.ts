@@ -2,13 +2,14 @@ import {
   LiveRunEventSchema,
   LiveRunStatusSchema,
   RunViewModelSchema,
+  type ApiHealth,
   type LiveRunEvent,
   type LiveRunStatus,
   type RunSummary,
   type RunViewModel,
 } from "@a11yforge/shared";
 
-export type { LiveRunEvent, LiveRunStatus, RunSummary, RunViewModel };
+export type { ApiHealth, LiveRunEvent, LiveRunStatus, RunSummary, RunViewModel };
 
 export function apiBase(): string {
   const fromEnv = process.env["NEXT_PUBLIC_API_URL"];
@@ -29,6 +30,24 @@ async function getJson(path: string): Promise<unknown> {
     throw new Error(`${res.status} ${detail}`);
   }
   return (await res.json()) as unknown;
+}
+
+/** Deployment health: safe booleans only (never keys, paths, or env values). */
+export async function fetchHealth(): Promise<ApiHealth | null> {
+  try {
+    const body = (await getJson("/health")) as ApiHealth;
+    if (
+      typeof body !== "object" ||
+      body === null ||
+      (body as ApiHealth).status !== "ok" ||
+      typeof (body as ApiHealth).modelConfigured !== "boolean"
+    ) {
+      return null;
+    }
+    return body as ApiHealth;
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchRuns(): Promise<RunSummary[]> {

@@ -1,0 +1,11 @@
+{
+  "model": "muse-spark-1.3-contributor",
+  "operation": "accessibility-repair-proposal",
+  "inputTokens": 1738,
+  "cachedInputTokens": 0,
+  "outputTokens": 1565,
+  "reasoningTokens": 919,
+  "latencyMs": 12449,
+  "timestamp": "2026-10-26T19:04:51.695Z",
+  "requestId": null
+}

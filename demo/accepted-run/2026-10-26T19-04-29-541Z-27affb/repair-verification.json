@@ -1,0 +1,41 @@
+{
+  "repairId": "repair-checkout-modal-focus-trap-1",
+  "proposalId": "prop-checkout-modal-focus-trap-1",
+  "buildPassed": true,
+  "buildCommand": "node <workspace>/node_modules/vite/bin/vite.js build",
+  "buildExitCode": 0,
+  "buildDurationMs": 512,
+  "originalAssertion": {
+    "passed": false,
+    "actualFocus": "#background-control"
+  },
+  "repairedAssertion": {
+    "passed": true,
+    "actualFocus": "#checkout-modal-email"
+  },
+  "scenarioPassed": true,
+  "baselineAxeRules": [
+    "button-name",
+    "color-contrast",
+    "image-alt",
+    "label"
+  ],
+  "repairedAxeRules": [
+    "button-name",
+    "color-contrast",
+    "image-alt",
+    "label"
+  ],
+  "newAxeViolations": [],
+  "removedBaselineRules": [],
+  "newSeriousCritical": [],
+  "resolvedTargetFailure": true,
+  "regressions": [],
+  "diffArtifact": "repair-diff.patch",
+  "evidenceArtifacts": [
+    "repaired-scenario.json",
+    "repaired-scan.json",
+    "focus-contained-after.png"
+  ],
+  "decisionBasis": "deterministic gate failed: required regression tests did not pass; fixture typecheck failed: tsc exited 2: src/App.tsx(152,21): error TS18048: 'last' is possibly 'undefined'.\nsrc/App.tsx(155,21): error TS18048: 'first' is possibly 'undefined'.\n"
+}

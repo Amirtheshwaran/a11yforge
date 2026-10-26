@@ -18,6 +18,9 @@
     "propose:fixture": "pnpm --filter @a11yforge/engine propose:fixture",
     "repair:fixture": "pnpm --filter @a11yforge/engine repair:fixture",
     "recover:fixture": "pnpm --filter @a11yforge/engine recover:fixture",
+    "demo:export": "pnpm --filter @a11yforge/engine demo:export",
+    "demo:validate": "pnpm --filter @a11yforge/engine demo:validate",
+    "start": "pnpm --filter @a11yforge/web --filter @a11yforge/api -r --parallel start",
     "test:engine": "pnpm --filter @a11yforge/engine test",
     "test:meta": "pnpm --filter @a11yforge/meta test"
   },

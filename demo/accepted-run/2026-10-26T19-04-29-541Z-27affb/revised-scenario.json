@@ -1,0 +1,366 @@
+{
+  "runId": "2026-10-26T19-05-04-781Z-c348ed",
+  "scenarioId": "checkout-modal-keyboard",
+  "targetUrl": "http://127.0.0.1:37187",
+  "startedAt": "2026-10-26T19:05:04.814Z",
+  "completedAt": "2026-10-26T19:05:04.939Z",
+  "observations": [
+    {
+      "seq": 0,
+      "action": "modal-open",
+      "key": null,
+      "timestamp": "2026-10-26T19:05:04.900Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-close",
+      "tagName": "button",
+      "role": "button",
+      "accessibleName": "Close",
+      "text": "Close",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    },
+    {
+      "seq": 1,
+      "action": "press",
+      "key": "Tab",
+      "timestamp": "2026-10-26T19:05:04.926Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-email",
+      "tagName": "input",
+      "role": "textbox",
+      "accessibleName": "Email for receipt",
+      "text": "",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    },
+    {
+      "seq": 2,
+      "action": "press",
+      "key": "Tab",
+      "timestamp": "2026-10-26T19:05:04.928Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-continue",
+      "tagName": "button",
+      "role": "button",
+      "accessibleName": "Continue",
+      "text": "Continue",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    },
+    {
+      "seq": 3,
+      "action": "press",
+      "key": "Tab",
+      "timestamp": "2026-10-26T19:05:04.929Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-close",
+      "tagName": "button",
+      "role": "button",
+      "accessibleName": "Close",
+      "text": "Close",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    },
+    {
+      "seq": 4,
+      "action": "press",
+      "key": "Tab",
+      "timestamp": "2026-10-26T19:05:04.931Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-email",
+      "tagName": "input",
+      "role": "textbox",
+      "accessibleName": "Email for receipt",
+      "text": "",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    },
+    {
+      "seq": 5,
+      "action": "press",
+      "key": "Tab",
+      "timestamp": "2026-10-26T19:05:04.932Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-continue",
+      "tagName": "button",
+      "role": "button",
+      "accessibleName": "Continue",
+      "text": "Continue",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    },
+    {
+      "seq": 6,
+      "action": "press",
+      "key": "Tab",
+      "timestamp": "2026-10-26T19:05:04.933Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-close",
+      "tagName": "button",
+      "role": "button",
+      "accessibleName": "Close",
+      "text": "Close",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    },
+    {
+      "seq": 7,
+      "action": "press",
+      "key": "Tab",
+      "timestamp": "2026-10-26T19:05:04.934Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-email",
+      "tagName": "input",
+      "role": "textbox",
+      "accessibleName": "Email for receipt",
+      "text": "",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    },
+    {
+      "seq": 8,
+      "action": "press",
+      "key": "Tab",
+      "timestamp": "2026-10-26T19:05:04.936Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-continue",
+      "tagName": "button",
+      "role": "button",
+      "accessibleName": "Continue",
+      "text": "Continue",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    },
+    {
+      "seq": 9,
+      "action": "press",
+      "key": "Tab",
+      "timestamp": "2026-10-26T19:05:04.937Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-close",
+      "tagName": "button",
+      "role": "button",
+      "accessibleName": "Close",
+      "text": "Close",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    },
+    {
+      "seq": 10,
+      "action": "press",
+      "key": "Tab",
+      "timestamp": "2026-10-26T19:05:04.938Z",
+      "pageUrl": "http://127.0.0.1:37187/",
+      "selector": "#checkout-modal-email",
+      "tagName": "input",
+      "role": "textbox",
+      "accessibleName": "Email for receipt",
+      "text": "",
+      "tabIndex": 0,
+      "disabled": false,
+      "ariaHidden": false,
+      "insideModal": true
+    }
+  ],
+  "assertions": [
+    {
+      "assertion": "focus-contained-in-modal",
+      "passed": true,
+      "step": 10,
+      "pressedKey": "Tab",
+      "expectedRegion": "#checkout-modal",
+      "actualFocus": "#checkout-modal-email",
+      "actualHtml": "<input id=\"checkout-modal-email\" autocomplete=\"email\" type=\"email\" name=\"checkout-modal-email\" style=\"\">"
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "before-modal.png",
+      "type": "screenshot",
+      "capturedAt": "2026-10-26T19:05:04.875Z"
+    },
+    {
+      "name": "modal-open.png",
+      "type": "screenshot",
+      "capturedAt": "2026-10-26T19:05:04.926Z"
+    }
+  ],
+  "events": [
+    {
+      "seq": 0,
+      "type": "scenario-started",
+      "timestamp": "2026-10-26T19:05:04.814Z",
+      "detail": "checkout-modal-keyboard against http://127.0.0.1:37187"
+    },
+    {
+      "seq": 1,
+      "type": "page-loaded",
+      "timestamp": "2026-10-26T19:05:04.852Z",
+      "detail": "http://127.0.0.1:37187"
+    },
+    {
+      "seq": 2,
+      "type": "screenshot-captured",
+      "timestamp": "2026-10-26T19:05:04.875Z",
+      "detail": "before-modal.png"
+    },
+    {
+      "seq": 3,
+      "type": "modal-opened",
+      "timestamp": "2026-10-26T19:05:04.901Z",
+      "detail": "#checkout-modal visible, focus on #checkout-modal-close"
+    },
+    {
+      "seq": 4,
+      "type": "screenshot-captured",
+      "timestamp": "2026-10-26T19:05:04.926Z",
+      "detail": "modal-open.png"
+    },
+    {
+      "seq": 5,
+      "type": "key-pressed",
+      "timestamp": "2026-10-26T19:05:04.926Z",
+      "detail": "pressed Tab"
+    },
+    {
+      "seq": 6,
+      "type": "focus-changed",
+      "timestamp": "2026-10-26T19:05:04.927Z",
+      "detail": "#checkout-modal-close -> #checkout-modal-email"
+    },
+    {
+      "seq": 7,
+      "type": "key-pressed",
+      "timestamp": "2026-10-26T19:05:04.928Z",
+      "detail": "pressed Tab"
+    },
+    {
+      "seq": 8,
+      "type": "focus-changed",
+      "timestamp": "2026-10-26T19:05:04.928Z",
+      "detail": "#checkout-modal-email -> #checkout-modal-continue"
+    },
+    {
+      "seq": 9,
+      "type": "key-pressed",
+      "timestamp": "2026-10-26T19:05:04.929Z",
+      "detail": "pressed Tab"
+    },
+    {
+      "seq": 10,
+      "type": "focus-changed",
+      "timestamp": "2026-10-26T19:05:04.930Z",
+      "detail": "#checkout-modal-continue -> #checkout-modal-close"
+    },
+    {
+      "seq": 11,
+      "type": "key-pressed",
+      "timestamp": "2026-10-26T19:05:04.931Z",
+      "detail": "pressed Tab"
+    },
+    {
+      "seq": 12,
+      "type": "focus-changed",
+      "timestamp": "2026-10-26T19:05:04.931Z",
+      "detail": "#checkout-modal-close -> #checkout-modal-email"
+    },
+    {
+      "seq": 13,
+      "type": "key-pressed",
+      "timestamp": "2026-10-26T19:05:04.932Z",
+      "detail": "pressed Tab"
+    },
+    {
+      "seq": 14,
+      "type": "focus-changed",
+      "timestamp": "2026-10-26T19:05:04.933Z",
+      "detail": "#checkout-modal-email -> #checkout-modal-continue"
+    },
+    {
+      "seq": 15,
+      "type": "key-pressed",
+      "timestamp": "2026-10-26T19:05:04.933Z",
+      "detail": "pressed Tab"
+    },
+    {
+      "seq": 16,
+      "type": "focus-changed",
+      "timestamp": "2026-10-26T19:05:04.934Z",
+      "detail": "#checkout-modal-continue -> #checkout-modal-close"
+    },
+    {
+      "seq": 17,
+      "type": "key-pressed",
+      "timestamp": "2026-10-26T19:05:04.934Z",
+      "detail": "pressed Tab"
+    },
+    {
+      "seq": 18,
+      "type": "focus-changed",
+      "timestamp": "2026-10-26T19:05:04.935Z",
+      "detail": "#checkout-modal-close -> #checkout-modal-email"
+    },
+    {
+      "seq": 19,
+      "type": "key-pressed",
+      "timestamp": "2026-10-26T19:05:04.936Z",
+      "detail": "pressed Tab"
+    },
+    {
+      "seq": 20,
+      "type": "focus-changed",
+      "timestamp": "2026-10-26T19:05:04.936Z",
+      "detail": "#checkout-modal-email -> #checkout-modal-continue"
+    },
+    {
+      "seq": 21,
+      "type": "key-pressed",
+      "timestamp": "2026-10-26T19:05:04.937Z",
+      "detail": "pressed Tab"
+    },
+    {
+      "seq": 22,
+      "type": "focus-changed",
+      "timestamp": "2026-10-26T19:05:04.937Z",
+      "detail": "#checkout-modal-continue -> #checkout-modal-close"
+    },
+    {
+      "seq": 23,
+      "type": "key-pressed",
+      "timestamp": "2026-10-26T19:05:04.938Z",
+      "detail": "pressed Tab"
+    },
+    {
+      "seq": 24,
+      "type": "focus-changed",
+      "timestamp": "2026-10-26T19:05:04.939Z",
+      "detail": "#checkout-modal-close -> #checkout-modal-email"
+    },
+    {
+      "seq": 25,
+      "type": "scenario-completed",
+      "timestamp": "2026-10-26T19:05:04.939Z",
+      "detail": "focus-contained-in-modal passed"
+    }
+  ]
+}

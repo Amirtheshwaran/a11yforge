@@ -1,0 +1,31 @@
+{
+  "repairId": "repair-checkout-modal-focus-trap-2",
+  "proposalId": "prop-checkout-modal-focus-trap-2",
+  "state": "ACCEPTED",
+  "transitions": [
+    {
+      "from": "PROPOSED",
+      "to": "APPLYING",
+      "at": "2026-10-26T19:05:03.726Z",
+      "reason": "validated revision; creating fresh isolated workspace"
+    },
+    {
+      "from": "APPLYING",
+      "to": "APPLIED",
+      "at": "2026-10-26T19:05:03.737Z",
+      "reason": "exact anchors verified; revision diff recorded"
+    },
+    {
+      "from": "APPLIED",
+      "to": "VERIFIED",
+      "at": "2026-10-26T19:05:06.171Z",
+      "reason": "deterministic gate passed; requesting critic verdict"
+    },
+    {
+      "from": "VERIFIED",
+      "to": "ACCEPTED",
+      "at": "2026-10-26T19:05:16.883Z",
+      "reason": "critic ACCEPT (confidence 0.86): Tab escape from #checkout-modal-continue to #background-control while modal open is resolved by Tab trap wrapping to #checkout-modal-email. Build passes with no new axe violations and TS undefined guard addresses prior TS18048 rejection."
+    }
+  ]
+}

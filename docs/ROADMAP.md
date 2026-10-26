@@ -131,13 +131,23 @@ AI critic (ACCEPT 0.82 with remaining risks). No fake data, no live model
 calls, no new repair intelligence; the console itself is axe-clean
 (0 serious/critical). Details: `docs/ARCHITECTURE.md`.
 
-## Phase 7 — additional accessibility strategies + Meta open-weight critic
+## Phase 7 — deployment readiness + recorded demo ✅ COMPLETE
+
+Feature-freeze on the repair loop. Shipped: a committed sanitized real
+ACCEPTED run (`demo/accepted-run/`, `pnpm demo:export` / `pnpm demo:validate`),
+recorded-mode fallback without credentials, `pnpm start`, a container image
+with Playwright Chromium, `A11YFORGE_DATA_DIR`, startup validation, a safe
+`GET /health`, env-driven web/API configuration, judge-ready README with
+architecture diagram, and deployment tests. Zero live model calls.
+Details: `docs/ARCHITECTURE.md`.
+
+## Later — additional accessibility strategies + Meta open-weight critic
 
 More issue strategies beyond the first defect class, and an open-weight Meta
-model as an independent second critic on patches and verdicts.
+model as an independent second critic on patches and verdicts. Explicitly
+out of scope for the hackathon build.
 
-## Phase 8 — demo hardening
+## Later — demo hardening (rehearsed narrative)
 
-Freeze the demo path end to end: seeded fixture, reliable rebuild, recorded
-fallback evidence, and a rehearsed narrative — finding, tracing, fixing, and
-proving a real issue resolved.
+Recorded fallback evidence shipped in Phase 7; a rehearsed live narrative
+remains future work.

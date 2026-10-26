@@ -1,0 +1,27 @@
+{
+  "diagnosisId": "diag-checkout-modal-keyboard-focus-escape",
+  "issueType": "focus-containment",
+  "title": "Keyboard focus escapes checkout modal on Tab",
+  "summary": "Keyboard Tab sequence escaped the open checkout modal to background content instead of remaining trapped inside the dialog.",
+  "severity": "serious",
+  "confidence": 0.95,
+  "affectedStrategies": [
+    "keyboard-navigation",
+    "screen-reader-navigation"
+  ],
+  "evidenceIds": [
+    "ev-modal-open",
+    "ev-focus-step-1",
+    "ev-focus-step-2",
+    "ev-focus-escape",
+    "ev-assertion-failed"
+  ],
+  "observedFailure": "While #checkout-modal remained open, pressing Tab at step 3 moved focus from #checkout-modal-continue inside the modal to #background-control outside the modal, failing assertion focus-contained-in-modal which expected focus inside #checkout-modal.",
+  "likelyCause": "The modal likely lacks a working focus trap or loop handler for Tab at the last focusable element, so pressing Tab from the final control allows focus to leave the open dialog to the background page.",
+  "recommendedRepairStrategy": "Implement a focus containment strategy that keeps Tab and Shift+Tab cycling within #checkout-modal while it is open, prevents focus from moving to background content, and restores management of initial focus and close behavior.",
+  "relevantWcagCriteria": [
+    "2.1.2 No Keyboard Trap",
+    "2.4.3 Focus Order"
+  ],
+  "needsSourceContext": true
+}

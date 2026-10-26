@@ -19,7 +19,9 @@
     "trace:fixture": "node dist/trace-fixture.js",
     "propose:fixture": "node dist/propose-fixture.js",
     "repair:fixture": "node dist/repair-fixture.js",
-    "recover:fixture": "node dist/recover-fixture.js"
+    "recover:fixture": "node dist/recover-fixture.js",
+    "demo:export": "node dist/demo-export.js",
+    "demo:validate": "node dist/demo-validate.js"
   },
   "dependencies": {
     "@a11yforge/meta": "workspace:*",

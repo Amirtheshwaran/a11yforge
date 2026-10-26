@@ -4,12 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   artifactSrc,
   fetchArtifactText,
+  fetchHealth,
   fetchRun,
   fetchRunStatus,
   fetchRuns,
   shortRunId,
   startRun,
   subscribeRunEvents,
+  type ApiHealth,
   type LiveRunEvent,
   type LiveRunStatus,
   type RunSummary,
@@ -212,6 +214,7 @@ export default function Home() {
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   const [attempt, setAttempt] = useState<number>(2);
 
+  const [health, setHealth] = useState<ApiHealth | null>(null);
   const [livePhase, setLivePhase] = useState<LivePhase>("idle");
   const [liveRunId, setLiveRunId] = useState<string | null>(null);
   const [liveStatus, setLiveStatus] = useState<LiveRunStatus | null>(null);
@@ -243,6 +246,20 @@ export default function Home() {
   useEffect(() => {
     void load(selected);
   }, [load, selected]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchHealth()
+      .then((h) => {
+        if (!cancelled) setHealth(h);
+      })
+      .catch(() => {
+        /* health is best-effort; the recorded console works regardless */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const stopLiveStream = useCallback(() => {
     streamRef.current?.();
@@ -407,6 +424,12 @@ export default function Home() {
           verify → critic) and streams its events here. Nothing is faked; instant stages display
           honestly.
         </p>
+        {health !== null && !health.modelConfigured && (
+          <p className="notice" role="note">
+            Live Meta execution unavailable — MODEL_API_KEY not configured. The recorded
+            accepted run below remains fully inspectable.
+          </p>
+        )}
         {(livePhase === "idle" || livePhase === "done" || livePhase === "failed") && (
           <button type="button" onClick={() => void startLive()} disabled={liveBusy}>
             {livePhase === "idle" ? "Start Autonomous Repair" : "Start New Autonomous Repair"}
@@ -562,6 +585,12 @@ export default function Home() {
       <h2 className="section-heading" id="h-recorded">
         Completed demo run <span className="demo-badge">RECORDED</span>
       </h2>
+      {health?.demoMode === "bundled-recorded" && (
+        <p className="notice" role="note">
+          Recorded accepted run — a real historical A11yForge run bundled with this checkout.
+          No API key needed; this is a recording, not a live run.
+        </p>
+      )}
 
       <div className="controls" role="group" aria-label="Run controls">
         <label htmlFor="run-select">Run</label>

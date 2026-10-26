@@ -6,10 +6,23 @@
  * so the web app, API, engine, and Meta provider all speak the same shapes.
  */
 
-/** Response body for `GET /health`. */
+/**
+ * Response body for `GET /health`.
+ *
+ * Deployment-friendly and safe by construction: booleans and labels only.
+ * Never environment values, keys, paths, or filesystem structure.
+ */
 export interface ApiHealth {
   status: "ok";
   service: "a11yforge-api";
+  /** Release label (`A11YFORGE_VERSION`, defaults to the package version). */
+  version: string;
+  /** True when the API server has MODEL_API_KEY and live runs can execute. */
+  modelConfigured: boolean;
+  /** Where the recorded demo run is served from. */
+  demoMode: "bundled-recorded" | "local";
+  /** True when the runtime data directory is present and writable. */
+  dataDirWritable: boolean;
 }
 
 export {
