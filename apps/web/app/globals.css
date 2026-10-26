@@ -1,0 +1,35 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+    sans-serif;
+  color: #1a1a1a;
+  background: #ffffff;
+}
+
+.shell {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 96px 24px;
+}
+
+.shell h1 {
+  font-size: 40px;
+  line-height: 1.1;
+  margin: 0 0 12px;
+  letter-spacing: -0.02em;
+}
+
+.tagline {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+.build {
+  font-size: 14px;
+  color: #555;
+  margin: 0;
+}

@@ -1,0 +1,23 @@
+{
+  "name": "a11yforge",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A11yForge — autonomous accessibility engineering (hackathon build)",
+  "packageManager": "pnpm@10.34.9",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r --parallel typecheck",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.49.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
