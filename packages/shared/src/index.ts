@@ -23,6 +23,25 @@ export type {
   Impact,
 } from "./evidence.js";
 export {
+  AccessibilityDiagnosisSchema,
+  DiagnosisSeveritySchema,
+  EvidenceBundleSchema,
+  EvidenceItemKindSchema,
+  EvidenceItemSchema,
+  IssueTypeSchema,
+  ModelUsageSchema,
+  evidenceIdsOf,
+} from "./diagnosis.js";
+export type {
+  AccessibilityDiagnosis,
+  DiagnosisSeverity,
+  EvidenceBundle,
+  EvidenceItem,
+  EvidenceItemKind,
+  IssueType,
+  ModelUsage,
+} from "./diagnosis.js";
+export {
   EvidenceTypeSchema,
   FocusObservationSchema,
   InteractionAssertionSchema,

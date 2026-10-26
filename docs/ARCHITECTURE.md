@@ -98,6 +98,38 @@ live in `packages/shared` (`EvidenceType`: `axe-finding`,
 `focus-observation`, `interaction-assertion`, `screenshot`) so Phase 1 and
 Phase 2 artifacts share one vocabulary without rewriting the scanner.
 
+## Phase 3 diagnosis flow (implemented)
+
+```text
+pnpm diagnose:fixture
+  → engine selects the latest completed run with a failed
+    focus-contained-in-modal assertion (deterministic lexical order;
+    scan-only runs skipped, never a fresh browser run)
+  → builds the compact evidence bundle (stable IDs: ev-modal-open,
+    ev-focus-step-<seq>, ev-focus-escape, ev-assertion-failed; no events,
+    screenshots, axe findings, or page dumps)
+  → prints the credit notice (model, operation, evidence count, call budget)
+  → meta provider makes EXACTLY ONE request to
+    https://api.meta.ai/v1/chat/completions (model muse-spark-1.3-contributor
+    unless A11YFORGE_META_MODEL overrides; key from MODEL_API_KEY only)
+  → response_format.json_schema constrains decoding to the
+    accessibility-diagnosis schema (never a bare "return JSON" prompt)
+  → local validation: Zod parse + evidence-ID grounding (unknown IDs fail)
+  → persists diagnosis.json + model-usage.json next to source scenario.json
+```
+
+Three validation layers: Meta constrained decoding, local Zod validation,
+A11yForge evidence-reference validation. Budget: `ModelCallBudget` capped by
+`A11YFORGE_MAX_MODEL_CALLS_PER_RUN` (default 1); no retry loop — transport
+errors report, malformed results fail. Output budget: `max_tokens: 1500`
+(documented in `packages/meta/src/config.ts`). Usage telemetry records only
+fields the API exposes (absent token counts stay null, never fabricated).
+Shared shapes (`AccessibilityDiagnosis`, `EvidenceBundle`, `ModelUsage`) live
+in `packages/shared`; the provider lives in `packages/meta`; bundle
+construction and the CLI live in `packages/engine`. No live call runs in
+tests or builds — `pnpm diagnose:fixture` without `MODEL_API_KEY` fails
+before any network attempt.
+
 ## Future browser evidence flow
 
 ```text

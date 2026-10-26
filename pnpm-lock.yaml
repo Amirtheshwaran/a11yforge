@@ -95,6 +95,9 @@ importers:
 
   packages/engine:
     dependencies:
+      '@a11yforge/meta':
+        specifier: workspace:*
+        version: link:../meta
       '@a11yforge/shared':
         specifier: workspace:*
         version: link:../shared
@@ -120,7 +123,13 @@ importers:
       '@a11yforge/shared':
         specifier: workspace:*
         version: link:../shared
+      zod:
+        specifier: ^4.1.12
+        version: 4.6.7
     devDependencies:
+      '@types/node':
+        specifier: ^22.19.0
+        version: 22.20.5
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

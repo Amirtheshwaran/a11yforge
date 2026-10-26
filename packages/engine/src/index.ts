@@ -52,3 +52,15 @@ export {
   type InteractionArtifactOptions,
 } from "./interaction/artifacts.js";
 export { formatInteractionSummary } from "./interaction/report.js";
+export { buildFocusContainmentBundle } from "./diagnosis/evidence-bundle.js";
+export { findLatestScenarioRun } from "./diagnosis/run-selector.js";
+export type { ScenarioRunSelection } from "./diagnosis/run-selector.js";
+export {
+  diagnosePreamble,
+  runDiagnoseFixture,
+} from "./diagnosis/diagnose.js";
+export type {
+  DiagnoseFixtureDeps,
+  DiagnoseFixtureResult,
+} from "./diagnosis/diagnose.js";
+export { formatDiagnosisSummary } from "./diagnosis/report.js";

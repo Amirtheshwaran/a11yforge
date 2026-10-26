@@ -14,9 +14,11 @@
     "test": "node --test --test-concurrency=1 \"dist/**/*.test.js\"",
     "scan": "node dist/cli.js",
     "scan:fixture": "node dist/scan-fixture.js",
-    "scenario:fixture": "node dist/scenario-fixture.js"
+    "scenario:fixture": "node dist/scenario-fixture.js",
+    "diagnose:fixture": "node dist/diagnose-fixture.js"
   },
   "dependencies": {
+    "@a11yforge/meta": "workspace:*",
     "@a11yforge/shared": "workspace:*",
     "axe-core": "^4.10.3",
     "playwright": "^1.57.0",
