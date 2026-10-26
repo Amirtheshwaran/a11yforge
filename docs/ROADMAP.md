@@ -21,11 +21,28 @@ Verified with `pnpm scan:fixture` — 4 findings, 4 rules, every run:
 Normalized artifacts land in `.a11yforge/runs/<scan-id>/scan.json`.
 Details: `fixtures/broken-shop/README.md`, `docs/ARCHITECTURE.md`.
 
-## Phase 2 — browser evidence + keyboard testing
+## Phase 2 — browser evidence + keyboard testing ✅ COMPLETE
 
-Drive the fixture in a real browser: record interaction traces, capture
-DOM and accessibility-tree snapshots, and run keyboard-only checks. Produce a
-replayable evidence envelope per issue.
+Deterministic keyboard interaction evidence in `packages/engine`
+(runner, focus observations, `focus-contained-in-modal` assertion,
+run events, screenshots) over a deliberately trap-less checkout modal
+in `fixtures/broken-shop` (defect E), with shared Zod schemas in
+`packages/shared` (`FocusObservation`, `InteractionAssertion`,
+`KeyboardScenarioResult`, `EvidenceType`, scenario definitions).
+
+Verified with `pnpm scenario:fixture` — deterministic every run:
+
+- modal opens, focus lands on `#checkout-modal-close`
+- Tab → `#checkout-modal-email` (inside)
+- Tab → `#checkout-modal-continue` (inside)
+- Tab → `#background-control` (outside, modal still open)
+- `focus-contained-in-modal` FAILS at step 3 with evidence in
+  `.a11yforge/runs/<run-id>/` (`scenario.json` + exactly 3 PNGs)
+
+Phase 1 intact: `pnpm scan:fixture` still reports all four axe rules
+(`button-name`, `image-alt`, `label`, `color-contrast`). No model calls
+anywhere in the loop. Details: `fixtures/broken-shop/README.md`,
+`docs/ARCHITECTURE.md`.
 
 ## Phase 3 — Meta-powered structured diagnosis
 

@@ -20,3 +20,35 @@ export {
   type FixtureServer,
 } from "./scanner/fixture-server.js";
 export { findWorkspaceRoot } from "./scanner/workspace.js";
+export {
+  CHECKOUT_MODAL_KEYBOARD,
+  CHECKOUT_MODAL_SELECTOR,
+  CHECKOUT_TAB_PRESSES,
+  PROCEED_TO_CHECKOUT_SELECTOR,
+  getScenario,
+} from "./interaction/scenarios.js";
+export {
+  captureFocusObservation,
+  describeActiveElement,
+  isModalOpen,
+  isModalOpenInPage,
+  toFocusObservation,
+  type ObservationMeta,
+  type RawFocusSnapshot,
+} from "./interaction/observe.js";
+export {
+  evaluateFocusContainment,
+  type ContainmentInput,
+} from "./interaction/assertions.js";
+export {
+  newRunId,
+  runKeyboardScenario,
+  type KeyboardRunnerDeps,
+  type KeyboardRunnerOptions,
+} from "./interaction/runner.js";
+export {
+  writeInteractionArtifacts,
+  type InteractionArtifact,
+  type InteractionArtifactOptions,
+} from "./interaction/artifacts.js";
+export { formatInteractionSummary } from "./interaction/report.js";

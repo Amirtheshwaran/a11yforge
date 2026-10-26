@@ -18,8 +18,19 @@ A tiny React + Vite e-commerce product/checkout page served on
 | C | `label` (critical) | `#email` (`src/App.tsx`) | The visual "Email" text is a plain `<div>`, not a `<label>`, and the input deliberately has **no `placeholder`** (axe-core accepts a non-empty placeholder as a label, which would mask this defect). The "Full name" field is intentionally correct (`<label htmlFor>`) for contrast. |
 | D | `color-contrast` (serious) | `.fine-print` (`src/App.tsx`, `src/styles.css`) | `#999` on white (measured 2.84:1), below the 4.5:1 requirement for small text. Do not darken it. |
 
-Out of scope for this fixture (belong to later phases): keyboard traps,
-modal focus bugs, and any interaction-dependent defects.
+## Deliberate interaction defect (Phase 2, keyboard evidence)
+
+| # | behavior | Where | What is wrong |
+|---|----------|-------|---------------|
+| E | focus containment (no axe rule; keyboard replay only) | `src/App.tsx` — `Proceed to checkout` button, `#checkout-modal` dialog, `#background-control` footer link | The checkout dialog (`role="dialog"`, `aria-modal="true"`, labelled by its title — markup is intentionally valid so the failure is interaction-only) has **no focus trap**, and background content is deliberately **not** made `inert` or unfocusable. Focus correctly enters the dialog on open, but repeated Tab presses walk out: Close → Email → Continue → `#background-control` while the modal stays open. Do NOT add a trap, `inert`, `aria-hidden`, or `tabindex="-1"` to background content. |
+
+Deterministic escape order (asserted by `packages/engine` tests and
+reproduced by `pnpm scenario:fixture`):
+
+1. Click `Proceed to checkout` → modal opens, focus lands on Close.
+2. Tab → Email field (inside dialog).
+3. Tab → Continue button (inside dialog).
+4. Tab → `#background-control` footer link (**outside** dialog, modal still open) → `focus-contained-in-modal` FAILS.
 
 ## Changing this fixture
 

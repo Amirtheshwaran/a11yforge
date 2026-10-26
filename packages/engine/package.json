@@ -11,9 +11,10 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "pretest": "pnpm build",
-    "test": "node --test \"dist/**/*.test.js\"",
+    "test": "node --test --test-concurrency=1 \"dist/**/*.test.js\"",
     "scan": "node dist/cli.js",
-    "scan:fixture": "node dist/scan-fixture.js"
+    "scan:fixture": "node dist/scan-fixture.js",
+    "scenario:fixture": "node dist/scenario-fixture.js"
   },
   "dependencies": {
     "@a11yforge/shared": "workspace:*",

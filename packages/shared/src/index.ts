@@ -22,3 +22,25 @@ export type {
   AccessibilityScanResult,
   Impact,
 } from "./evidence.js";
+export {
+  EvidenceTypeSchema,
+  FocusObservationSchema,
+  InteractionAssertionSchema,
+  KeyboardScenarioResultSchema,
+  RunEventSchema,
+  RunEventTypeSchema,
+  ScenarioDefinitionSchema,
+  ScenarioStepSchema,
+  ScreenshotRefSchema,
+} from "./interaction.js";
+export type {
+  EvidenceType,
+  FocusObservation,
+  InteractionAssertion,
+  KeyboardScenarioResult,
+  RunEvent,
+  RunEventType,
+  ScenarioDefinition,
+  ScenarioStep,
+  ScreenshotRef,
+} from "./interaction.js";

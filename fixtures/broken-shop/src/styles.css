@@ -90,3 +90,55 @@
   border-radius: 4px;
   cursor: pointer;
 }
+
+.proceed-to-checkout {
+  margin-top: 12px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 700;
+  background: #ffffff;
+  color: #005fcc;
+  border: 2px solid #005fcc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.site-footer {
+  margin-top: 32px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* DEFECT E overlay: purely visual. It does NOT trap focus and does NOT
+ * disable background content — that absence is the intentional defect. */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkout-modal {
+  background: #ffffff;
+  color: #1a1a1a;
+  border-radius: 8px;
+  padding: 24px;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checkout-modal-close,
+.checkout-modal-continue {
+  padding: 10px 16px;
+  font-size: 16px;
+  font-weight: 700;
+  background: #005fcc;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}

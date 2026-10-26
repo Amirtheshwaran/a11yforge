@@ -58,6 +58,46 @@ booting the fixture. `pnpm fixture:dev` serves the fixture alone on :3002.
 The scanner collects objective facts only (rule, impact, selector, HTML
 fragment, failure summary, URL) — no interpretation, no model calls.
 
+## Phase 2 keyboard flow (implemented)
+
+```text
+pnpm scenario:fixture
+  → engine boots fixtures/broken-shop (Vite, :3002) and waits for HTTP 200
+  → Playwright launches Chromium, goto(url, waitUntil "load")
+  → wait for `main` selector (same HMR reasoning as the scanner)
+  → scenario runner executes `checkout-modal-keyboard`
+     (packages/engine/src/interaction/scenarios.ts — data-driven steps:
+     screenshot, click `.proceed-to-checkout`, wait-for `#checkout-modal`,
+     screenshot, up to 10 Tab presses; later phases select scenarios by id
+     without rewriting the runner)
+  → after the modal opens and after every Tab, `document.activeElement`
+     is described in-page into a compact FocusObservation
+     (seq, action, key, timestamp, URL, selector, tag name, role,
+     accessible name, bounded text, tabIndex, disabled, aria-hidden,
+     inside-modal flag — no DOM snapshots)
+  → deterministic assertion `focus-contained-in-modal`: while the modal is
+     open, focus must stay inside the dialog subtree; the first outside
+     observation fails with step, pressed key, expected region, actual
+     focused selector, and bounded HTML (packages/shared Zod schemas
+     validate every boundary)
+  → exactly three screenshots: `before-modal.png`, `modal-open.png`,
+     `focus-escaped.png` (only the escape press is screenshotted, never
+     every Tab)
+  → run events recorded in the artifact (`scenario-started`, `page-loaded`,
+     `modal-opened`, `key-pressed`, `focus-changed`, `assertion-failed`,
+     `screenshot-captured`, `scenario-completed`) — stored, not streamed;
+     no SSE, no timeline UI yet
+  → terminal report printed; KeyboardScenarioResult written to
+     .a11yforge/runs/<run-id>/scenario.json
+  → browser closed in a `finally`; fixture server stopped in a `finally`
+```
+
+Exit 1 when focus escapes (the intended defect reproduced) or the run
+fails; exit 0 only if focus stays contained. Unified evidence categories
+live in `packages/shared` (`EvidenceType`: `axe-finding`,
+`focus-observation`, `interaction-assertion`, `screenshot`) so Phase 1 and
+Phase 2 artifacts share one vocabulary without rewriting the scanner.
+
 ## Future browser evidence flow
 
 ```text

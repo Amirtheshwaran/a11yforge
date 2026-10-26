@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./styles.css";
 
 /**
@@ -6,11 +6,22 @@ import "./styles.css";
  *
  * DO NOT FIX the accessibility defects marked DEFECT below. They are
  * intentional test fixtures for the Phase 1 deterministic scanner
- * (see README.md). Fixing them silently breaks `pnpm scan:fixture`
- * expectations and the engine smoke test.
+ * (see README.md) and the Phase 2 keyboard scenario
+ * (`pnpm scenario:fixture`). Fixing them silently breaks `pnpm scan:fixture`
+ * and `pnpm scenario:fixture` expectations and the engine tests.
  */
 export default function App() {
   const [quantity, setQuantity] = useState(1);
+  const [modalOpen, setModalOpen] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Move keyboard focus into the dialog when it opens (correct behavior).
+  // Focus containment itself is deliberately NOT implemented (DEFECT E).
+  useEffect(() => {
+    if (modalOpen) {
+      closeButtonRef.current?.focus();
+    }
+  }, [modalOpen]);
 
   return (
     <div className="page">
@@ -97,8 +108,79 @@ export default function App() {
           <button type="button" className="place-order">
             Place order
           </button>
+          <button
+            type="button"
+            className="proceed-to-checkout"
+            onClick={() => setModalOpen(true)}
+          >
+            Proceed to checkout
+          </button>
+          {/*
+           * DEFECT E (focus containment, Phase 2): the checkout dialog has
+           * NO focus trap, and the page behind it is deliberately NOT made
+           * inert. Repeated Tab presses walk out of the dialog onto
+           * background controls while the modal stays open. Do NOT add a
+           * focus trap, `inert`, or `tabindex="-1"` to background content.
+           * Markup stays semantic (`role="dialog"`, labelled by its title)
+           * so the failure is interaction-only, not invalid markup.
+           */}
+          {modalOpen && (
+            <div className="modal-overlay">
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="checkout-modal-title"
+                data-testid="checkout-modal"
+                id="checkout-modal"
+                className="checkout-modal"
+              >
+                <h2 id="checkout-modal-title">Checkout</h2>
+                <button
+                  type="button"
+                  ref={closeButtonRef}
+                  id="checkout-modal-close"
+                  className="checkout-modal-close"
+                  onClick={() => setModalOpen(false)}
+                >
+                  Close
+                </button>
+                <div className="field">
+                  <label htmlFor="checkout-modal-email">
+                    Email for receipt
+                  </label>
+                  <input
+                    id="checkout-modal-email"
+                    name="checkout-modal-email"
+                    type="email"
+                    autoComplete="email"
+                  />
+                </div>
+                <button
+                  type="button"
+                  id="checkout-modal-continue"
+                  className="checkout-modal-continue"
+                  onClick={() => setModalOpen(false)}
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          )}
         </section>
       </main>
+      <footer className="site-footer">
+        {/*
+         * Background controls: focusable elements behind the modal that a
+         * correct focus trap would keep unreachable while the dialog is
+         * open. They are the deterministic escape targets for DEFECT E.
+         */}
+        <a id="background-control" href="#shipping-info">
+          Shipping info
+        </a>{" "}
+        <a id="background-help" href="#help">
+          Help
+        </a>
+      </footer>
     </div>
   );
 }

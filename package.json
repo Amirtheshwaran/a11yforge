@@ -12,6 +12,7 @@
     "fixture:dev": "pnpm --filter @a11yforge/broken-shop dev",
     "scan": "pnpm --filter @a11yforge/engine scan",
     "scan:fixture": "pnpm --filter @a11yforge/engine scan:fixture",
+    "scenario:fixture": "pnpm --filter @a11yforge/engine scenario:fixture",
     "test:engine": "pnpm --filter @a11yforge/engine test"
   },
   "devDependencies": {
