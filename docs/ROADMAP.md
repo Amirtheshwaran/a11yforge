@@ -101,6 +101,24 @@ was correctly NOT called (1 of 2 model calls spent, on the proposal).
 The critic path itself is implemented and covered by mocked tests. The
 main fixture source was never mutated. Details: `docs/ARCHITECTURE.md`.
 
+## Phase 5b — verifier-driven repair recovery ✅ COMPLETE
+
+Bounded fix-forward in `packages/engine/src/verify/` (`feedback.ts`,
+`validate-revision.ts`, `reverse.ts`, `recover-fixture.ts`) plus the
+`accessibility-repair-revision` operation in `packages/meta` and
+`RepairFailureFeedback` / `RepairRevisionRequest` / `TYPECHECK_FAILED` /
+`MAX_REPAIR_ATTEMPTS = 2` in `packages/shared`. Entry point
+`pnpm recover:fixture`: Attempt-1 evidence preserved byte-for-byte,
+one feedback-grounded revision, fresh workspace, typecheck-first
+verification, forward + reverse keyboard replay, axe baseline
+comparison, critic only after all gates.
+
+Verified live (2026-10-26): Attempt 1 rejected (`TS18048`,
+`REGRESSION_FAILED`, behaviorally fixed); Attempt 2 added the
+`undefined` guard and reached ACCEPTED — critic ACCEPT at 0.82
+confidence, 2 of 2 model calls spent, no Proposal #3. A11yForge's first
+fully verified and accepted repair. Details: `docs/ARCHITECTURE.md`.
+
 ## Phase 6 — observable agent UI
 
 Build the real web dashboard: run timeline, evidence viewer, before/after

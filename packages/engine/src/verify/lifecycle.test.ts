@@ -49,6 +49,7 @@ describe("repair lifecycle", () => {
   it("treats every failure state as terminal", () => {
     for (const state of [
       "BUILD_FAILED",
+      "TYPECHECK_FAILED",
       "VERIFY_FAILED",
       "REGRESSION_FAILED",
       "ACCEPTED",
@@ -93,5 +94,17 @@ describe("repair lifecycle", () => {
     }
     second = transitionRepairLifecycle(second, "REJECTED", "critic reject");
     assert.equal(second.state, "REJECTED");
+  });
+
+  it("walks APPLIED → TYPECHECK_FAILED for compiler failures", () => {
+    let lifecycle = newRepairLifecycle({
+      repairId: "repair-1",
+      proposalId: "prop-1",
+    });
+    for (const to of ["APPLYING", "APPLIED", "TYPECHECK_FAILED"] as const) {
+      lifecycle = transitionRepairLifecycle(lifecycle, to, `reason for ${to}`);
+    }
+    assert.equal(lifecycle.state, "TYPECHECK_FAILED");
+    assert.ok(isRepairLifecycleTerminal("TYPECHECK_FAILED"));
   });
 });

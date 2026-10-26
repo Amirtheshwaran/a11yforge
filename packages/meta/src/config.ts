@@ -55,6 +55,9 @@ export const DIAGNOSIS_OPERATION = "accessibility-diagnosis";
 /** Operation label for the repair-proposal request (telemetry-distinct). */
 export const REPAIR_OPERATION = "accessibility-repair-proposal";
 
+/** Operation label for the bounded repair-revision request (telemetry-distinct). */
+export const REVISION_OPERATION = "accessibility-repair-revision";
+
 /** Operation label for the repair-critic request (telemetry-distinct). */
 export const CRITIC_OPERATION = "repair-critic-review";
 

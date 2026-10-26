@@ -90,6 +90,21 @@ export type {
   RepairLifecycleTransition,
   RepairVerificationResult,
 } from "./verify.js";
+export {
+  MAX_REPAIR_ATTEMPTS,
+  RepairFailureFeedbackSchema,
+  RepairRevisionRequestSchema,
+  RevisionDiagnosisSchema,
+  VerificationStageSchema,
+  isRevisionExhausted,
+  isTerminalFailureState,
+} from "./recovery.js";
+export type {
+  RepairFailureFeedback,
+  RepairRevisionRequest,
+  RevisionDiagnosis,
+  VerificationStage,
+} from "./recovery.js";
 export type {
   EvidenceType,
   FocusObservation,

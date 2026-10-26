@@ -113,6 +113,13 @@ export interface ReplayRepairedDeps {
   /** Run dir receiving `repaired-*.png`, scenario, and screenshots. */
   screenshotDir: string;
   screenshotTimeoutMs?: number;
+  /**
+   * Prefix for runner screenshots (default `repaired`). Recovery runs use
+   * a distinct prefix so Attempt-1 evidence is never overwritten.
+   */
+  screenshotPrefix?: string;
+  /** Final contained-focus screenshot name (default artifact name). */
+  containedScreenshotName?: string;
 }
 
 /**
@@ -126,6 +133,9 @@ export async function replayCheckoutScenario(
 ): Promise<KeyboardScenarioResult> {
   const scenario = getScenario("checkout-modal-keyboard");
   const runId = newRunId();
+  const prefix = deps.screenshotPrefix ?? "repaired";
+  const containedName =
+    deps.containedScreenshotName ?? FOCUS_CONTAINED_AFTER_SCREENSHOT;
   const browser: Browser = await chromium.launch();
   try {
     const page = await browser.newPage();
@@ -136,7 +146,7 @@ export async function replayCheckoutScenario(
       targetUrl: deps.targetUrl,
       takeScreenshot: async (name: string) => {
         await page.screenshot({
-          path: join(deps.screenshotDir, `repaired-${name}`),
+          path: join(deps.screenshotDir, `${prefix}-${name}`),
           timeout: deps.screenshotTimeoutMs ?? 10_000,
         });
       },
@@ -144,7 +154,7 @@ export async function replayCheckoutScenario(
     // Equivalent post-repair evidence: the visible state after the same
     // Tab sequence ran against the repaired modal.
     await page.screenshot({
-      path: join(deps.screenshotDir, FOCUS_CONTAINED_AFTER_SCREENSHOT),
+      path: join(deps.screenshotDir, containedName),
       timeout: deps.screenshotTimeoutMs ?? 10_000,
     });
     return result;

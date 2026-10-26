@@ -593,9 +593,13 @@ export async function runRepairFixture(
   );
 
   if (reasons.length > 0) {
-    const failureState: RepairLifecycleState = !scenario.resolvedTargetFailure
-      ? "VERIFY_FAILED"
-      : "REGRESSION_FAILED";
+    // Compiler failures get their own precise state instead of grouping
+    // under REGRESSION_FAILED; historical artifacts stay readable.
+    const failureState: RepairLifecycleState = !typecheck.passed
+      ? "TYPECHECK_FAILED"
+      : !scenario.resolvedTargetFailure
+        ? "VERIFY_FAILED"
+        : "REGRESSION_FAILED";
     lifecycle = transitionRepairLifecycle(lifecycle, failureState, verification.decisionBasis);
     await persistLifecycle();
     const done = finish(

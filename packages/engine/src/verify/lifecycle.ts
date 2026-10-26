@@ -9,7 +9,8 @@ import {
  * Phase 5 repair lifecycle tracker.
  *
  * A proposed repair moves PROPOSED → APPLYING → APPLIED, then to exactly
- * one of BUILD_FAILED / VERIFY_FAILED / REGRESSION_FAILED / VERIFIED.
+ * one of BUILD_FAILED / TYPECHECK_FAILED / VERIFY_FAILED /
+ * REGRESSION_FAILED / VERIFIED.
  * VERIFIED is transient (deterministic gate passed, critic pending) and
  * resolves to ACCEPTED or REJECTED. An apply-time safety refusal goes
  * straight to REJECTED. Illegal transitions throw — the lifecycle is a

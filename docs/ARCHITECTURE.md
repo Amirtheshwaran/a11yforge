@@ -236,10 +236,13 @@ Two-level trust model:
 
 Lifecycle states (`packages/shared` `RepairLifecycleState`, persisted in
 `repair-lifecycle.json`): PROPOSED → APPLYING → APPLIED →
-BUILD_FAILED / VERIFY_FAILED / REGRESSION_FAILED / VERIFIED →
-ACCEPTED / REJECTED. Failure states and verdicts are terminal; VERIFIED
-is transient (gate passed, critic pending). The main fixture source is
-never mutated: the accepted workspace stays an artifact and the
+BUILD_FAILED / TYPECHECK_FAILED / VERIFY_FAILED / REGRESSION_FAILED /
+VERIFIED → ACCEPTED / REJECTED. Failure states and verdicts are
+terminal; VERIFIED is transient (gate passed, critic pending).
+`TYPECHECK_FAILED` names compiler failures precisely instead of grouping
+them under `REGRESSION_FAILED`; historical artifacts that used the older
+label remain readable (the enum only gained a state). The main fixture
+source is never mutated: the accepted workspace stays an artifact and the
 intentionally broken fixture remains the before-state baseline.
 
 Shared shapes (`RepairLifecycle`, `RepairVerificationResult`,
@@ -247,6 +250,65 @@ Shared shapes (`RepairLifecycle`, `RepairVerificationResult`,
 provider call lives in `packages/meta` (`critiqueRepairWithMeta`); the
 workspace/apply/build/replay/regression/gate/orchestrator modules and
 the CLI live in `packages/engine/src/verify/`.
+
+## Phase 5b verifier-driven recovery flow (implemented)
+
+```text
+pnpm recover:fixture (at most TWO paid requests, only after Attempt 1 failed)
+  → engine selects the latest run holding a terminally FAILED first
+    attempt (proposal + diff + replay + verification + lifecycle) that has
+    no repair-revision-proposal.json yet (MAX_REPAIR_ATTEMPTS = 2 —
+    a run that already revised refuses Proposal #3 outright)
+  → Attempt-1 artifacts are NEVER rewritten: feedback and revision live
+    in repair-feedback.json / repair-revision-* alongside them
+  → builds the compact RepairFailureFeedback bundle (proposal/repair
+    ids, previous result, failed stage, compiler command, exit status,
+    bounded stderr tail, exact diagnostic codes, affected region,
+    original edit, diagnosis, evidence ids, rationale, supplied files)
+  → EXACTLY ONE Meta revision request
+    (operation accessibility-repair-revision, model
+    muse-spark-1.3-contributor, low reasoning — the model receives the
+    original context + rejected proposal + verifier feedback, never the
+    repository)
+  → revision safety: all existing safeguards (exact anchors, evidence
+    grounding, file/edit bounds, confinement) PLUS the revision must
+    differ, touch no tests or compiler config, and carry no `any`,
+    `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `eslint-disable`,
+    or noUncheckedIndexedAccess tampering (invalid → REJECTED, no
+    workspace, no critic)
+  → creates a FRESH isolated workspace from the original broken fixture
+    (never a mutated repair workspace; records repair-revision-diff.patch)
+  → verification in order: typecheck FIRST (failure → TYPECHECK_FAILED,
+    no build/replay/critic) → build → replay of the EXACT
+    checkout-modal-keyboard scenario → reverse Shift+Tab traversal check
+    (wrap-first-to-last, same assertion, primary scenario untouched) →
+    fresh baseline vs revised axe comparison
+  → deterministic acceptance gate (same conjunction + reverse contained)
+  → ONLY if every gate passes: the SECOND and FINAL Meta call, the
+    critic, now also carrying the rejected first proposal and its reason
+  → ACCEPTED on critic ACCEPT, REJECTED otherwise
+```
+
+Trust model, unchanged and strengthened:
+
+1. The deterministic verifier is authoritative AND controls whether
+   additional reasoning is allowed. AI cannot self-certify: the critic
+   is never consulted on a failing repair, and the revision call itself
+   exists only because the verifier classified a failure the model can
+   address.
+2. The loop is hard-bounded: one proposal + one revision, then stop.
+   `pnpm recover:fixture` on an already-recovered run refuses instead
+   of spending a third call.
+
+First live recovery (2026-10-26): Attempt 1's focus trap fixed the
+escape but failed `tsc --noEmit` (`TS18048` under
+`noUncheckedIndexedAccess`, recorded as `REGRESSION_FAILED`);
+`pnpm recover:fixture` built the feedback bundle, the revision added one
+guard line (`if (first === undefined || last === undefined) return;`),
+and the fresh workspace passed typecheck, build, forward + reverse
+replay, and the 4-rule axe baseline — critic ACCEPT (0.82) → ACCEPTED
+(2 of 2 model calls spent). Details below; the failed-first artifacts
+are preserved in the same run dir.
 
 ## Future browser evidence flow
 

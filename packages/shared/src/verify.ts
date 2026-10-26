@@ -17,6 +17,7 @@ export const RepairLifecycleStateSchema = z.enum([
   "APPLYING",
   "APPLIED",
   "BUILD_FAILED",
+  "TYPECHECK_FAILED",
   "VERIFY_FAILED",
   "REGRESSION_FAILED",
   "VERIFIED",
@@ -27,9 +28,11 @@ export type RepairLifecycleState = z.infer<typeof RepairLifecycleStateSchema>;
 
 /**
  * Allowed lifecycle transitions. Failure states (BUILD_FAILED,
- * VERIFY_FAILED, REGRESSION_FAILED) and verdicts (ACCEPTED, REJECTED) are
- * terminal. VERIFIED is transient: deterministic gate passed, critic
- * verdict still pending.
+ * TYPECHECK_FAILED, VERIFY_FAILED, REGRESSION_FAILED) and verdicts
+ * (ACCEPTED, REJECTED) are terminal. VERIFIED is transient: deterministic
+ * gate passed, critic verdict still pending. Historical artifacts that
+ * recorded a compiler failure as REGRESSION_FAILED remain readable: the
+ * enum only gains a state, never renames one.
  */
 export const REPAIR_LIFECYCLE_TRANSITIONS: Record<
   RepairLifecycleState,
@@ -37,8 +40,15 @@ export const REPAIR_LIFECYCLE_TRANSITIONS: Record<
 > = {
   PROPOSED: ["APPLYING", "REJECTED"],
   APPLYING: ["APPLIED", "REJECTED"],
-  APPLIED: ["BUILD_FAILED", "VERIFY_FAILED", "REGRESSION_FAILED", "VERIFIED"],
+  APPLIED: [
+    "BUILD_FAILED",
+    "TYPECHECK_FAILED",
+    "VERIFY_FAILED",
+    "REGRESSION_FAILED",
+    "VERIFIED",
+  ],
   BUILD_FAILED: [],
+  TYPECHECK_FAILED: [],
   VERIFY_FAILED: [],
   REGRESSION_FAILED: [],
   VERIFIED: ["ACCEPTED", "REJECTED"],
@@ -136,6 +146,10 @@ export const CriticInputSchema = z.object({
   repairedAxeRules: z.array(z.string().min(1)),
   newAxeViolations: z.array(z.string().min(1)),
   regressions: z.array(z.string()),
+  /** Rejected first-attempt summary (revision reviews only). */
+  previousProposalSummary: z.string().min(1).max(2000).optional(),
+  /** Why the first attempt was rejected (revision reviews only). */
+  previousRejectionReason: z.string().min(1).max(2000).optional(),
 });
 export type CriticInput = z.infer<typeof CriticInputSchema>;
 

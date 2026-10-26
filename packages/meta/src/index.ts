@@ -23,6 +23,7 @@ export {
   REPAIR_MAX_OUTPUT_TOKENS,
   REPAIR_OPERATION,
   REPAIR_REASONING_EFFORT,
+  REVISION_OPERATION,
   getMaxModelCallsPerRun,
   getMetaModel,
   requireApiKey,
@@ -32,6 +33,7 @@ export {
   CRITIC_SYSTEM_PROMPT,
   DIAGNOSIS_SYSTEM_PROMPT,
   REPAIR_SYSTEM_PROMPT,
+  REVISION_SYSTEM_PROMPT,
 } from "./prompt.js";
 export {
   ACCESSIBILITY_DIAGNOSIS_JSON_SCHEMA,
@@ -53,6 +55,11 @@ export type {
   ProposeRepairOptions,
   ProposeRepairResult,
 } from "./repair.js";
+export { proposeRepairRevisionWithMeta } from "./revision.js";
+export type {
+  ProposeRevisionOptions,
+  ProposeRevisionResult,
+} from "./revision.js";
 export {
   MetaApiError,
   MetaMalformedResultError,
