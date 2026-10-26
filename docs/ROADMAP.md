@@ -5,11 +5,21 @@
 Clean TypeScript monorepo: Next.js shell, Fastify `/health`, engine/meta/
 shared package shells, strict TS, lint, docs. No scanner, no browser, no AI.
 
-## Phase 1 — controlled broken accessibility target + deterministic scanner
+## Phase 1 — controlled broken accessibility target + deterministic scanner ✅ COMPLETE
 
-Add a fixture app in `fixtures/` with known, deliberate accessibility defects,
-plus a deterministic scanner that reports them as structured facts. No AI yet;
-output is machine-checkable evidence.
+Fixture `fixtures/broken-shop` (React + Vite on :3002) plus a deterministic
+Playwright + axe-core scanner in `packages/engine` reporting normalized
+`AccessibilityFinding` facts. No AI; output is machine-checkable evidence.
+
+Verified with `pnpm scan:fixture` — 4 findings, 4 rules, every run:
+
+- `button-name` (critical) at `.quantity-decrement`
+- `image-alt` (critical) at `img`
+- `label` (critical) at `#email`
+- `color-contrast` (serious) at `.fine-print`
+
+Normalized artifacts land in `.a11yforge/runs/<scan-id>/scan.json`.
+Details: `fixtures/broken-shop/README.md`, `docs/ARCHITECTURE.md`.
 
 ## Phase 2 — browser evidence + keyboard testing
 

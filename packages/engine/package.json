@@ -9,12 +9,20 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "pretest": "pnpm build",
+    "test": "node --test \"dist/**/*.test.js\"",
+    "scan": "node dist/cli.js",
+    "scan:fixture": "node dist/scan-fixture.js"
   },
   "dependencies": {
-    "@a11yforge/shared": "workspace:*"
+    "@a11yforge/shared": "workspace:*",
+    "axe-core": "^4.10.3",
+    "playwright": "^1.57.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@types/node": "^22.19.0",
     "typescript": "^5.9.3"
   }
 }

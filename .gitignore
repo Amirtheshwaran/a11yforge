@@ -8,6 +8,8 @@ out/
 dist/
 build/
 coverage/
+.a11yforge/
+.playwright-browsers/
 .DS_Store
 *.local
 .env

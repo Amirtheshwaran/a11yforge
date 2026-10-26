@@ -11,3 +11,14 @@ export interface ApiHealth {
   status: "ok";
   service: "a11yforge-api";
 }
+
+export {
+  AccessibilityFindingSchema,
+  AccessibilityScanResultSchema,
+  ImpactSchema,
+} from "./evidence.js";
+export type {
+  AccessibilityFinding,
+  AccessibilityScanResult,
+  Impact,
+} from "./evidence.js";

@@ -12,6 +12,8 @@ export default tseslint.config(
       "**/out/**",
       "**/build/**",
       "**/coverage/**",
+      "**/.a11yforge/**",
+      "**/.playwright-browsers/**",
       "apps/web/next-env.d.ts",
     ],
   },

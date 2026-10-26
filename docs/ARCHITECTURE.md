@@ -36,6 +36,28 @@ Single source of truth for cross-boundary shapes: health payloads today;
 evidence envelopes, diagnoses, patch proposals, and verdicts in later phases.
 Imported by web, API, engine, and meta.
 
+## Phase 1 scanner flow (implemented)
+
+```text
+pnpm scan:fixture
+  → engine boots fixtures/broken-shop (Vite, :3002) and waits for HTTP 200
+  → Playwright launches Chromium, goto(url, waitUntil "load")
+  → wait for `main` selector (dev HMR keeps sockets open, so no networkidle)
+  → axe-core injected from the local dependency (axe.min.js, no CDN)
+  → axe.run analyzed in-page
+  → normalize: one violation × N nodes → N AccessibilityFinding records
+     (shared Zod schema in packages/shared; per-node shape chosen so Phase 4
+     source tracing maps one failing node to the component rendering it)
+  → terminal summary printed; normalized result written to
+     .a11yforge/runs/<scan-id>/scan.json (git-ignored, future agent input)
+  → browser closed in a `finally`; fixture server stopped in a `finally`
+```
+
+`pnpm scan -- <url>` runs the same pipeline against any URL without
+booting the fixture. `pnpm fixture:dev` serves the fixture alone on :3002.
+The scanner collects objective facts only (rule, impact, selector, HTML
+fragment, failure summary, URL) — no interpretation, no model calls.
+
 ## Future browser evidence flow
 
 ```text
