@@ -30,11 +30,34 @@ Requires Node.js >= 20 and pnpm.
 
 ```sh
 pnpm install
+pnpm build
+```
+
+For a live autonomous repair, export a Meta Model API key (server-side only —
+never committed, never sent to the browser):
+
+```sh
+export MODEL_API_KEY=<your-key>
+```
+
+Then:
+
+```sh
 pnpm dev
 ```
 
-- Web shell: http://localhost:3000 (not running until you start it)
+- Web console: http://localhost:3000 (not running until you start it)
 - API health: http://localhost:3001/health (not running until you start it)
+
+Open [http://localhost:3000](http://localhost:3000) in a browser and click
+**Start Autonomous Repair**. The backend runs the real pipeline against the
+Broken Shop fixture (scan → keyboard test → diagnosis → source trace →
+proposal → isolated verify → critic) and streams live events to the console:
+stages progress, evidence appears as each artifact lands, and the final
+verdict becomes ACCEPTED or REJECTED. At most 4 live Meta calls per run
+(diagnosis, proposal, at most one bounded revision, critic if eligible);
+usage is shown after the run, and no cost is computed. Without
+`MODEL_API_KEY` the button explains the missing key instead of crashing.
 
 ## Scripts
 
@@ -47,30 +70,35 @@ pnpm dev
 
 ## Local demo
 
-Requires the accepted repair artifacts on disk (produced by the Phase 2–5
-pipeline; never committed — the console renders them, it never fakes them):
+Two views, clearly labeled:
+
+- **LIVE** — start a real autonomous run with the button (requires
+  `MODEL_API_KEY`; at most 4 live Meta calls, usage shown afterwards).
+- **RECORDED** — the previously completed accepted run (`GET /runs/demo`):
+  pipeline, focus evidence, before/after, diagnosis, source trace, both
+  diffs, deterministic gates, and the critic verdict. The recorded run stays
+  available even if a live attempt hits a transient failure, and it is never
+  presented as a current live run.
 
 ```sh
 pnpm install
+pnpm build
 pnpm dev          # web on :3000, API on :3001
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in a browser. The console
-loads the latest accepted run (`GET /runs/demo`): pipeline, focus evidence,
-before/after, diagnosis, source trace, both diffs, deterministic gates, and
-the critic verdict. With no local artifacts it shows an empty state, never
-placeholder data. Zero live model calls are made by this page.
+With no local artifacts the recorded view shows an empty state, never
+placeholder data. Run artifacts live under `.a11yforge/` (git-ignored).
 
 ## Layout
 
 ```text
 apps/
-  web/        Next.js development shell (real dashboard comes later)
-  api/        Fastify API (GET /health only for now)
+  web/        Next.js console: live autonomous runs + recorded demo run
+  api/        Fastify API: run orchestration (POST /runs, SSE events)
 packages/
-  engine/     Future autonomous repair loop (shell only)
-  meta/       Future Meta model provider (shell only)
-  shared/     Shared schemas and types
-fixtures/     Future controlled broken-accessibility targets
+  engine/     Autonomous repair loop + live-run pipeline orchestration
+  meta/       Bounded Meta model caller (diagnosis, proposal, critic)
+  shared/     Shared schemas and types (incl. live-run stream shapes)
+fixtures/     Controlled broken-accessibility targets (Broken Shop)
 docs/         Project spec, architecture, roadmap
 ```

@@ -1,6 +1,14 @@
-import { RunViewModelSchema, type RunSummary, type RunViewModel } from "@a11yforge/shared";
+import {
+  LiveRunEventSchema,
+  LiveRunStatusSchema,
+  RunViewModelSchema,
+  type LiveRunEvent,
+  type LiveRunStatus,
+  type RunSummary,
+  type RunViewModel,
+} from "@a11yforge/shared";
 
-export type { RunSummary, RunViewModel };
+export type { LiveRunEvent, LiveRunStatus, RunSummary, RunViewModel };
 
 export function apiBase(): string {
   const fromEnv = process.env["NEXT_PUBLIC_API_URL"];
@@ -42,6 +50,62 @@ export async function fetchArtifactText(url: string): Promise<string> {
   const res = await fetch(`${apiBase()}${url}`, { cache: "no-store" });
   if (!res.ok) throw new Error(`artifact unavailable (${res.status})`);
   return res.text();
+}
+
+/** Absolute API URL for an opaque artifact path (img tags need this). */
+export function artifactSrc(url: string): string {
+  return `${apiBase()}${url}`;
+}
+
+export interface StartRunResult {
+  runId: string;
+  alreadyRunning: boolean;
+}
+
+/** Start one autonomous repair run. 409 means a run is already active. */
+export async function startRun(): Promise<StartRunResult> {
+  const res = await fetch(`${apiBase()}/runs`, { method: "POST" });
+  const body = (await res.json().catch(() => ({}))) as {
+    runId?: string;
+    error?: string;
+  };
+  if (res.status === 202 && typeof body.runId === "string") {
+    return { runId: body.runId, alreadyRunning: false };
+  }
+  if (res.status === 409 && typeof body.runId === "string") {
+    return { runId: body.runId, alreadyRunning: true };
+  }
+  throw new Error(
+    typeof body.error === "string" && body.error !== ""
+      ? `${res.status} ${body.error}`
+      : `Could not start run (${res.status}).`,
+  );
+}
+
+export async function fetchRunStatus(runId: string): Promise<LiveRunStatus> {
+  return LiveRunStatusSchema.parse(await getJson(`/runs/${encodeURIComponent(runId)}/status`));
+}
+
+/** Subscribe to a run's Server-Sent Event stream. Returns an unsubscribe fn. */
+export function subscribeRunEvents(
+  runId: string,
+  onEvent: (event: LiveRunEvent) => void,
+  onError: () => void,
+): () => void {
+  const source = new EventSource(`${apiBase()}/runs/${encodeURIComponent(runId)}/events`);
+  source.onmessage = (message) => {
+    try {
+      onEvent(LiveRunEventSchema.parse(JSON.parse(message.data as string) as unknown));
+    } catch {
+      /* ignore one malformed frame; the status poll still converges */
+    }
+  };
+  source.onerror = () => {
+    onError();
+  };
+  return () => {
+    source.close();
+  };
 }
 
 /** Short display form of a run id for selectors. */

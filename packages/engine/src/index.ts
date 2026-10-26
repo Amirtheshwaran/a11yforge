@@ -189,3 +189,18 @@ export {
   REPAIR_WORKSPACES_DIRNAME,
   type RepairWorkspace,
 } from "./verify/workspace.js";
+export {
+  AUTORUN_STAGE_TIMEOUTS_MS,
+  AutorunStageTimeoutError,
+  collectSpendLedger,
+  MAX_LIVE_MODEL_CALLS_PER_RUN,
+  runAutonomousRepair,
+  summarizeSpend,
+  type AutorunDrivers,
+  type AutorunEmit,
+  type AutorunEvidenceContext,
+  type AutorunOptions,
+  type AutorunResult,
+  type AutorunStageContext,
+  type AutorunStageKey,
+} from "./autorun/pipeline.js";

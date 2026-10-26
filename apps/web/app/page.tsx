@@ -1,11 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  artifactSrc,
   fetchArtifactText,
   fetchRun,
+  fetchRunStatus,
   fetchRuns,
   shortRunId,
+  startRun,
+  subscribeRunEvents,
+  type LiveRunEvent,
+  type LiveRunStatus,
   type RunSummary,
   type RunViewModel,
 } from "../lib/api";
@@ -27,6 +33,97 @@ function stageWord(status: string): string {
   if (status === "failed") return "FAILED";
   if (status === "current") return "IN PROGRESS";
   return "PENDING";
+}
+
+/** Live pipeline states reuse the recorded-console marks (text + glyph). */
+function liveMark(state: string): string {
+  if (state === "passed") return "✓";
+  if (state === "failed") return "✕";
+  if (state === "running") return "●";
+  if (state === "skipped") return "–";
+  return "○";
+}
+
+function liveMarkStatus(state: string): string {
+  if (state === "passed") return "success";
+  if (state === "failed") return "failed";
+  if (state === "running") return "current";
+  return "pending";
+}
+
+function liveWord(state: string): string {
+  if (state === "passed") return "DONE";
+  if (state === "failed") return "FAILED";
+  if (state === "running") return "IN PROGRESS";
+  if (state === "skipped") return "SKIPPED";
+  return "PENDING";
+}
+
+interface LiveEvidence {
+  findings: string | null;
+  escape: string | null;
+  diagnosis: string | null;
+  diagnosisMeta: string | null;
+  source: string | null;
+  proposal: string | null;
+}
+
+/** Fold the live event stream into progressive evidence summaries. */
+function foldLiveEvidence(events: LiveRunEvent[]): LiveEvidence {
+  const out: LiveEvidence = {
+    findings: null,
+    escape: null,
+    diagnosis: null,
+    diagnosisMeta: null,
+    source: null,
+    proposal: null,
+  };
+  for (const event of events) {
+    const meta = event.metadata as Record<string, unknown>;
+    if (event.type === "scanner-completed") {
+      const findings = typeof meta["findings"] === "number" ? meta["findings"] : null;
+      const rules = Array.isArray(meta["rules"])
+        ? meta["rules"].filter((r): r is string => typeof r === "string")
+        : [];
+      out.findings =
+        findings !== null
+          ? `${findings} finding${findings === 1 ? "" : "s"} across ${rules.length} rule${rules.length === 1 ? "" : "s"}${rules.length > 0 ? `: ${rules.join(", ")}` : ""}`
+          : event.message;
+    } else if (event.type === "focus-escape-detected") {
+      const step = typeof meta["step"] === "number" ? `step ${meta["step"]}` : "a Tab press";
+      const actual = typeof meta["actualFocus"] === "string" ? meta["actualFocus"] : "outside the dialog";
+      out.escape = `${step} → ${actual}`;
+    } else if (event.type === "diagnosis-completed") {
+      const title = /Diagnosed:\s*(.*)/.exec(event.message)?.[1] ?? event.message;
+      out.diagnosis = title;
+      const parts: string[] = [];
+      for (const key of ["issueType", "severity", "confidence"] as const) {
+        const value = meta[key];
+        if (typeof value === "string" || typeof value === "number") parts.push(`${key}: ${value}`);
+      }
+      out.diagnosisMeta = parts.length > 0 ? parts.join(" · ") : null;
+    } else if (event.type === "source-candidate-selected") {
+      const file = typeof meta["file"] === "string" ? meta["file"] : null;
+      const score = typeof meta["score"] === "number" ? ` · score ${meta["score"]}` : "";
+      out.source = file !== null ? `${file}${score}` : event.message;
+    } else if (event.type === "repair-proposal-completed") {
+      const files = Array.isArray(meta["targetFiles"])
+        ? meta["targetFiles"].filter((f): f is string => typeof f === "string")
+        : [];
+      const editCount = typeof meta["edits"] === "number" ? meta["edits"] : null;
+      const edits = editCount !== null ? ` · ${editCount} edit${editCount === 1 ? "" : "s"}` : "";
+      out.proposal = files.length > 0 ? `${files.join(", ")}${edits}` : event.message;
+    }
+  }
+  return out;
+}
+
+function formatTokens(usage: LiveRunStatus["usage"]): string {
+  const parts = [`in ${usage.inputTokens ?? "n/a"}`, `out ${usage.outputTokens ?? "n/a"}`];
+  if (usage.reasoningTokens !== null && usage.reasoningTokens !== undefined) {
+    parts.push(`reasoning ${usage.reasoningTokens}`);
+  }
+  return parts.join(" · ");
 }
 
 function StatusPill({ status }: { status: string }) {
@@ -107,11 +204,22 @@ function DiffView({ url, label }: { url: string | null; label: string }) {
   );
 }
 
+type LivePhase = "idle" | "starting" | "running" | "done" | "failed";
+
 export default function Home() {
   const [runs, setRuns] = useState<RunSummary[]>([]);
   const [selected, setSelected] = useState<string>("demo");
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   const [attempt, setAttempt] = useState<number>(2);
+
+  const [livePhase, setLivePhase] = useState<LivePhase>("idle");
+  const [liveRunId, setLiveRunId] = useState<string | null>(null);
+  const [liveStatus, setLiveStatus] = useState<LiveRunStatus | null>(null);
+  const [liveEvents, setLiveEvents] = useState<LiveRunEvent[]>([]);
+  const [liveError, setLiveError] = useState<string | null>(null);
+  const streamRef = useRef<(() => void) | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const finishedRef = useRef<boolean>(false);
 
   const load = useCallback(async (runId: string) => {
     setState({ kind: "loading" });
@@ -136,6 +244,138 @@ export default function Home() {
     void load(selected);
   }, [load, selected]);
 
+  const stopLiveStream = useCallback(() => {
+    streamRef.current?.();
+    streamRef.current = null;
+    if (pollRef.current !== null) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => stopLiveStream, [stopLiveStream]);
+
+  const refreshStatus = useCallback(async (runId: string) => {
+    try {
+      setLiveStatus(await fetchRunStatus(runId));
+    } catch {
+      /* the next event or poll retry converges */
+    }
+  }, []);
+
+  const settleLiveRun = useCallback(
+    async (runId: string, terminal: "done" | "failed") => {
+      if (finishedRef.current) return;
+      finishedRef.current = true;
+      stopLiveStream();
+      await refreshStatus(runId);
+      setLivePhase(terminal);
+      try {
+        const summaries = await fetchRuns();
+        setRuns(summaries);
+      } catch {
+        /* run list refresh is best-effort */
+      }
+      if (terminal === "done") {
+        // Render the finished live run through the full recorded console.
+        setSelected(runId);
+        await load(runId);
+      }
+    },
+    [load, refreshStatus, stopLiveStream],
+  );
+
+  const startLivePollFallback = useCallback(
+    (runId: string) => {
+      if (pollRef.current !== null || finishedRef.current) return;
+      pollRef.current = setInterval(() => {
+        void (async () => {
+          try {
+            const status = await fetchRunStatus(runId);
+            setLiveStatus(status);
+            if (status.state === "COMPLETED") {
+              void settleLiveRun(runId, "done");
+            } else if (status.state === "FAILED") {
+              setLiveError(status.error ?? "The run failed.");
+              void settleLiveRun(runId, "failed");
+            }
+          } catch {
+            /* keep polling until the stream recovers or the run ends */
+          }
+        })();
+      }, 2000);
+    },
+    [settleLiveRun],
+  );
+
+  const startLive = useCallback(async () => {
+    if (livePhase === "starting" || livePhase === "running") return;
+    stopLiveStream();
+    finishedRef.current = false;
+    setLiveError(null);
+    setLiveEvents([]);
+    setLiveStatus(null);
+    setLivePhase("starting");
+    let runId: string;
+    try {
+      const started = await startRun();
+      runId = started.runId;
+    } catch (error) {
+      setLiveError(error instanceof Error ? error.message : "Could not start run.");
+      setLivePhase("failed");
+      return;
+    }
+    setLiveRunId(runId);
+    setLivePhase("running");
+    void refreshStatus(runId);
+    streamRef.current = subscribeRunEvents(
+      runId,
+      (event) => {
+        setLiveEvents((prev) => [...prev.slice(-99), event]);
+        void refreshStatus(runId);
+        if (event.type === "run-completed") {
+          void settleLiveRun(runId, "done");
+        } else if (event.type === "run-failed") {
+          setLiveError(event.message);
+          void settleLiveRun(runId, "failed");
+        }
+      },
+      () => {
+        // Event stream interrupted — fall back to status polling.
+        startLivePollFallback(runId);
+      },
+    );
+  }, [livePhase, refreshStatus, settleLiveRun, startLivePollFallback, stopLiveStream]);
+
+  const liveEvidence = foldLiveEvidence(liveEvents);
+  const liveRunningStage =
+    liveStatus?.stages.find((s) => s.state === "running") ?? null;
+  const liveBusy = livePhase === "starting" || livePhase === "running";
+  const isLiveSelection = liveRunId !== null && selected === liveRunId;
+  const liveDiffUrl =
+    liveRunId !== null && (liveStatus?.artifacts.includes("repair-diff.patch") ?? false)
+      ? `/runs/${encodeURIComponent(liveRunId)}/artifacts/repair-diff.patch`
+      : null;
+  const liveRevisionDiffUrl =
+    liveRunId !== null &&
+    (liveStatus?.artifacts.includes("repair-revision-diff.patch") ?? false)
+      ? `/runs/${encodeURIComponent(liveRunId)}/artifacts/repair-revision-diff.patch`
+      : null;
+  const liveEscapedShot =
+    liveRunId !== null && (liveStatus?.artifacts.includes("focus-escaped.png") ?? false)
+      ? artifactSrc(`/runs/${encodeURIComponent(liveRunId)}/artifacts/focus-escaped.png`)
+      : null;
+  const liveAfterShot =
+    liveRunId !== null &&
+    (liveStatus?.artifacts.includes("focus-contained-after-revision.png") ?? false)
+      ? artifactSrc(
+          `/runs/${encodeURIComponent(liveRunId)}/artifacts/focus-contained-after-revision.png`,
+        )
+      : liveRunId !== null &&
+          (liveStatus?.artifacts.includes("focus-contained-after.png") ?? false)
+        ? artifactSrc(`/runs/${encodeURIComponent(liveRunId)}/artifacts/focus-contained-after.png`)
+        : null;
+
   return (
     <div className="console">
       <a className="skip-link" href="#main">
@@ -147,7 +387,181 @@ export default function Home() {
           <p>Autonomous accessibility engineering — observable repair console</p>
         </div>
         {state.kind === "ready" && <StatusPill status={state.view.finalStatus} />}
+        {state.kind === "ready" && isLiveSelection && (
+          <span className="live-badge" aria-label="This is the live run you just started">
+            LIVE RUN
+          </span>
+        )}
       </header>
+
+      <section className="panel live-panel" aria-labelledby="h-live">
+        <h2 id="h-live">
+          Live autonomous repair{" "}
+          <span className="live-badge" aria-hidden="true">
+            LIVE
+          </span>
+        </h2>
+        <p>
+          Target: <strong>Broken Shop</strong> — the controlled fixture. Starting a run executes
+          the real backend pipeline (scan → keyboard test → diagnosis → source trace → proposal →
+          verify → critic) and streams its events here. Nothing is faked; instant stages display
+          honestly.
+        </p>
+        {(livePhase === "idle" || livePhase === "done" || livePhase === "failed") && (
+          <button type="button" onClick={() => void startLive()} disabled={liveBusy}>
+            {livePhase === "idle" ? "Start Autonomous Repair" : "Start New Autonomous Repair"}
+          </button>
+        )}
+        {livePhase === "starting" && (
+          <p className="loading" role="status">
+            Starting autonomous run…
+          </p>
+        )}
+        {(livePhase === "running" || livePhase === "done" || livePhase === "failed") &&
+          liveStatus !== null && (
+            <>
+              <p role="status" className="live-status">
+                {liveStatus.state === "RUNNING" && liveRunningStage !== null && (
+                  <>
+                    <span aria-hidden="true">● </span>Running: {liveRunningStage.label}
+                    {liveRunningStage.detail !== undefined && ` — ${liveRunningStage.detail}`}
+                  </>
+                )}
+                {liveStatus.state === "RUNNING" &&
+                  liveRunningStage === null &&
+                  "Running: preparing stages…"}
+                {liveStatus.state === "COMPLETED" && (
+                  <>Finished: {liveStatus.finalState ?? "completed"}</>
+                )}
+                {liveStatus.state === "FAILED" && "Run failed — see error below."}
+              </p>
+              <ol className="pipeline" aria-label="Live pipeline stages">
+                {liveStatus.stages.map((stage) => (
+                  <li key={stage.id}>
+                    <span
+                      className="stage-mark"
+                      data-status={liveMarkStatus(stage.state)}
+                      aria-hidden="true"
+                    >
+                      {liveMark(stage.state)}
+                    </span>
+                    <span>
+                      <span className="stage-label">{stage.label}</span>{" "}
+                      <span className="stage-state" data-status={liveMarkStatus(stage.state)}>
+                        {liveWord(stage.state)}
+                      </span>
+                      {stage.detail !== undefined && (
+                        <div className="stage-detail">{stage.detail}</div>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              <div className="live-evidence" aria-label="Progressive run evidence">
+                {liveEvidence.findings !== null && (
+                  <p>
+                    <strong>Scanning evidence:</strong> {liveEvidence.findings}
+                  </p>
+                )}
+                {liveEvidence.escape !== null && (
+                  <p>
+                    <strong>Keyboard evidence:</strong> focus escaped {liveEvidence.escape}
+                  </p>
+                )}
+                {liveEvidence.diagnosis !== null && (
+                  <p>
+                    <strong>Diagnosis:</strong> {liveEvidence.diagnosis}
+                    {liveEvidence.diagnosisMeta !== null && ` (${liveEvidence.diagnosisMeta})`}
+                  </p>
+                )}
+                {liveEvidence.source !== null && (
+                  <p>
+                    <strong>Source candidate:</strong> {liveEvidence.source}
+                  </p>
+                )}
+                {liveEvidence.proposal !== null && (
+                  <p>
+                    <strong>Repair proposal:</strong> {liveEvidence.proposal}
+                  </p>
+                )}
+                {liveDiffUrl !== null && (
+                  <div>
+                    <h3>Attempt 1 diff</h3>
+                    <DiffView url={liveDiffUrl} label="Live attempt 1 diff" />
+                  </div>
+                )}
+                {liveRevisionDiffUrl !== null && (
+                  <div>
+                    <h3>Attempt 2 (revision) diff</h3>
+                    <DiffView url={liveRevisionDiffUrl} label="Live attempt 2 diff" />
+                  </div>
+                )}
+                {(liveEscapedShot !== null || liveAfterShot !== null) && (
+                  <div className="shots">
+                    {liveEscapedShot !== null && (
+                      <figure>
+                        <img
+                          src={liveEscapedShot}
+                          alt="Live run before repair: checkout modal open while keyboard focus has escaped"
+                          loading="lazy"
+                        />
+                        <figcaption>BEFORE — focus escaped ✕</figcaption>
+                      </figure>
+                    )}
+                    {liveAfterShot !== null && (
+                      <figure>
+                        <img
+                          src={liveAfterShot}
+                          alt="Live run after repair: focus remains inside the checkout modal"
+                          loading="lazy"
+                        />
+                        <figcaption>AFTER — focus contained ✓</figcaption>
+                      </figure>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="usage-line" aria-label="Model inference usage">
+                <p>
+                  Meta inference calls: <span className="fact">{liveStatus.usage.calls}</span>
+                  {" · "}Tokens:{" "}
+                  <span className="fact">{formatTokens(liveStatus.usage)}</span>
+                </p>
+                <p className="usage-note">
+                  Usage only — no cost is computed (no pricing configured). The run is hard-capped
+                  at 4 live calls (diagnosis, proposal, at most one bounded revision, critic if
+                  eligible).
+                </p>
+              </div>
+              {livePhase === "failed" && liveError !== null && (
+                <div className="error-box" role="alert">
+                  <h2 style={{ margin: "0 0 6px", fontSize: 15 }}>Live run failed</h2>
+                  <p style={{ margin: 0 }}>
+                    {liveError} Artifacts generated so far are preserved on the API server.
+                  </p>
+                </div>
+              )}
+              {liveEvents.length > 0 && (
+                <details className="event-log">
+                  <summary>Pipeline events ({liveEvents.length})</summary>
+                  <ol aria-label="Pipeline event history">
+                    {liveEvents.slice(-30).map((event) => (
+                      <li key={event.eventId}>
+                        <span className="fact">{event.type}</span> — {event.message}
+                      </li>
+                    ))}
+                  </ol>
+                </details>
+              )}
+            </>
+          )}
+      </section>
+
+      <main id="main">
+      <section aria-labelledby="h-recorded">
+      <h2 className="section-heading" id="h-recorded">
+        Completed demo run <span className="demo-badge">RECORDED</span>
+      </h2>
 
       <div className="controls" role="group" aria-label="Run controls">
         <label htmlFor="run-select">Run</label>
@@ -169,15 +583,12 @@ export default function Home() {
       </div>
 
       {state.kind === "loading" && (
-        <main id="main">
           <p className="loading" role="status">
             Loading run artifacts…
           </p>
-        </main>
       )}
 
       {state.kind === "error" && (
-        <main id="main">
           <div className="error-box" role="alert">
             <h2 style={{ margin: "0 0 6px", fontSize: 15 }}>No run data to show</h2>
             <p style={{ margin: 0 }}>
@@ -185,11 +596,10 @@ export default function Home() {
               Produce a run locally, then refresh.
             </p>
           </div>
-        </main>
       )}
 
       {state.kind === "ready" && (
-        <main id="main">
+        <>
           <dl className="meta-grid" aria-label="Run metadata">
             <div className="meta-cell">
               <dt>Target</dt>
@@ -336,7 +746,7 @@ export default function Home() {
                 {state.view.artifacts.focusEscapedUrl !== null && (
                   <figure>
                     <img
-                      src={state.view.artifacts.focusEscapedUrl}
+                      src={artifactSrc(state.view.artifacts.focusEscapedUrl)}
                       alt="Before repair: checkout modal open while keyboard focus has escaped to the background control"
                       loading="lazy"
                     />
@@ -346,7 +756,7 @@ export default function Home() {
                 {state.view.artifacts.afterUrl !== null && (
                   <figure>
                     <img
-                      src={state.view.artifacts.afterUrl}
+                      src={artifactSrc(state.view.artifacts.afterUrl)}
                       alt="After repair: focus remains inside the checkout modal"
                       loading="lazy"
                     />
@@ -548,8 +958,10 @@ export default function Home() {
             A11yForge console · renders local artifacts only · 0 live model calls on this
             page · deterministic gates above, AI reasoning below
           </footer>
-        </main>
+        </>
       )}
+      </section>
+      </main>
     </div>
   );
 }

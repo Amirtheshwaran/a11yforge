@@ -5,7 +5,7 @@
   "description": "A11yForge — autonomous accessibility engineering (hackathon build)",
   "packageManager": "pnpm@10.34.9",
   "scripts": {
-    "dev": "pnpm -r --parallel dev",
+    "dev": "pnpm --filter @a11yforge/web --filter @a11yforge/api -r --parallel dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r --parallel typecheck",
     "lint": "eslint .",

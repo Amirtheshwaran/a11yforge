@@ -600,6 +600,72 @@ footer.footnote {
   font-family: var(--mono);
 }
 
+/* Live run (Phase 6.5): reuses panel/pipeline/shot styles above. */
+
+.live-panel {
+  margin-top: 20px;
+  border-color: var(--accent);
+}
+
+.section-heading {
+  font-size: 16px;
+  margin: 28px 0 4px;
+}
+
+.live-badge,
+.demo-badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  vertical-align: middle;
+}
+
+.demo-badge {
+  border-color: var(--ink-faint);
+  color: var(--ink-dim);
+}
+
+.live-status {
+  font-weight: 600;
+}
+
+.live-evidence p {
+  margin: 6px 0;
+}
+
+.usage-line {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.usage-note {
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+.event-log {
+  margin-top: 12px;
+}
+
+.event-log summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.event-log ol {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  color: var(--ink-dim);
+  font-size: 13px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none;

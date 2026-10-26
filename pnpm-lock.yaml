@@ -29,6 +29,9 @@ importers:
       '@a11yforge/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@a11yforge/meta':
+        specifier: workspace:*
+        version: link:../../packages/meta
       '@a11yforge/shared':
         specifier: workspace:*
         version: link:../../packages/shared
