@@ -8,6 +8,7 @@ import {
 import {
   DIAGNOSIS_MAX_OUTPUT_TOKENS,
   DIAGNOSIS_OPERATION,
+  DIAGNOSIS_REASONING_EFFORT,
   META_API_BASE_URL,
 } from "./config.js";
 import {
@@ -38,11 +39,22 @@ export class MetaApiError extends Error {
   }
 }
 
-/** The model returned bytes that are not a valid diagnosis object. */
+/**
+ * The model returned bytes that are not a valid diagnosis object.
+ *
+ * When the HTTP request succeeded but the model produced no usable output
+ * (e.g. empty content), `usage` carries the telemetry for the request that
+ * consumed credits, so callers can preserve it before throwing. It is null
+ * when no usage was reported or when the failure happened before any
+ * response arrived.
+ */
 export class MetaMalformedResultError extends Error {
-  constructor(message: string) {
+  readonly usage: ModelUsage | null;
+
+  constructor(message: string, usage: ModelUsage | null = null) {
     super(message);
     this.name = "MetaMalformedResultError";
+    this.usage = usage;
   }
 }
 
@@ -107,6 +119,48 @@ function asNonNegativeIntOrNull(value: unknown): number | null {
     value >= 0
     ? value
     : null;
+}
+
+function asOptionalString(value: unknown): string | null {
+  return typeof value === "string" && value !== "" ? value : null;
+}
+
+/**
+ * Safe, secret-free summary of an empty-content Chat Completions response.
+ * Reports only response metadata (request id, model, finish reason, token
+ * counts) — never the API key, headers, hidden reasoning, or raw secrets.
+ */
+function describeEmptyContent(args: {
+  model: string;
+  responseId: string | null;
+  finishReason: string | null;
+  shapeDetail: string;
+  usage: ModelUsage;
+  totalTokens: number | null;
+}): string {
+  const detail = [
+    "HTTP request succeeded",
+    `model=${args.model}`,
+    `requestId=${args.responseId ?? "n/a"}`,
+    `finish_reason=${args.finishReason ?? "n/a"}`,
+    `promptTokens=${args.usage.inputTokens ?? "n/a"}`,
+    `completionTokens=${args.usage.outputTokens ?? "n/a"}`,
+    `reasoningTokens=${args.usage.reasoningTokens ?? "n/a"}`,
+    `totalTokens=${args.totalTokens ?? "n/a"}`,
+    "contentEmpty=true",
+  ].join(", ");
+  let message =
+    `Meta API returned no message content for the diagnosis ` +
+    `(${args.shapeDetail}; ${detail}).`;
+  if (args.finishReason === "length") {
+    message +=
+      " Meta diagnosis exhausted the completion-token budget before " +
+      "producing visible structured output (finish_reason=length). The " +
+      "reasoning model consumed the completion budget before emitting JSON; " +
+      "raise max_completion_tokens or lower reasoning effort and retry " +
+      "as a new bounded request.";
+  }
+  return message;
 }
 
 function extractUsage(
@@ -174,7 +228,10 @@ export async function diagnoseWithMeta(
         schema: ACCESSIBILITY_DIAGNOSIS_JSON_SCHEMA,
       },
     },
-    max_tokens: maxOutputTokens,
+    // `max_completion_tokens` covers reasoning + visible tokens on
+    // reasoning models; `reasoning_effort` is centralized in config.
+    max_completion_tokens: maxOutputTokens,
+    reasoning_effort: DIAGNOSIS_REASONING_EFFORT,
   };
 
   const startedAt = Date.now();
@@ -207,16 +264,44 @@ export async function diagnoseWithMeta(
   const body = (await response.json().catch(() => null)) as
     | ChatCompletionsResponse
     | null;
-  const bodyRecord = asRecord(body);
-  const choices = bodyRecord !== null ? bodyRecord["choices"] : undefined;
+  // Official Chat Completions path only: choices[0].message.content.
+  // No alternate speculative response formats are accepted.
+  const bodyRecord = asRecord(body) ?? {};
+  const choices = bodyRecord["choices"];
   const firstChoice = asRecord(
-    Array.isArray(choices) ? choices[0] : null,
+    Array.isArray(choices) ? choices[0] : undefined,
   );
   const message = asRecord(firstChoice?.["message"]);
   const content = message?.["content"];
   if (typeof content !== "string" || content.trim() === "") {
+    const shapeDetail =
+      !Array.isArray(choices) || choices.length === 0
+        ? "response has no usable choice"
+        : firstChoice === null
+          ? "first choice is not an object"
+          : message === null
+            ? "first choice has no message object"
+            : "message content is missing or empty";
+    const finishReason = asOptionalString(firstChoice?.["finish_reason"]);
+    const usage = extractUsage(
+      bodyRecord as ChatCompletionsResponse,
+      model,
+      latencyMs,
+      new Date().toISOString(),
+    );
+    const totalTokens = asNonNegativeIntOrNull(
+      asRecord(bodyRecord["usage"])?.["total_tokens"],
+    );
     throw new MetaMalformedResultError(
-      "Meta API returned no message content for the diagnosis.",
+      describeEmptyContent({
+        model,
+        responseId: usage.requestId,
+        finishReason,
+        shapeDetail,
+        usage,
+        totalTokens,
+      }),
+      usage,
     );
   }
 
@@ -240,7 +325,7 @@ export async function diagnoseWithMeta(
   return {
     diagnosis: validated.data,
     usage: extractUsage(
-      (bodyRecord ?? {}) as ChatCompletionsResponse,
+      bodyRecord as ChatCompletionsResponse,
       model,
       latencyMs,
       new Date().toISOString(),

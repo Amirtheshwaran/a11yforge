@@ -25,11 +25,29 @@ export const MAX_MODEL_CALLS_ENV = "A11YFORGE_MAX_MODEL_CALLS_PER_RUN";
 export const DEFAULT_MAX_MODEL_CALLS_PER_RUN = 1;
 
 /**
- * Conservative output budget for a single structured diagnosis.
- * A diagnosis is a short fixed-schema object; 1500 tokens is ample while
- * keeping the billed output small. Documented here per the Phase 3 spec.
+ * Completion budget for a single structured diagnosis.
+ *
+ * Muse Spark is a reasoning model: hidden reasoning tokens count against
+ * `max_completion_tokens`, so the budget must leave room for both private
+ * reasoning and the (small) visible structured diagnosis. A live Phase 3
+ * call with ~1500 tokens was exhausted by reasoning alone and returned
+ * empty `message.content` with `finish_reason: "length"`. 4096 is a
+ * maximum, not a target — unused tokens cost nothing.
  */
-export const DIAGNOSIS_MAX_OUTPUT_TOKENS = 1500;
+export const DIAGNOSIS_MAX_OUTPUT_TOKENS = 4096;
+
+/** Reasoning-effort levels accepted by the Meta Chat Completions API. */
+export type DiagnosisReasoningEffort = "low" | "medium" | "high";
+
+/**
+ * Reasoning effort for the accessibility diagnosis request.
+ *
+ * Diagnosis is a bounded evidence-classification task, not open-ended
+ * reasoning, so `"low"` keeps hidden reasoning tokens small and leaves the
+ * completion budget for the visible structured output. Centralized here so
+ * it is easy to raise later if diagnoses need deeper inference.
+ */
+export const DIAGNOSIS_REASONING_EFFORT: DiagnosisReasoningEffort = "low";
 
 /** Operation label recorded in usage telemetry and terminal output. */
 export const DIAGNOSIS_OPERATION = "accessibility-diagnosis";

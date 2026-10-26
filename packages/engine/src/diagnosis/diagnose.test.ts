@@ -173,4 +173,53 @@ describe("runDiagnoseFixture (mocked model)", () => {
     );
     assert.equal(calls(), 1);
   });
+
+  it("preserves usage but no diagnosis when the model returns empty content", async () => {
+    const runsDir = freshRunsDir("emptycontent");
+    const runId = "2026-01-03T00-00-00-000Z-cccc";
+    const runDir = await seedRun(runsDir, runId);
+    let calls = 0;
+    const fetchFn = (() => {
+      calls += 1;
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            id: "req-length-fixture",
+            choices: [
+              {
+                message: { role: "assistant", content: "" },
+                finish_reason: "length",
+              },
+            ],
+            usage: {
+              prompt_tokens: 812,
+              completion_tokens: 4096,
+              total_tokens: 4908,
+              completion_tokens_details: { reasoning_tokens: 4050 },
+            },
+          }),
+        text: () => Promise.resolve("{}"),
+      });
+    }) as unknown as MetaFetch;
+    await assert.rejects(
+      () =>
+        runDiagnoseFixture({ env: { MODEL_API_KEY: "k" }, fetchFn, runsDir }),
+      /exhausted the completion-token budget/,
+    );
+    assert.equal(calls, 1);
+    // Credits were consumed: the usage artifact is preserved in the
+    // existing usage structure, but no diagnosis is fabricated.
+    const usageRaw = await readFile(join(runDir, "model-usage.json"), "utf8");
+    const usage = JSON.parse(usageRaw) as {
+      operation: string;
+      reasoningTokens: number;
+      requestId: string;
+    };
+    assert.equal(usage.operation, "accessibility-diagnosis");
+    assert.equal(usage.reasoningTokens, 4050);
+    assert.equal(usage.requestId, "req-length-fixture");
+    await assert.rejects(() => readFile(join(runDir, "diagnosis.json"), "utf8"));
+  });
 });

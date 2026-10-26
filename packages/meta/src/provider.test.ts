@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   AccessibilityDiagnosisSchema,
+  ModelUsageSchema,
   type EvidenceBundle,
 } from "@a11yforge/shared";
 import {
@@ -80,10 +81,19 @@ function okResponse(payload: unknown): Response {
   } as unknown as Response;
 }
 
-function completionWith(content: string, usage?: unknown): unknown {
+function completionWith(
+  content: string,
+  usage?: unknown,
+  finishReason = "stop",
+): unknown {
   return {
     id: "req-test-1",
-    choices: [{ message: { role: "assistant", content } }],
+    choices: [
+      {
+        message: { role: "assistant", content },
+        finish_reason: finishReason,
+      },
+    ],
     ...(usage !== undefined ? { usage } : {}),
   };
 }
@@ -138,7 +148,9 @@ describe("diagnoseWithMeta (mocked transport)", () => {
     const body = JSON.parse(seenBody) as Record<string, unknown>;
     const format = body["response_format"] as Record<string, unknown>;
     assert.equal(format["type"], "json_schema");
-    assert.equal(body["max_tokens"], 1500);
+    assert.equal(body["max_completion_tokens"], 4096);
+    assert.equal(body["reasoning_effort"], "low");
+    assert.ok(!("max_tokens" in body));
     assert.ok(seenUrl.endsWith("/chat/completions"));
     assert.equal(seenAuth, "Bearer test-key");
   });
@@ -221,6 +233,114 @@ describe("diagnoseWithMeta (mocked transport)", () => {
       () => diagnoseWithMeta(BUNDLE, { fetchFn, model: "m", apiKey: "k" }),
       MetaMalformedResultError,
     );
+  });
+
+  it("reports budget exhaustion when reasoning fills the budget (length)", async () => {
+    const payload = {
+      id: "req-length-1",
+      choices: [
+        {
+          message: { role: "assistant", content: "" },
+          finish_reason: "length",
+        },
+      ],
+      usage: {
+        prompt_tokens: 812,
+        completion_tokens: 4096,
+        total_tokens: 4908,
+        completion_tokens_details: { reasoning_tokens: 4050 },
+      },
+    };
+    const { fetchFn } = mockFetch(payload);
+    const error = await diagnoseWithMeta(BUNDLE, {
+      fetchFn,
+      model: "muse-spark-1.3-contributor",
+      apiKey: "k",
+    }).catch((e: unknown) => e);
+    assert.ok(error instanceof MetaMalformedResultError);
+    assert.match(
+      error.message,
+      /exhausted the completion-token budget before producing visible structured output/,
+    );
+    assert.match(error.message, /finish_reason=length/);
+    assert.match(error.message, /HTTP request succeeded/);
+    assert.match(error.message, /reasoningTokens=4050/);
+    assert.match(error.message, /requestId=req-length-1/);
+    const usage = (error as MetaMalformedResultError).usage;
+    assert.ok(usage !== null);
+    assert.equal(usage?.reasoningTokens, 4050);
+    assert.equal(usage?.inputTokens, 812);
+    assert.equal(usage?.outputTokens, 4096);
+    assert.equal(usage?.requestId, "req-length-1");
+  });
+
+  it("fails with safe diagnostics when choices are missing", async () => {
+    const payloads = [
+      { id: "req-no-choices", usage: { prompt_tokens: 10 } },
+      { id: "req-empty-choices", choices: [], usage: { prompt_tokens: 10 } },
+    ];
+    for (const payload of payloads) {
+      const { fetchFn } = mockFetch(payload);
+      const error = await diagnoseWithMeta(BUNDLE, {
+        fetchFn,
+        model: "m",
+        apiKey: "distinctive-placeholder-key",
+      }).catch((e: unknown) => e);
+      assert.ok(error instanceof MetaMalformedResultError);
+      assert.match(error.message, /no usable choice/);
+      assert.match(error.message, /HTTP request succeeded/);
+      assert.ok(!error.message.includes("distinctive-placeholder-key"));
+    }
+  });
+
+  it("fails without a budget-exhaustion claim when content is empty for another reason", async () => {
+    const { fetchFn } = mockFetch(
+      completionWith("  ", { prompt_tokens: 40 }, "stop"),
+    );
+    const error = await diagnoseWithMeta(BUNDLE, {
+      fetchFn,
+      model: "m",
+      apiKey: "k",
+    }).catch((e: unknown) => e);
+    assert.ok(error instanceof MetaMalformedResultError);
+    assert.match(error.message, /no message content/);
+    assert.match(error.message, /finish_reason=stop/);
+    assert.ok(
+      !error.message.includes("exhausted the completion-token budget"),
+    );
+  });
+
+  it("preserves usage telemetry on an API-success/model-output-failure", async () => {
+    const payload = {
+      id: "req-telemetry-1",
+      choices: [
+        {
+          message: { role: "assistant", content: null },
+          finish_reason: "length",
+        },
+      ],
+      usage: {
+        prompt_tokens: 900,
+        completion_tokens: 4096,
+        total_tokens: 4996,
+        completion_tokens_details: { reasoning_tokens: 4000 },
+      },
+    };
+    const { fetchFn } = mockFetch(payload);
+    const error = await diagnoseWithMeta(BUNDLE, {
+      fetchFn,
+      model: "muse-spark-1.3-contributor",
+      apiKey: "k",
+    }).catch((e: unknown) => e);
+    assert.ok(error instanceof MetaMalformedResultError);
+    const usage = (error as MetaMalformedResultError).usage;
+    assert.ok(usage !== null);
+    // The preserved telemetry fits the existing usage artifact structure —
+    // it is real reported usage, not a fabricated successful diagnosis.
+    assert.ok(ModelUsageSchema.safeParse(usage).success);
+    assert.equal(usage?.model, "muse-spark-1.3-contributor");
+    assert.equal(usage?.operation, "accessibility-diagnosis");
+    assert.equal(usage?.reasoningTokens, 4000);
   });
 
   it("propagates API errors with the status attached", async () => {

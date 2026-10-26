@@ -12,6 +12,7 @@ export {
   DEFAULT_META_MODEL,
   DIAGNOSIS_MAX_OUTPUT_TOKENS,
   DIAGNOSIS_OPERATION,
+  DIAGNOSIS_REASONING_EFFORT,
   MAX_MODEL_CALLS_ENV,
   META_API_BASE_URL,
   META_MODEL_ENV,
@@ -20,6 +21,7 @@ export {
   getMetaModel,
   requireApiKey,
 } from "./config.js";
+export type { DiagnosisReasoningEffort } from "./config.js";
 export { DIAGNOSIS_SYSTEM_PROMPT } from "./prompt.js";
 export {
   ACCESSIBILITY_DIAGNOSIS_JSON_SCHEMA,
