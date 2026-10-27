@@ -27,11 +27,11 @@ export default function RootLayout({
         {children}
         <footer className="site-footer">
           <div className="site-footer-inner">
-            <span>a11yforge.engine // wcag aaa strict</span>
+            <span>Find. Fix. Prove accessibility.</span>
             <span>
-              <Link href="/console#h-evidence">Evidence log</Link>
+              <Link href="/console#h-evidence">Developer details</Link>
               {" · "}
-              <Link href="/connect">Connect source</Link>
+              <Link href="/connect">Connect your code</Link>
             </span>
           </div>
         </footer>

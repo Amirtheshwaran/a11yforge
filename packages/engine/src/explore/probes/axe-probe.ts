@@ -35,6 +35,71 @@ const STANDARD_URLS: Record<string, string> = {
   wcag2aa: "https://www.w3.org/TR/WCAG21/#aa",
 };
 
+interface MeasuredBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  viewportWidth: number;
+  viewportHeight: number;
+  role: string;
+  name: string;
+}
+
+/**
+ * Runs inside the page: measures viewport-relative boxes for the exact
+ * selectors axe reported. Returns null per selector when the element is
+ * missing or has no rendered area — never guessed coordinates.
+ */
+export function measureSelectors(selectors: string[]): (MeasuredBox | null)[] {
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  return selectors.map((selector) => {
+    let el: Element | null = null;
+    try {
+      el = document.querySelector(selector);
+    } catch {
+      el = null;
+    }
+    if (el === null) return null;
+    const rect = el.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return null;
+    const tag = el.tagName.toLowerCase();
+    const explicit = el.getAttribute("role")?.trim().split(/\s+/)[0] ?? "";
+    let role = explicit;
+    if (role === "") {
+      if (tag === "button") role = "button";
+      else if (tag === "a" && el.hasAttribute("href")) role = "link";
+      else if (tag === "img") role = "image";
+      else if (tag === "input" || tag === "select" || tag === "textarea") role = "field";
+      else role = tag;
+    }
+    // Structural elements have no meaningful visible text (their textContent
+    // is script/style noise) — leave them unnamed so labels fall back to role.
+    const textual = tag !== "html" && tag !== "head" && tag !== "body" && tag !== "title" && tag !== "script" && tag !== "style";
+    const text = textual ? (el.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 80) : "";
+    const name =
+      el.getAttribute("aria-label")?.trim() ||
+      text ||
+      (el instanceof HTMLImageElement ? el.alt : "") ||
+      (el instanceof HTMLInputElement ? el.value || el.placeholder || el.type : "");
+    return {
+      x: rect.x,
+      y: rect.y,
+      width: rect.width,
+      height: rect.height,
+      viewportWidth,
+      viewportHeight,
+      role,
+      name: name.slice(0, 80),
+    };
+  });
+}
+
+export function labelOf(measured: MeasuredBox): string {
+  return measured.name !== "" ? `"${measured.name}" ${measured.role}` : measured.role;
+}
+
 export const axeProbe: AccessibilityProbe = {
   id: "page-axe-scan",
 
@@ -64,6 +129,19 @@ export const axeProbe: AccessibilityProbe = {
 
     const screenshot = await ctx.captureScreenshot("page-loaded", null);
     const screenshots = screenshot === null ? [] : [screenshot];
+
+    // Measure real geometry for every reported node in one in-page pass.
+    // Same scroll position as the screenshot above, so boxes align.
+    const uniqueSelectors = [...new Set(scan.findings.map((finding) => finding.selector))];
+    let measured: (MeasuredBox | null)[] = uniqueSelectors.map(() => null);
+    try {
+      measured = await ctx.page.evaluate(measureSelectors, uniqueSelectors);
+    } catch {
+      measured = uniqueSelectors.map(() => null);
+    }
+    const boxBySelector = new Map<string, MeasuredBox | null>(
+      uniqueSelectors.map((selector, index) => [selector, measured[index] ?? null]),
+    );
 
     if (scan.findings.length === 0) {
       trace.record("axe-clean", "No automated rule violations on this page.");
@@ -102,19 +180,24 @@ export const axeProbe: AccessibilityProbe = {
         `across ${ruleIds.size} ${ruleIds.size === 1 ? "rule" : "rules"} (${topRules}). ` +
         `Each one below names the element and the rule it breaks.`,
       severity,
-      evidence: scan.findings.slice(0, 50).map((finding) => ({
-        kind: "axe-violation",
-        summary: `${finding.help} — ${finding.selector || "page"}`,
-        data: {
-          ruleId: finding.ruleId,
-          impact: finding.impact,
-          help: finding.help,
-          helpUrl: finding.helpUrl,
-          selector: finding.selector,
-          html: finding.html,
-          failureSummary: finding.failureSummary,
-        },
-      })),
+      evidence: scan.findings.slice(0, 50).map((finding) => {
+        const box = boxBySelector.get(finding.selector) ?? null;
+        return {
+          kind: "axe-violation",
+          summary: `${finding.help} — ${finding.selector || "page"}`,
+          data: {
+            ruleId: finding.ruleId,
+            impact: finding.impact,
+            help: finding.help,
+            helpUrl: finding.helpUrl,
+            selector: finding.selector,
+            html: finding.html,
+            failureSummary: finding.failureSummary,
+            box,
+            boxLabel: box === null ? "" : labelOf(box),
+          },
+        };
+      }),
       actionTrace: trace.steps,
       screenshots,
       standardReferences: [STANDARD_URLS["wcag2aa"] ?? ""],

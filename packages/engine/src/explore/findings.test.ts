@@ -90,4 +90,72 @@ describe("projectFindings", () => {
       assert.ok(!text.includes("assertion failed"), text);
     }
   });
+
+  it("carries measured axe boxes into highlights aligned to the page shot", () => {
+    const box = { x: 10, y: 20, width: 100, height: 30, viewportWidth: 1280, viewportHeight: 720 };
+    const axe = baseResult({
+      probeId: "page-axe-scan",
+      status: "failed",
+      screenshots: ["screenshot-0.png"],
+      evidence: [
+        { kind: "axe-violation", summary: "a", data: { ruleId: "image-alt", help: "Images need text", helpUrl: "https://example.com/h", impact: "critical", selector: "img.a", html: "<img>", failureSummary: "fix", box, boxLabel: "photo image" } },
+        { kind: "axe-violation", summary: "b", data: { ruleId: "image-alt", help: "Images need text", helpUrl: "https://example.com/h", impact: "critical", selector: "img.b", html: "<img>", failureSummary: "fix", box: null, boxLabel: "" } },
+      ],
+    });
+    const [finding] = projectFindings([axe]);
+    assert.ok(finding !== undefined);
+    assert.equal(finding.highlights.length, 1);
+    assert.deepEqual(finding.highlights[0], {
+      screenshot: "screenshot-0.png",
+      ...box,
+      label: "photo image",
+      selector: "img.a",
+    });
+  });
+
+  it("emits no highlights when boxes are missing, invalid, or unaligned", () => {
+    const bad = { x: 0, y: 0, width: 0, height: 5, viewportWidth: 1280, viewportHeight: 720 };
+    const axe = baseResult({
+      probeId: "page-axe-scan",
+      status: "failed",
+      screenshots: [],
+      evidence: [
+        { kind: "axe-violation", summary: "a", data: { ruleId: "label", help: "Label it", helpUrl: "", impact: "serious", selector: "#e", html: "<input>", failureSummary: "fix", box: bad, boxLabel: "x" } },
+      ],
+    });
+    const [noShot] = projectFindings([axe]);
+    assert.deepEqual(noShot?.highlights ?? null, []);
+    const withShot = baseResult({
+      probeId: "page-axe-scan",
+      status: "failed",
+      screenshots: ["screenshot-0.png"],
+      evidence: [
+        { kind: "axe-violation", summary: "a", data: { ruleId: "label", help: "Label it", helpUrl: "", impact: "serious", selector: "#e", html: "<input>", failureSummary: "fix", box: { what: "nope" }, boxLabel: "x" } },
+      ],
+    });
+    const [invalid] = projectFindings([withShot]);
+    assert.deepEqual(invalid?.highlights ?? null, []);
+  });
+
+  it("highlights the focused element for keyboard anomalies", () => {
+    const box = { x: 5, y: 5, width: 50, height: 20, viewportWidth: 1280, viewportHeight: 720 };
+    const failed = baseResult({
+      status: "failed",
+      title: "Keyboard focus moved to content hidden from assistive technology.",
+      screenshots: ["screenshot-1.png"],
+      evidence: [
+        {
+          kind: "keyboard-focus-anomaly",
+          summary: "focus landed on hidden content at step 3",
+          data: { role: "iframe", name: "", selector: "iframe", box, startLabel: "body", steps: 3 },
+        },
+      ],
+    });
+    const [finding] = projectFindings([failed]);
+    assert.ok(finding !== undefined);
+    assert.equal(finding.category, "confirmed-failure");
+    assert.deepEqual(finding.highlights, [
+      { screenshot: "screenshot-1.png", ...box, label: "iframe", selector: "iframe" },
+    ]);
+  });
 });

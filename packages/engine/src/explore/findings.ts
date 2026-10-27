@@ -55,6 +55,30 @@ export function traceToSteps(pageUrl: string, result: ProbeResult): string[] {
   return steps.slice(0, 20);
 }
 
+interface HighlightBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  viewportWidth: number;
+  viewportHeight: number;
+}
+
+function isHighlightBox(value: unknown): value is HighlightBox {
+  if (typeof value !== "object" || value === null) return false;
+  const box = value as Record<string, unknown>;
+  return (
+    typeof box["x"] === "number" &&
+    typeof box["y"] === "number" &&
+    typeof box["width"] === "number" &&
+    typeof box["height"] === "number" &&
+    typeof box["viewportWidth"] === "number" &&
+    typeof box["viewportHeight"] === "number" &&
+    box["width"] > 0 &&
+    box["height"] > 0
+  );
+}
+
 function projectAxeRule(
   result: ProbeResult,
   ruleId: string,
@@ -68,6 +92,28 @@ function projectAxeRule(
   const helpUrl = (first?.data["helpUrl"] as string) ?? "";
   const impact = (first?.data["impact"] as string | null) ?? null;
   const selectors = nodes.slice(0, 3).map((entry) => (entry.data["selector"] as string) || "the page");
+  const screenshot = result.screenshots[0] ?? "";
+  const highlights =
+    screenshot === ""
+      ? []
+      : nodes.flatMap((entry) => {
+          const box = entry.data["box"];
+          const label = entry.data["boxLabel"];
+          if (!isHighlightBox(box) || typeof label !== "string" || label === "") return [];
+          return [
+            {
+              screenshot,
+              x: box.x,
+              y: box.y,
+              width: box.width,
+              height: box.height,
+              viewportWidth: box.viewportWidth,
+              viewportHeight: box.viewportHeight,
+              label,
+              selector: (entry.data["selector"] as string) ?? "",
+            },
+          ];
+        });
   return {
     findingId: `${result.probeId}-${ruleId}-${index}`,
     category: "automated-finding",
@@ -88,6 +134,7 @@ function projectAxeRule(
     probeId: result.probeId,
     screenshots: result.screenshots,
     standardReferences: helpUrl === "" ? result.standardReferences : [helpUrl],
+    highlights,
   };
 }
 
@@ -97,6 +144,33 @@ function projectSingle(
   index: number,
 ): ExplorationFinding {
   const kind = result.evidence[0]?.kind ?? "observation";
+  const anomaly = result.evidence[0]?.kind === "keyboard-focus-anomaly" ? result.evidence[0] : null;
+  const screenshot = result.screenshots[0] ?? "";
+  const anomalyBox = anomaly?.data["box"];
+  const anomalyName = anomaly?.data["name"];
+  const anomalyRole = anomaly?.data["role"];
+  const anomalyLabel =
+    typeof anomalyName === "string" && anomalyName !== "" && typeof anomalyRole === "string" && anomalyRole !== ""
+      ? `"${anomalyName}" ${anomalyRole}`
+      : typeof anomalyRole === "string" && anomalyRole !== ""
+        ? anomalyRole
+        : "focused element";
+  const highlights =
+    screenshot === "" || !isHighlightBox(anomalyBox)
+      ? []
+      : [
+          {
+            screenshot,
+            x: anomalyBox.x,
+            y: anomalyBox.y,
+            width: anomalyBox.width,
+            height: anomalyBox.height,
+            viewportWidth: anomalyBox.viewportWidth,
+            viewportHeight: anomalyBox.viewportHeight,
+            label: anomalyLabel,
+            selector: typeof anomaly?.data["selector"] === "string" ? (anomaly?.data["selector"] as string) : "",
+          },
+        ];
   return {
     findingId: `${result.probeId}-${index}`,
     category,
@@ -109,6 +183,7 @@ function projectSingle(
     probeId: result.probeId,
     screenshots: result.screenshots,
     standardReferences: result.standardReferences,
+    highlights,
   };
 }
 

@@ -15,6 +15,15 @@ import {
  * observations, never failures.
  */
 
+interface FocusBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  viewportWidth: number;
+  viewportHeight: number;
+}
+
 interface FocusSnapshot {
   hasFocus: boolean;
   role: string;
@@ -26,6 +35,8 @@ interface FocusSnapshot {
   rendered: boolean;
   onScreen: boolean;
   isBody: boolean;
+  /** Viewport-relative box of the focused element, when measurable. */
+  box: FocusBox | null;
 }
 
 /** Runs inside the page: describes document.activeElement right now. */
@@ -43,6 +54,7 @@ export function describeActiveElement(): FocusSnapshot {
       rendered: true,
       onScreen: true,
       isBody: true,
+      box: null,
     };
   }
   const el = active as Element;
@@ -87,6 +99,16 @@ export function describeActiveElement(): FocusSnapshot {
       rect.right >= 0 &&
       rect.left <= window.innerWidth,
     isBody: false,
+    box: rendered
+      ? {
+          x: rect.x,
+          y: rect.y,
+          width: rect.width,
+          height: rect.height,
+          viewportWidth: window.innerWidth,
+          viewportHeight: window.innerHeight,
+        }
+      : null,
   };
 }
 
@@ -110,7 +132,14 @@ export const keyboardProbe: AccessibilityProbe = {
     trace.record("traversal-started", `Keyboard focus started on ${labelFocus(start)}.`);
 
     const seen: string[] = [];
-    let failure: { title: string; summary: string; detail: string } | null = null;
+    let failure: {
+      title: string;
+      summary: string;
+      detail: string;
+      snapshot: FocusSnapshot;
+      startLabel: string;
+      steps: number;
+    } | null = null;
     let bodyFallbacks = 0;
     let steps = 0;
 
@@ -144,6 +173,9 @@ export const keyboardProbe: AccessibilityProbe = {
             `from assistive technology. Sighted keyboard users see a focus indicator on ` +
             `something screen reader users cannot perceive.`,
           detail: `focus landed on hidden content at step ${steps}`,
+          snapshot,
+          startLabel: labelFocus(start),
+          steps,
         };
         const shot = await ctx.captureScreenshot("keyboard-focus-hidden", null);
         if (shot !== null) screenshots.push(shot);
@@ -156,6 +188,9 @@ export const keyboardProbe: AccessibilityProbe = {
             `After pressing Tab, focus landed on ${labelFocus(snapshot)}, which is ` +
             `disabled. Disabled controls must not be reachable by keyboard.`,
           detail: `focus landed on a disabled control at step ${steps}`,
+          snapshot,
+          startLabel: labelFocus(start),
+          steps,
         };
         const shot = await ctx.captureScreenshot("keyboard-focus-disabled", null);
         if (shot !== null) screenshots.push(shot);
@@ -190,6 +225,7 @@ export const keyboardProbe: AccessibilityProbe = {
     }
 
     if (failure !== null) {
+      const end = failure.snapshot;
       return buildProbeResult({
         probeId: "keyboard-traversal",
         targetId: ctx.targetId,
@@ -198,7 +234,20 @@ export const keyboardProbe: AccessibilityProbe = {
         title: failure.title,
         humanSummary: failure.summary,
         severity: "serious",
-        evidence: [{ kind: "keyboard-focus-anomaly", summary: failure.detail, data: {} }],
+        evidence: [
+          {
+            kind: "keyboard-focus-anomaly",
+            summary: failure.detail,
+            data: {
+              role: end.role,
+              name: end.name,
+              selector: end.selector,
+              box: end.box,
+              startLabel: failure.startLabel,
+              steps: failure.steps,
+            },
+          },
+        ],
         actionTrace: trace.steps,
         screenshots,
         standardReferences: ["https://www.w3.org/WAI/WCAG21/Understanding/focus-order.html"],

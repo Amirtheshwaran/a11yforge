@@ -3,13 +3,11 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import {
-  EXPLORATION_STAGE_LABELS,
-  type ExplorationEvent,
-  type ExplorationFinding,
-  type ExplorationRun,
+import type {
+  ExplorationEvent,
+  ExplorationFinding,
+  ExplorationRun,
 } from "@a11yforge/shared";
-import { STAGE_ORDER, stageState } from "../../../lib/exploration-stages";
 import {
   Accordion,
   AccordionContent,
@@ -33,7 +31,30 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { StageSteps, type StageStep } from "@/components/domain";
+import { StageSteps } from "@/components/domain";
+import { EvidenceViewer } from "@/components/evidence-viewer";
+import { STAGE_ORDER, stageState } from "../../../lib/exploration-stages";
+import {
+  affectedCountOf,
+  fixGuidanceOf,
+  GROUP_ORDER,
+  groupOf,
+  humanFindingOf,
+  humanLimitationOf,
+  humanProgressOf,
+  LIMITATION_SUPPORTING,
+  pluralize,
+  PROBLEM_GROUPS,
+  ruleSlugOf,
+  severityWordOf,
+  shortPageOf,
+  storyboardOf,
+  tierOfSeverity,
+  verdictOf,
+  VERDICT_COPY,
+  type GroupId,
+} from "../../../lib/human-copy";
+import { drawableHighlights } from "../../../lib/overlay";
 import {
   cancelExploration,
   explorationShotSrc,
@@ -64,13 +85,6 @@ function categoryHelp(category: ExplorationFinding["category"]): string {
   return "Skipped: the interaction could not be tested safely.";
 }
 
-function severityGlyph(severity: ExplorationFinding["severity"]): string {
-  if (severity === "critical" || severity === "serious") return "[✕]";
-  if (severity === "moderate") return "[!]";
-  if (severity === "minor") return "[i]";
-  return "[—]";
-}
-
 function probeStatusGlyph(status: string): string {
   if (status === "failed") return "[✕]";
   if (status === "passed") return "[✓]";
@@ -78,102 +92,269 @@ function probeStatusGlyph(status: string): string {
   return "[!]";
 }
 
-function FindingCard({ finding, runId, run }: { finding: ExplorationFinding; runId: string; run: ExplorationRun }) {
-  const evidenceId = `evidence-${finding.findingId}`;
-  const probe = run.probeResults.find((candidate) => candidate.probeId === finding.probeId) ?? null;
-  const criterion = finding.standardReferences.length > 0 ? finding.standardReferences[0] : null;
+function FindingTechnicalDetails({ finding }: { finding: ExplorationFinding }) {
+  const slug = ruleSlugOf(finding);
+  return (
+    <div className="finding-evidence">
+      {slug !== null && (
+        <p className="badge-mono" style={{ margin: "0 0 8px" }}>
+          Check: {slug}
+        </p>
+      )}
+      <h4>How it was checked</h4>
+      <ol>
+        {finding.howReproduced.map((step, index) => (
+          <li key={index}>{step}</li>
+        ))}
+      </ol>
+      {finding.standardReferences.length > 0 && (
+        <p className="std-refs">
+          Standards:{" "}
+          {finding.standardReferences.map((ref, index) => (
+            <span key={index}>
+              {index > 0 && ", "}
+              <a href={ref} target="_blank" rel="noreferrer">
+                {ref}
+              </a>
+            </span>
+          ))}
+        </p>
+      )}
+      <p className="std-refs">
+        Probe: {finding.probeId} · Finding: {finding.findingId}
+      </p>
+    </div>
+  );
+}
+
+function ConnectCta({ runId, findingId }: { runId: string; findingId: string }) {
+  return (
+    <div>
+      <div className="finding-actions">
+        <Button size="sm" asChild>
+          <Link
+            href={`/connect?run=${encodeURIComponent(runId)}&finding=${encodeURIComponent(findingId)}`}
+          >
+            Connect source
+          </Link>
+        </Button>
+      </div>
+      <p className="help mt-2" style={{ color: "var(--ink-dim)" }}>
+        Connect source to check repair support. A11yForge can try to locate
+        and repair supported issues once your code is connected.
+      </p>
+    </div>
+  );
+}
+
+/** Compact card for observations (not confirmed problems). */
+function ObservationCard({
+  finding,
+  runId,
+  developer,
+}: {
+  finding: ExplorationFinding;
+  runId: string;
+  developer: boolean;
+}) {
+  const human = humanFindingOf(finding);
+  const drawable = drawableHighlights(finding.highlights);
+  const shot = finding.screenshots[0] ?? null;
   return (
     <article aria-labelledby={`finding-title-${finding.findingId}`}>
       <Card className="p-5">
         <CardHeader className="p-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline">
-              {severityGlyph(finding.severity)} {finding.severity.toUpperCase()}
-            </Badge>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge>
-                  {categoryGlyph(finding.category)} {categoryLabel(finding.category)}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent>{categoryHelp(finding.category)}</TooltipContent>
-            </Tooltip>
-            {criterion !== null && criterion !== undefined && (
-              <Badge variant="faint">Criterion: {criterion}</Badge>
-            )}
-          </div>
+          {developer && (
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline">
+                {finding.severity.toUpperCase()}
+              </Badge>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge>
+                    {categoryGlyph(finding.category)} {categoryLabel(finding.category)}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>{categoryHelp(finding.category)}</TooltipContent>
+              </Tooltip>
+            </div>
+          )}
           <CardTitle asChild className="text-lg">
-            <h3 id={`finding-title-${finding.findingId}`}>{finding.title}</h3>
+            <h3 id={`finding-title-${finding.findingId}`}>{human.title}</h3>
           </CardTitle>
-          <CardDescription>{finding.whatHappened}</CardDescription>
+          <CardDescription>{human.why}</CardDescription>
           <p className="font-mono text-[11px] text-inkdim">
-            Location: <code>{finding.pageUrl}</code>
+            Where: <code>{developer ? finding.pageUrl : shortPageOf(finding.pageUrl)}</code>
           </p>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="finding-actions">
-            <Button size="sm" asChild>
-              <Link
-                href={`/connect?run=${encodeURIComponent(runId)}&finding=${encodeURIComponent(finding.findingId)}`}
-              >
-                Connect source to repair
-              </Link>
-            </Button>
-          </div>
+          <ConnectCta runId={runId} findingId={finding.findingId} />
           <Accordion type="single" collapsible className="mt-2">
-            <AccordionItem value={evidenceId}>
-              <AccordionTrigger>See evidence</AccordionTrigger>
+            <AccordionItem value={`show-me-${finding.findingId}`}>
+              <AccordionTrigger>Show me</AccordionTrigger>
               <AccordionContent>
-                <div className="finding-evidence">
-                  <h4>Why this matters</h4>
-                  <p style={{ color: "var(--ink-dim)" }}>{finding.whyItMatters}</p>
-                  <h4>How we reproduced it</h4>
-                  <ol>
-                    {finding.howReproduced.map((step, index) => (
-                      <li key={index}>{step}</li>
-                    ))}
-                  </ol>
-                  {probe !== null && probe.actionTrace.length > 0 && (
-                    <>
-                      <h4>Interaction trace</h4>
-                      <ol>
-                        {probe.actionTrace.map((step) => (
-                          <li key={step.seq}>
-                            <span className="kbd">{step.action}</span> {step.detail !== "" ? `— ${step.detail}` : ""}{" "}
-                            <span className="std-refs">{step.pageUrl}</span>
-                          </li>
-                        ))}
-                      </ol>
-                    </>
-                  )}
-                  {finding.screenshots.map((shot) => (
-                    <img
-                      key={shot}
-                      src={explorationShotSrc(runId, shot)}
-                      alt={`Screenshot of the page where: ${finding.title}`}
-                      loading="lazy"
-                    />
-                  ))}
-                  {finding.standardReferences.length > 0 && (
-                    <p className="std-refs">
-                      Standards:{" "}
-                      {finding.standardReferences.map((ref, index) => (
-                        <span key={index}>
-                          {index > 0 && ", "}
-                          <a href={ref} target="_blank" rel="noreferrer">
-                            {ref}
-                          </a>
-                        </span>
-                      ))}
-                    </p>
-                  )}
-                </div>
+                {shot !== null && drawable.length > 0 ? (
+                  <EvidenceViewer
+                    src={explorationShotSrc(runId, shot)}
+                    alt={`Screenshot from the test showing where: ${human.title}`}
+                    highlights={drawable}
+                    selectedIndex={0}
+                    onSelect={() => undefined}
+                  />
+                ) : (
+                  <p className="help" style={{ color: "var(--ink-dim)" }}>
+                    We found this problem but could not visually locate it in
+                    the captured screenshot.
+                  </p>
+                )}
+                <Accordion type="single" collapsible className="mt-2">
+                  <AccordionItem value={`technical-${finding.findingId}`}>
+                    <AccordionTrigger>Developer details</AccordionTrigger>
+                    <AccordionContent>
+                      <FindingTechnicalDetails finding={finding} />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
         </CardContent>
       </Card>
     </article>
+  );
+}
+
+/**
+ * Guided walkthrough detail for one problem: visual evidence, plain
+ * explanation, fix guidance, and navigation. Evidence-first, jargon-last.
+ */
+function WalkthroughItem({
+  finding,
+  runId,
+  position,
+  total,
+  developer,
+  elementIndex,
+  onElementSelect,
+  viewerRef,
+  headingRef,
+}: {
+  finding: ExplorationFinding;
+  runId: string;
+  position: number;
+  total: number;
+  developer: boolean;
+  elementIndex: number;
+  onElementSelect: (index: number) => void;
+  viewerRef: React.RefObject<HTMLDivElement | null>;
+  headingRef: React.RefObject<HTMLHeadingElement | null>;
+}) {
+  const human = humanFindingOf(finding);
+  const count = affectedCountOf(finding);
+  const drawable = drawableHighlights(finding.highlights);
+  const shot = finding.screenshots[0] ?? null;
+  const selected = drawable.length === 0 ? 0 : Math.min(elementIndex, drawable.length - 1);
+  const isKeyboard = finding.probeId === "keyboard-traversal";
+  return (
+    <div>
+      <p className="badge-mono" aria-live="polite">
+        Issue {position} of {total}
+      </p>
+      <h3 ref={headingRef} tabIndex={-1} className="outline-none" style={{ fontSize: 24, lineHeight: "32px", margin: "8px 0 4px" }}>
+        {human.title}
+      </h3>
+      <p className="help" style={{ color: "var(--ink-dim)" }}>
+        {severityWordOf(finding.severity)}
+      </p>
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:gap-6">
+        <div className="lg:col-start-2 lg:row-start-2">
+          <h4>What&apos;s wrong?</h4>
+          <p>{human.title}.</p>
+          <h4>Why it matters</h4>
+          <p style={{ color: "var(--ink-dim)" }}>{human.why}</p>
+          <h4>Where it happens</h4>
+          <p className="font-mono text-[11px] text-inkdim">
+            <code>{developer ? finding.pageUrl : shortPageOf(finding.pageUrl)}</code>
+          </p>
+          {count !== null && (
+            <p className="font-mono text-[11px] text-inkdim">
+              Affected: {pluralize(count, human.noun)}
+            </p>
+          )}
+          {isKeyboard && (
+            <>
+              <h4>What happened</h4>
+              <ol className="finding-steps">
+                {storyboardOf(finding).map((step, index) => (
+                  <li key={index}>
+                    {step.marker !== "start" && <span aria-hidden="true">↓ Tab </span>}
+                    {step.text}
+                    {step.marker === "problem" && " ✕"}
+                  </li>
+                ))}
+              </ol>
+            </>
+          )}
+        </div>
+        <div ref={viewerRef} className="lg:col-start-1 lg:row-start-2 lg:row-span-3 scroll-mt-4">
+          {shot !== null && drawable.length > 0 ? (
+            <EvidenceViewer
+              src={explorationShotSrc(runId, shot)}
+              alt={`Screenshot from the test showing where: ${human.title}`}
+              highlights={drawable}
+              selectedIndex={selected}
+              onSelect={onElementSelect}
+              caption="This is the exact element to look at."
+            />
+          ) : (
+            <Card>
+              <p className="help" style={{ color: "var(--ink-dim)" }}>
+                We found this problem but could not visually locate it in the
+                captured screenshot.
+              </p>
+              {shot !== null && (
+                <img
+                  src={explorationShotSrc(runId, shot)}
+                  alt="Screenshot from the test showing the checked page"
+                  loading="lazy"
+                  style={{ display: "block", width: "100%", height: "auto", marginTop: 8 }}
+                />
+              )}
+            </Card>
+          )}
+        </div>
+        <div className="lg:col-start-2 lg:row-start-3">
+          <h4>How do I fix this?</h4>
+          <p>{fixGuidanceOf(finding)}</p>
+          <ConnectCta runId={runId} findingId={finding.findingId} />
+          <p style={{ marginTop: 12 }}>
+            <Button size="sm" variant="secondary" asChild>
+              <a href={finding.pageUrl} target="_blank" rel="noreferrer">
+                Open affected page
+              </a>
+            </Button>
+          </p>
+        </div>
+      </div>
+      {developer && (
+        <Card className="mt-4">
+          <p className="badge-mono">
+            {finding.severity.toUpperCase()} · {categoryGlyph(finding.category)} {categoryLabel(finding.category)}
+          </p>
+          <FindingTechnicalDetails finding={finding} />
+        </Card>
+      )}
+      {!developer && (
+        <Accordion type="single" collapsible className="mt-4">
+          <AccordionItem value={`walk-technical-${finding.findingId}`}>
+            <AccordionTrigger>Developer details</AccordionTrigger>
+            <AccordionContent>
+              <FindingTechnicalDetails finding={finding} />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
+    </div>
   );
 }
 
@@ -195,17 +376,27 @@ function ExploreRunContent(): React.JSX.Element {
   const [run, setRun] = useState<ExplorationRun | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const [developer, setDeveloper] = useState(false);
+  const [unreachable, setUnreachable] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const failuresRef = useRef(0);
 
   const poll = useCallback(async () => {
     try {
       const finished = await fetchExploration(runId);
+      failuresRef.current = 0;
       if (finished !== null) {
         setRun(finished);
         if (pollRef.current !== null) clearInterval(pollRef.current);
       }
     } catch {
-      /* keep polling; SSE errors surface separately */
+      // The run record is unreachable (unknown id, server restarted).
+      // After several consecutive failures, say so instead of waiting forever.
+      failuresRef.current += 1;
+      if (failuresRef.current >= 5) {
+        if (pollRef.current !== null) clearInterval(pollRef.current);
+        setUnreachable(true);
+      }
     }
   }, [runId]);
 
@@ -241,20 +432,71 @@ function ExploreRunContent(): React.JSX.Element {
   }
 
   const latest = events.length > 0 ? events[events.length - 1] ?? null : null;
+  const previous = events.length > 1 ? events[events.length - 2] ?? null : null;
+  // Live-region restraint: announce only when the stage actually changes.
+  const announceLatest = latest !== null && (previous === null || previous.stage !== latest.stage);
   const confirmed = run?.findings.filter((finding) => finding.category === "confirmed-failure") ?? [];
   const automated = run?.findings.filter((finding) => finding.category === "automated-finding") ?? [];
   const observations = run?.findings.filter((finding) => finding.category === "observation") ?? [];
   const notTestedFindings = run?.findings.filter((finding) => finding.category === "not-tested") ?? [];
   const shots = run?.screenshots ?? [];
   const newestShot = shots.length > 0 ? shots[shots.length - 1] : null;
-  const issueCount = confirmed.length + automated.length;
+  const problems = [...confirmed, ...automated];
+  const issueCount = problems.length;
   const targetUrl = entryUrl !== "" ? entryUrl : (run?.target.entryUrl ?? "…");
-  const steps: StageStep[] = STAGE_ORDER.map((stage) => ({
-    id: stage,
-    label: EXPLORATION_STAGE_LABELS[stage],
-    state: stageState(stage, events, run),
-  }));
-  const doneSteps = steps.filter((step) => step.state === "done").length;
+
+  const backendStates = Object.fromEntries(
+    STAGE_ORDER.map((stage) => [stage, stageState(stage, events, run)]),
+  ) as Record<(typeof STAGE_ORDER)[number], "pending" | "running" | "done">;
+  const progress = humanProgressOf(backendStates);
+  const doneSteps = progress.filter((step) => step.state === "done").length;
+
+  const tier0 = problems.filter((finding) => tierOfSeverity(finding.severity) === 0);
+  const tier1 = problems.filter((finding) => tierOfSeverity(finding.severity) === 1);
+  const tier2 = problems.filter((finding) => tierOfSeverity(finding.severity) === 2);
+  const verdict = verdictOf(problems.map((finding) => finding.severity));
+  const grouped = new Map<string, ExplorationFinding[]>();
+  for (const finding of problems) {
+    const group = groupOf(finding);
+    const list = grouped.get(group) ?? [];
+    list.push(finding);
+    grouped.set(group, list);
+  }
+  const severityRank = (severity: ExplorationFinding["severity"]): number =>
+    severity === "critical" ? 0 : severity === "serious" ? 1 : severity === "moderate" ? 2 : 3;
+  for (const list of grouped.values()) {
+    list.sort((a, b) => severityRank(a.severity) - severityRank(b.severity));
+  }
+
+  // Guided walkthrough: issue-by-issue review over the grouped problems.
+  const [walk, setWalk] = useState<{ scope: "all" | GroupId; fi: number; ei: number } | null>(null);
+  const walkHeadingRef = useRef<HTMLHeadingElement | null>(null);
+  const walkViewerRef = useRef<HTMLDivElement | null>(null);
+  const walkSectionRef = useRef<HTMLElement | null>(null);
+
+  const walkProblems: ExplorationFinding[] = [];
+  for (const id of GROUP_ORDER) {
+    const list = grouped.get(id);
+    if (list !== undefined) walkProblems.push(...list);
+  }
+
+  function enterWalkthrough(scope: "all" | GroupId, fi = 0): void {
+    setWalk({ scope, fi, ei: 0 });
+  }
+
+  const scopedWalk =
+    walk === null
+      ? []
+      : walk.scope === "all"
+        ? walkProblems
+        : walkProblems.filter((finding) => groupOf(finding) === walk.scope);
+  const walkFinding = walk === null ? null : (scopedWalk[Math.min(walk.fi, Math.max(scopedWalk.length - 1, 0))] ?? null);
+
+  useEffect(() => {
+    if (walk === null) return;
+    walkSectionRef.current?.scrollIntoView({ block: "start" });
+    walkHeadingRef.current?.focus({ preventScroll: true });
+  }, [walk?.scope, walk?.fi]);
 
   return (
     <main className="landing-wide">
@@ -262,49 +504,53 @@ function ExploreRunContent(): React.JSX.Element {
         Skip to result
       </a>
 
-      {run === null && (
+      {run === null && !unreachable && (
         <section aria-labelledby="run-title" id="result">
           <Card className="flex flex-wrap items-center justify-between gap-3">
             <Badge>
-              <span aria-hidden="true">●</span> Testing: <span className="normal-case text-ink">{targetUrl}</span>
+              Checking: <span className="normal-case text-ink">{shortPageOf(targetUrl)}</span>
             </Badge>
             <Button type="button" variant="secondary" onClick={onCancel} disabled={cancelling}>
-              {cancelling ? "Cancelling…" : "Cancel test"}
+              {cancelling ? "Cancelling…" : "Cancel check"}
             </Button>
           </Card>
 
           <div className="steps-grid" style={{ display: "grid", gap: 16, marginTop: 16 }}>
-            <Card className="overflow-hidden p-0" aria-label="Live browser viewport">
+            <Card className="overflow-hidden p-0" aria-label="Live browser view">
               {newestShot !== undefined && newestShot !== null ? (
                 <img
                   src={explorationShotSrc(runId, newestShot)}
-                  alt="Screenshot captured by the test browser on the tested page"
+                  alt="Screenshot from the test browser showing the page being checked"
                   style={{ display: "block", width: "100%", height: "auto" }}
                 />
               ) : (
-                <div className="p-8 text-center" role="status" aria-label="Live browser viewport">
+                <div className="p-8 text-center" role="status" aria-label="Live browser view">
                   <Skeleton className="mx-auto h-48 w-full" />
                   <p className="help mt-3">
-                    Live browser viewport — screenshot appears here once captured.
+                    Waiting for browser evidence…
                   </p>
                 </div>
               )}
               <p className="help px-4 py-2">
-                Headless Chromium viewport · real deterministic test in an isolated environment.
+                This is what the test browser sees right now.
               </p>
             </Card>
 
             <div style={{ display: "grid", gap: 16 }}>
               <Card aria-labelledby="run-title">
                 <CardTitle asChild>
-                  <h1 id="run-title">Testing accessibility…</h1>
+                  <h1 id="run-title">Checking your website…</h1>
                 </CardTitle>
                 <Progress
-                  value={(doneSteps / STAGE_ORDER.length) * 100}
-                  aria-label={`${doneSteps} of ${STAGE_ORDER.length} testing stages complete`}
+                  value={(doneSteps / progress.length) * 100}
+                  aria-label={`${doneSteps} of ${progress.length} check steps complete`}
                 />
-                <StageSteps steps={steps} ariaLabel="Testing steps" />
-                {latest !== null && (
+                <StageSteps steps={progress} ariaLabel="Check steps" />
+                <p className="help mt-3" style={{ color: "var(--ink-dim)" }}>
+                  This usually checks things like text readability, missing
+                  labels, keyboard navigation, and page structure.
+                </p>
+                {announceLatest && latest !== null && (
                   <p className="latest" role="status" aria-live="polite">
                     {latest.message}
                   </p>
@@ -316,72 +562,248 @@ function ExploreRunContent(): React.JSX.Element {
                 )}
               </Card>
 
-              <Card aria-labelledby="diag-title">
-                <CardTitle asChild className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em]">
-                  <h2 id="diag-title">Diagnostics feed</h2>
-                </CardTitle>
-                <Badge variant="faint">Steps observed: {events.length} · Run: {runId}</Badge>
-                {latest !== null && (
-                  <p className="help mt-2" style={{ color: "var(--ink-dim)" }}>
-                    Current action: {latest.message}
-                  </p>
-                )}
-              </Card>
+              <Accordion type="single" collapsible>
+                <AccordionItem value="testing-technical">
+                  <AccordionTrigger>Developer details</AccordionTrigger>
+                  <AccordionContent>
+                    <Badge variant="faint">Steps observed: {events.length} · Run: {runId}</Badge>
+                    {latest !== null && (
+                      <p className="help mt-2" style={{ color: "var(--ink-dim)" }}>
+                        Current action: {latest.message}
+                      </p>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </div>
           </div>
+        </section>
+      )}
+
+      {run === null && unreachable && (
+        <section aria-labelledby="missing-title" id="result">
+          <h1 id="missing-title" style={{ fontSize: 36, lineHeight: "44px", letterSpacing: "-0.03em" }}>
+            We couldn&apos;t find this check
+          </h1>
+          <Card style={{ marginTop: 16 }}>
+            <p className="lede mt-2">
+              This check may have run on a server that has since restarted, so
+              its progress is no longer available.
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 12 }}>
+              <Button asChild>
+                <Link href="/">Check a website</Link>
+              </Button>
+              <Button variant="secondary" asChild>
+                <Link href="/console">See the recorded example instead</Link>
+              </Button>
+            </div>
+          </Card>
         </section>
       )}
 
       {run !== null && run.state === "COMPLETED" && (
         <section aria-labelledby="run-title" id="result">
           <header style={{ padding: "24px 0" }}>
-            <Badge>
-              <span aria-hidden="true">●</span> Run ID: {run.runId} / Execution status: Complete
-            </Badge>
             <h1 id="run-title" style={{ fontSize: 36, lineHeight: "44px", letterSpacing: "-0.03em", margin: "8px 0" }}>
-              {issueCount > 0 ? "Accessibility test complete" : "No accessibility failures were reproduced"}
+              {issueCount > 0 ? `We found ${issueCount} accessibility ${issueCount === 1 ? "problem" : "problems"}` : "We didn’t find any major accessibility problems"}
             </h1>
             <p className="help" style={{ color: "var(--ink-dim)" }}>
-              Target: <span style={{ color: "var(--ink)" }}>{run.target.entryUrl}</span>
+              {issueCount > 0
+                ? `On this page: ${shortPageOf(run.target.entryUrl)}`
+                : "in the parts of the site we tested."}
             </p>
           </header>
           <Separator />
 
           {issueCount > 0 ? (
-            <section aria-label="Diagnostic run summary" style={{ padding: "24px 0" }}>
-              <p style={{ fontSize: 36, lineHeight: "44px", fontWeight: 600, margin: 0 }}>
-                {issueCount} {issueCount === 1 ? "issue" : "issues"} found
-              </p>
-              <p className="lede">
-                {confirmed.length} confirmed interaction {confirmed.length === 1 ? "failure" : "failures"} · {automated.length} automated{" "}
-                {automated.length === 1 ? "finding" : "findings"}
-                {observations.length > 0 && ` · ${observations.length} ${observations.length === 1 ? "observation" : "observations"}`}
-              </p>
-              <Card>
-                <Badge variant="faint">
-                  {run.pagesVisited.length} pages tested · {run.probeResults.length} interaction probes executed ·{" "}
-                  {notTestedFindings.length} interactions could not be safely tested
-                </Badge>
-              </Card>
-            </section>
+            <>
+              <section aria-label="Summary" style={{ padding: "24px 0" }}>
+                <p style={{ fontSize: 24, lineHeight: "32px", fontWeight: 600, margin: "0 0 4px" }}>
+                  {VERDICT_COPY[verdict]}
+                </p>
+                {tier0.length > 0 && (
+                  <p className="lede">
+                    Start here: {tier0.length === 1 ? "1 problem needs attention first." : `${tier0.length} problems need attention first.`}{" "}
+                    <Button
+                      variant="link"
+                      className="h-auto p-0 text-base"
+                      onClick={() =>
+                        enterWalkthrough(
+                          "all",
+                          Math.max(
+                            walkProblems.findIndex((finding) => tierOfSeverity(finding.severity) === 0),
+                            0,
+                          ),
+                        )
+                      }
+                    >
+                      View important problems
+                    </Button>
+                  </p>
+                )}
+                <p className="help" style={{ color: "var(--ink-dim)" }}>
+                  Also found:{" "}
+                  {[
+                    tier1.length > 0 ? `${tier1.length} may make the site harder to use` : null,
+                    tier2.length > 0 ? `${tier2.length} are smaller improvements` : null,
+                  ]
+                    .filter((part) => part !== null)
+                    .join(" · ") || "nothing else"}
+                  {observations.length > 0 && ` · ${observations.length} ${observations.length === 1 ? "observation" : "observations"}`}
+                </p>
+                <div role="group" aria-label="Detail level" style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                  <Button
+                    size="sm"
+                    variant={developer ? "secondary" : "default"}
+                    aria-pressed={!developer}
+                    onClick={() => setDeveloper(false)}
+                  >
+                    Simple view
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={developer ? "default" : "secondary"}
+                    aria-pressed={developer}
+                    onClick={() => setDeveloper(true)}
+                  >
+                    Developer view
+                  </Button>
+                </div>
+                {developer && (
+                  <Card className="mt-4">
+                    <Badge variant="faint">
+                      Run: {run.runId} · {run.pagesVisited.length} pages checked · {run.probeResults.length} interaction checks ·{" "}
+                      {notTestedFindings.length} could not be tested
+                    </Badge>
+                  </Card>
+                )}
+                <p style={{ marginTop: 16 }}>
+                  <Button size="lg" onClick={() => enterWalkthrough("all")}>
+                    Review {issueCount} {issueCount === 1 ? "problem" : "problems"}
+                  </Button>
+                </p>
+              </section>
+
+              {walk !== null && walkFinding !== null && (
+                <section ref={walkSectionRef} aria-labelledby="walkthrough-title" className="scroll-mt-4" style={{ padding: "24px 0" }}>
+                  <h2 id="walkthrough-title" style={{ fontSize: 24, lineHeight: "32px", margin: "0 0 4px" }}>
+                    {walk.scope === "all" ? "Review problems" : `Review: ${PROBLEM_GROUPS[walk.scope].heading}`}
+                  </h2>
+                  <ol className="walk-mini-nav" aria-label="All problems in this review">
+                    {scopedWalk.map((item, index) => {
+                      const itemHuman = humanFindingOf(item);
+                      const shortTitle =
+                        itemHuman.title.length > 48 ? `${itemHuman.title.slice(0, 45)}…` : itemHuman.title;
+                      const active = walk !== null && index === Math.min(walk.fi, scopedWalk.length - 1);
+                      return (
+                        <li key={item.findingId}>
+                          <Button
+                            size="sm"
+                            variant={active ? "default" : "secondary"}
+                            aria-current={active ? "true" : undefined}
+                            aria-label={`Issue ${index + 1} of ${scopedWalk.length}: ${itemHuman.title}`}
+                            onClick={() => setWalk({ scope: walk.scope, fi: index, ei: 0 })}
+                          >
+                            {index + 1} · {shortTitle}
+                          </Button>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                  <WalkthroughItem
+                    finding={walkFinding}
+                    runId={runId}
+                    position={Math.min(walk.fi, scopedWalk.length - 1) + 1}
+                    total={scopedWalk.length}
+                    developer={developer}
+                    elementIndex={walk.ei}
+                    onElementSelect={(index) => setWalk({ scope: walk.scope, fi: walk.fi, ei: index })}
+                    viewerRef={walkViewerRef}
+                    headingRef={walkHeadingRef}
+                  />
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
+                    <Button
+                      variant="secondary"
+                      disabled={walk.fi <= 0}
+                      onClick={() => setWalk({ scope: walk.scope, fi: walk.fi - 1, ei: 0 })}
+                      aria-label="Previous issue"
+                    >
+                      ← Previous issue
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      disabled={walk.fi >= scopedWalk.length - 1}
+                      onClick={() => setWalk({ scope: walk.scope, fi: walk.fi + 1, ei: 0 })}
+                      aria-label="Next issue"
+                    >
+                      Next issue →
+                    </Button>
+                    <Button variant="link" onClick={() => setWalk(null)}>
+                      Back to summary
+                    </Button>
+                  </div>
+                </section>
+              )}
+
+              {GROUP_ORDER.filter((id) => (grouped.get(id) ?? []).length > 0).map((id) => {
+                const group = PROBLEM_GROUPS[id];
+                const list = grouped.get(id) ?? [];
+                const urgent = list.filter((finding) => tierOfSeverity(finding.severity) === 0).length;
+                return (
+                  <section key={id} aria-labelledby={`group-title-${id}`} style={{ padding: "24px 0" }}>
+                    <h2 id={`group-title-${id}`} style={{ fontSize: 24, lineHeight: "32px", margin: "0 0 4px" }}>
+                      {group.heading}
+                    </h2>
+                    <p className="help">{group.description}</p>
+                    <p className="help" style={{ color: "var(--ink-dim)" }}>
+                      {list.length} {list.length === 1 ? "problem" : "problems"}
+                      {urgent > 0 && ` · ${urgent} ${urgent === 1 ? "needs" : "need"} attention first`}
+                    </p>
+                    <p style={{ marginTop: 8 }}>
+                      <Button variant="secondary" onClick={() => enterWalkthrough(id)}>
+                        Review {list.length} {list.length === 1 ? "problem" : "problems"}
+                      </Button>
+                    </p>
+                  </section>
+                );
+              })}
+
+              {observations.length > 0 && (
+                <section aria-labelledby="observations-title" style={{ padding: "24px 0" }}>
+                  <h2 id="observations-title" style={{ fontSize: 24, lineHeight: "32px", margin: "0 0 4px" }}>
+                    Also noticed
+                  </h2>
+                  <p className="help">Things worth knowing that are not confirmed problems.</p>
+                  <div className="findings">
+                    {observations.map((finding) => (
+                      <ObservationCard key={finding.findingId} finding={finding} runId={runId} developer={developer} />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
           ) : (
             <Card style={{ margin: "24px 0" }}>
-              <Badge>[✓] Run completed · WCAG 2.2 strict</Badge>
-              <p className="lede mt-2">No accessibility failures were reproduced in the interactions A11yForge tested.</p>
+              <Badge>[✓] Check complete</Badge>
+              <p className="lede mt-2">We didn’t find any major accessibility problems in the parts of the site we tested.</p>
+              <p className="help" style={{ color: "var(--ink-dim)" }}>
+                This does not guarantee the entire website is accessible.
+              </p>
               <Card className="bg-sunken">
                 <Badge variant="faint">
-                  {run.pagesVisited.length} pages tested · {run.probeResults.length} accessibility probes executed ·{" "}
-                  {notTestedFindings.length} interactions not tested
+                  Pages checked: {run.pagesVisited.length} · Interactions checked: {run.probeResults.length} ·{" "}
+                  Could not be tested safely: {notTestedFindings.length}
                 </Badge>
               </Card>
-              {run.probeResults.length > 0 && (
+              {developer && run.probeResults.length > 0 && (
                 <>
-                  <h2 className="mt-4 text-base font-semibold">Verified test vectors</h2>
+                  <h2 className="mt-4 text-base font-semibold">Verified checks</h2>
                   <Table>
-                    <TableCaption>Interaction probes executed in this run</TableCaption>
+                    <TableCaption>Interaction checks run in this test</TableCaption>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Probe</TableHead>
+                        <TableHead>Check</TableHead>
                         <TableHead>Page</TableHead>
                         <TableHead>Status</TableHead>
                       </TableRow>
@@ -409,84 +831,102 @@ function ExploreRunContent(): React.JSX.Element {
             </Card>
           )}
 
-          {newestShot !== undefined && newestShot !== null && (
-            <Card className="overflow-hidden p-0">
-              <img
-                src={explorationShotSrc(runId, newestShot)}
-                alt="Screenshot captured by the test browser on the tested page"
-                style={{ display: "block", width: "100%", height: "auto" }}
-              />
-              <p className="help px-4 py-2">
-                Captured by the real browser during this test.
-              </p>
-            </Card>
-          )}
-
-          {run.findings.filter((finding) => finding.category !== "not-tested").length > 0 && (
-            <section aria-labelledby="findings-heading" style={{ padding: "24px 0" }}>
-              <h2 id="findings-heading" style={{ fontSize: 24, lineHeight: "32px", margin: "0 0 4px" }}>
-                Identified failures
-              </h2>
-              <p className="help">Failures verified against WCAG 2.2 Level AA and AAA behavioral criteria. Ordered by severity.</p>
-              <div className="findings">
-                {run.findings
-                  .filter((finding) => finding.category !== "not-tested")
-                  .map((finding) => (
-                    <FindingCard key={finding.findingId} finding={finding} runId={runId} run={run} />
-                  ))}
-              </div>
-            </section>
-          )}
-
           {(notTestedFindings.length > 0 || run.limitations.length > 0) && (
             <Card style={{ margin: "24px 0" }} aria-labelledby="coverage-title">
-              <Badge>[—] Neutral safety exclusion</Badge>
+              <Badge>[—] What we couldn&apos;t check</Badge>
               <CardTitle asChild className="mt-2">
-                <h2 id="coverage-title">What we couldn&apos;t test</h2>
+                <h2 id="coverage-title">What we couldn&apos;t check</h2>
               </CardTitle>
               <CardDescription>
-                {notTestedFindings.length > 0
-                  ? `${notTestedFindings.length} ${notTestedFindings.length === 1 ? "interaction was" : "interactions were"} skipped because A11yForge could not establish that activating ${notTestedFindings.length === 1 ? "it was" : "them was"} reversible.`
-                  : "Some interactions could not be safely tested in this run."}
+                {(() => {
+                  const unavailable = run.limitations.filter((item) => item.code === "page-unavailable").length;
+                  if (unavailable > 0) {
+                    return (
+                      <>
+                        {humanLimitationOf("page-unavailable", unavailable)}.{" "}
+                        {LIMITATION_SUPPORTING["page-unavailable"]}
+                      </>
+                    );
+                  }
+                  return "Some parts of the site could not be checked safely in this run.";
+                })()}
               </CardDescription>
-              <ul>
-                {notTestedFindings.map((finding) => (
-                  <li key={finding.findingId}>
-                    <strong>{finding.title}</strong> <Badge variant="faint">[—] Untested</Badge>
-                    <br />
-                    <span className="std-refs">{finding.whatHappened}</span>
-                  </li>
-                ))}
-                {run.limitations.map((limitation, index) => (
-                  <li key={`limit-${index}`}>
-                    <Badge variant="faint">{limitation.code}</Badge> {limitation.message}
-                    {limitation.pageUrl !== "" && <span className="std-refs"> — {limitation.pageUrl}</span>}
-                  </li>
-                ))}
-              </ul>
+              {notTestedFindings.length > 0 && (
+                <p className="help" style={{ color: "var(--ink-dim)" }}>
+                  {notTestedFindings.length} {notTestedFindings.length === 1 ? "interaction was" : "interactions were"} skipped because A11yForge could not establish that trying {notTestedFindings.length === 1 ? "it was" : "them was"} safe.
+                </p>
+              )}
+              <Accordion type="single" collapsible>
+                <AccordionItem value="coverage-technical">
+                  <AccordionTrigger>Developer details</AccordionTrigger>
+                  <AccordionContent>
+                    <ul>
+                      {notTestedFindings.map((finding) => (
+                        <li key={finding.findingId}>
+                          <strong>{humanFindingOf(finding).title}</strong>{" "}
+                          <span className="std-refs">[{finding.category}] {finding.findingId}</span>
+                        </li>
+                      ))}
+                      {run.limitations.map((limitation, index) => (
+                        <li key={`limit-${index}`}>
+                          <span className="std-refs">[{limitation.code}]</span> {limitation.message}
+                          {limitation.pageUrl !== "" && <span className="std-refs"> — {limitation.pageUrl}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </Card>
           )}
 
           <Accordion type="single" collapsible className="tech-evidence">
             <AccordionItem value="tech-evidence">
-              <AccordionTrigger>View technical evidence</AccordionTrigger>
+              <AccordionTrigger>Developer details</AccordionTrigger>
               <AccordionContent>
                 <p>
-                  Raw probe results, interaction traces, and page surfaces for advanced users.{" "}
-                  <Link href="/console">Open the full repair-evidence console</Link>
+                  Raw check results and page information for advanced users.{" "}
+                  <Link href="/console">Open the full developer console</Link>
                 </p>
-                <p>No model calls were used for this exploration — findings come from deterministic browser checks only.</p>
+                <p>No model calls were used for this check — findings come from deterministic browser checks only.</p>
                 <pre aria-label="Technical evidence JSON" tabIndex={0}>{JSON.stringify({ pages: run.pagesVisited, probes: run.probeResults.map((probe) => ({ id: probe.probeId, status: probe.status, page: probe.pageUrl })) }, null, 2)}</pre>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
 
+          {developer && (
+            <Card className="mt-4">
+              <CardTitle asChild>
+                <h2>Developer information</h2>
+              </CardTitle>
+              <Table>
+                <TableCaption>Severity and category per problem (developer view)</TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Problem</TableHead>
+                    <TableHead>Severity</TableHead>
+                    <TableHead>Category</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {problems.map((finding) => (
+                    <TableRow key={finding.findingId}>
+                      <TableCell className="std-refs">{finding.findingId}</TableCell>
+                      <TableCell>{finding.severity}</TableCell>
+                      <TableCell>{finding.category}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+
           <section aria-label="Next steps" style={{ display: "flex", flexWrap: "wrap", gap: 12, padding: "24px 0" }}>
             <Button asChild>
-              <Link href="/">Test another site</Link>
+              <Link href="/">Check another website</Link>
             </Button>
             <Button variant="secondary" asChild>
-              <Link href="/console">Technical evidence</Link>
+              <Link href="/console">Developer details</Link>
             </Button>
           </section>
         </section>
@@ -495,38 +935,28 @@ function ExploreRunContent(): React.JSX.Element {
       {run !== null && run.state !== "COMPLETED" && (
         <section aria-labelledby="run-title" id="result">
           <Badge>
-            <span aria-hidden="true">{run.state === "CANCELLED" ? "[—]" : "[✕]"}</span> Run ID: {run.runId} / Execution status:{" "}
-            {run.state === "CANCELLED" ? "Cancelled" : run.state}
+            {run.state === "CANCELLED" ? "Check cancelled" : "We couldn't open this website"}
           </Badge>
           <h1 id="run-title" style={{ fontSize: 36, lineHeight: "44px", letterSpacing: "-0.03em" }}>
-            {run.state === "CANCELLED" ? "Test cancelled" : "We couldn't open this website"}
+            {run.state === "CANCELLED" ? "Check cancelled" : "We couldn't open this website"}
           </h1>
           <Card>
-            <Badge variant={run.state === "CANCELLED" ? "faint" : "outline"}>
-              {run.state === "CANCELLED" ? "[—] Cancelled" : "[✕] Failure status: could not finish"}
-            </Badge>
             <p className="lede mt-2">
               {run.state === "CANCELLED"
-                ? "The test was cancelled. Partial results are shown honestly — nothing was backfilled."
-                : (run.error ?? "The test could not finish.")}
+                ? "The check was cancelled. Partial results are shown honestly — nothing was backfilled."
+                : (run.error ?? "The check could not finish.")}
             </p>
-            <Card className="bg-sunken">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ marginBottom: 4 }}>Target specification</p>
-              <Badge variant="faint">
-                Request URI: {run.target.entryUrl}
-              </Badge>
-            </Card>
             {run.limitations.map((limitation, index) => (
               <p key={index} className="help">
-                <Badge variant="faint">{limitation.code}</Badge> {limitation.message}
+                {limitation.message}
               </p>
             ))}
             <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 12 }}>
               <Button asChild>
-                <Link href="/">Test another website</Link>
+                <Link href="/">Check another website</Link>
               </Button>
               <Button variant="secondary" asChild>
-                <Link href="/console">See the recorded repair demo instead</Link>
+                <Link href="/console">See the recorded example instead</Link>
               </Button>
             </div>
           </Card>
@@ -535,9 +965,9 @@ function ExploreRunContent(): React.JSX.Element {
 
       <footer className="product-foot">
         <p>
-          <Link href="/">Test another website</Link>
+          <Link href="/">Check another website</Link>
           {" · "}
-          <Link href="/console">Technical evidence console</Link>
+          <Link href="/console">Developer console</Link>
         </p>
       </footer>
     </main>

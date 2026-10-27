@@ -191,6 +191,29 @@ export const FindingCategorySchema = z.enum([
 
 export type FindingCategory = z.infer<typeof FindingCategorySchema>;
 
+/**
+ * Real measured geometry for one affected element, captured by Playwright
+ * during the run. Coordinates are viewport-relative CSS pixels measured at
+ * the same scroll position as `screenshot`; the frontend scales them by
+ * display/native size. Never guessed — absent when unmeasurable.
+ */
+export const ElementHighlightSchema = z.object({
+  /** Screenshot artifact name this box aligns to. */
+  screenshot: z.string().min(1),
+  x: z.number(),
+  y: z.number(),
+  width: z.number(),
+  height: z.number(),
+  viewportWidth: z.number(),
+  viewportHeight: z.number(),
+  /** Human element label, e.g. `"Search" button` or `image`. */
+  label: z.string().min(1),
+  /** Element selector, for Developer details only. */
+  selector: z.string().default(""),
+});
+
+export type ElementHighlight = z.infer<typeof ElementHighlightSchema>;
+
 export const ExplorationFindingSchema = z.object({
   findingId: z.string().min(1),
   category: FindingCategorySchema,
@@ -206,6 +229,8 @@ export const ExplorationFindingSchema = z.object({
   probeId: z.string().min(1),
   screenshots: z.array(z.string()).default([]),
   standardReferences: z.array(z.string()).default([]),
+  /** Measured element geometry; empty when nothing was measurable. */
+  highlights: z.array(ElementHighlightSchema).default([]),
 });
 
 export type ExplorationFinding = z.infer<typeof ExplorationFindingSchema>;

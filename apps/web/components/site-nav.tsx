@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/", label: "Test a site" },
-  { href: "/console", label: "Demo" },
-  { href: "/console#h-evidence", label: "Technical evidence" },
+  { href: "/", label: "Check a website" },
+  { href: "/console", label: "Example" },
+  { href: "/console#h-evidence", label: "Developer details" },
 ] as const;
 
 export function SiteNav(): React.JSX.Element {

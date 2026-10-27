@@ -19,6 +19,7 @@ function finding(): ExplorationFinding {
     probeId: "dialog-focus",
     screenshots: [],
     standardReferences: ["https://www.w3.org/TR/WCAG21/"],
+    highlights: [],
   };
 }
 

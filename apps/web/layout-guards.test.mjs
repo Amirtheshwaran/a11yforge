@@ -32,4 +32,13 @@ describe("layout guards", () => {
       "globals.css must constrain grid children with min-width: 0",
     );
   });
+
+  it("walkthrough mini-nav buttons wrap instead of overflowing narrow viewports", async () => {
+    const css = await readFile(CSS_PATH, "utf8");
+    assert.match(
+      css,
+      /\.walk-mini-nav button\s*\{[^}]*white-space:\s*normal/,
+      "walk mini-nav buttons must override shadcn whitespace-nowrap so long issue titles wrap",
+    );
+  });
 });

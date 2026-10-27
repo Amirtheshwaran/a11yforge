@@ -168,6 +168,7 @@ export {
   ProbeResultSchema,
   ProbeStatusSchema,
   ActionStepSchema,
+  ElementHighlightSchema,
   SurfaceControlSchema,
   WebTargetSchema,
   isAllowedExplorationArtifactName,
@@ -175,6 +176,7 @@ export {
 } from "./explore.js";
 export type {
   ActionStep,
+  ElementHighlight,
   ElementRef,
   ExplorationEvent,
   ExplorationFinding,
