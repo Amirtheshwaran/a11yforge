@@ -80,6 +80,30 @@ export function artifactSrc(url: string): string {
   return `${apiBase()}${url}`;
 }
 
+/**
+ * Download a run artifact (e.g. a repair patch) via the real artifact
+ * endpoint. Uses a blob + object URL so the file downloads with a real
+ * filename even cross-origin (the `download` attribute alone is ignored
+ * across origins). Throws on non-2xx so callers can render the failure.
+ */
+export async function downloadArtifact(url: string, filename: string): Promise<void> {
+  const res = await fetch(`${apiBase()}${url}`, { cache: "no-store" });
+  if (!res.ok) throw new Error(`artifact unavailable (${res.status})`);
+  const blob = await res.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  try {
+    const anchor = document.createElement("a");
+    anchor.href = objectUrl;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  } finally {
+    // Revoke on the next tick so the download has started.
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+  }
+}
+
 export interface StartRunResult {
   runId: string;
   alreadyRunning: boolean;

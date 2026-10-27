@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { SiteNav } from "@/components/site-nav";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,10 +12,30 @@ export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
-}) {
+}): React.JSX.Element {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <header className="site-header">
+          <div className="site-header-inner">
+            <Link href="/" className="site-wordmark">
+              A11yForge
+            </Link>
+            <SiteNav />
+          </div>
+        </header>
+        {children}
+        <footer className="site-footer">
+          <div className="site-footer-inner">
+            <span>a11yforge.engine // wcag aaa strict</span>
+            <span>
+              <Link href="/console#h-evidence">Evidence log</Link>
+              {" · "}
+              <Link href="/connect">Connect source</Link>
+            </span>
+          </div>
+        </footer>
+      </body>
     </html>
   );
 }
