@@ -421,3 +421,64 @@ console lands on the RECORDED accepted run with no key, no browser, no disk
 Trust model, unchanged: the verifier stays authoritative, the critic stays
 advisory on passing repairs, and recorded evidence is never presented as
 a live run.
+
+## Phase 8 universal exploration (implemented)
+
+Two layers, kept distinct:
+
+```text
+UNIVERSAL EXPLORATION (no source, 0 model calls)
+  URL → Browser → semantic surface discovery → accessibility probes
+    → deterministic evidence → human-readable findings
+
+OPTIONAL SOURCE REPAIR (source connected; Phases 2–5b, unchanged)
+  Evidence → diagnosis → source trace → repair → verifier
+    → bounded revision → critic
+```
+
+The controlled `broken-shop` fixture is test infrastructure, not the
+product. No production explorer behavior is designed around it, and an
+automated source scan (`anti-coupling.test.ts`) rejects fixture-specific
+identifiers, routes, and target-conditional behavior in generic modules.
+
+```text
+paste URL → POST /explorations (SSRF-safe validation, 202 + runId)
+  → engine explore/ orchestrator (real Chromium, request-guard routing)
+  → same-origin crawl (bounded pages, normalized/deduped links)
+  → per page: surface snapshot (roles, names, ARIA states, keyboard order)
+  → generic probes (axe → keyboard → dialog → form → tabs → disclosure)
+  → findings projection (fixed human-language templates, 0 model calls)
+  → run artifacts (.a11yforge/runs/<run-id>/) + SSE stage events
+  → product UI (landing → live progress → finding cards + screenshots)
+```
+
+- `packages/shared/src/explore.ts` — target, surface, element-ref, probe,
+  finding, run, and event schemas plus the finding summary projection.
+- `packages/engine/src/explore/` — `target.ts` (SSRF-safe validation:
+  http/https only, DNS resolution with private/link-local/loopback/
+  reserved rejection unless `A11YFORGE_ALLOW_PRIVATE_TARGETS=true`,
+  per-request redirect revalidation with verdict caching), `surface.ts`
+  (in-page semantic snapshot + stable element references + navigable-link
+  filtering), `probes/` (applicability from runtime semantics; safe-only
+  interactions — Tab/Shift+Tab, focus inspection, Escape restoration;
+  forms never submitted; unsafe activations reported `not-tested`),
+  `findings.ts` (deterministic human copy), `orchestrator.ts`
+  (bounded crawl, screenshots with geometry overlays, cancellation via
+  AbortSignal, browser always released), `explore-cli.ts`
+  (`pnpm explore -- --url …`, the same engine the product uses).
+- `apps/api/src/explorations.ts` — `POST /explorations` (202),
+  `GET /explorations/:runId`, `GET /explorations/:runId/events` (SSE),
+  `GET /explorations/:runId/screenshots/:name` (allow-listed),
+  `POST /explorations/:runId/cancel`. Recorded repair data never
+  appears here; live failures are reported honestly.
+- `apps/web` — `/` is the product landing (one URL field, one action);
+  `/explore/:runId` shows live progress, finding cards, screenshots, and
+  coverage gaps; `/connect` is the honest source-repair placeholder;
+  `/console` hosts the previous forensic console as advanced technical
+  evidence (recorded repair demo intact).
+
+Safety model: URL safety is structural (scheme + DNS classification, not
+blocklists of names); interaction safety is structural (only reversible
+or observational actions — never submit, purchase, delete, upload,
+message, or mutate — with popup/dialog semantics and submitter/form
+checks gating every activation). `not-tested` is a first-class result.

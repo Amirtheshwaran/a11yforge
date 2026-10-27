@@ -1,24 +1,31 @@
 # A11yForge
 
-An autonomous accessibility engineer that reproduces accessibility failures, traces them into source code, repairs them, and proves the repair worked.
+**Find. Fix. Prove accessibility.**
 
-## Why A11yForge
+Paste a website and A11yForge tests it with a real browser, reproduces accessibility failures, and records exactly what happened.
 
-Scanners report failures and stop. The hard engineering work — reproducing the issue like a user would, finding the offending code, writing a safe fix, rebuilding, and confirming the fix actually worked — is left to the developer. A11yForge closes that loop: it experiences the failure (real keyboard replays against the real app), diagnoses it, traces it to source, patches it in an isolated workspace, replays the exact interaction, and accepts the repair only when deterministic evidence proves it. When the evidence does not prove it, A11yForge rejects its own repair.
+When source code is connected, A11yForge can trace a confirmed failure into the codebase, propose a repair, and deterministically verify whether the repair actually worked.
+
+## Two layers
+
+**Universal website testing** — paste any website. A11yForge opens it in a real browser, discovers its pages and interaction surfaces from live semantics, runs automated checks and safe keyboard probes, and reports human-readable findings with reproduction evidence. No source code needed, no AI calls involved.
+
+**Source-connected autonomous repair** — with the codebase connected, a confirmed failure is diagnosed, traced to source, patched minimally in an isolated workspace, rebuilt, replayed, and accepted only when deterministic evidence proves the fix. When the evidence does not prove it, A11yForge rejects its own repair.
 
 ## What it does
 
 ```text
-Explore / Scan
-  → Evidence (axe findings + keyboard focus trace)
-  → Diagnose (Meta model, evidence-grounded, 1 call)
+Universal exploration (no source needed, 0 model calls)
+  URL → Browser → semantic surface discovery → accessibility probes
+    → deterministic evidence → human-readable findings
+
+Optional source repair (source connected)
+  Evidence → Diagnose (Meta model, evidence-grounded, 1 call)
   → Trace Source (deterministic, 0 calls)
   → Repair (Meta proposal, exact-text anchors, 1 call)
   → Verify (isolated workspace: typecheck, build, replay, axe regression)
   → Reject or Accept (bounded revision on verifier feedback, then critic)
 ```
-
-One controlled target ships with the repo: **Broken Shop** (`fixtures/broken-shop`), a checkout flow with a deliberately trap-less modal. The keyboard scenario opens the modal, presses Tab, and watches focus escape onto a background control while the dialog stays open.
 
 ## Why the verifier matters
 
@@ -84,7 +91,15 @@ pnpm build
 pnpm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000): the recorded run shows the pipeline, focus evidence, before/after screenshots, diagnosis, source trace, both diffs, deterministic gates, and the critic verdict under a `RECORDED` badge.
+Open [http://localhost:3000](http://localhost:3000): paste any website to test it with a real browser. The **Try the demo** link opens the recorded repair run — pipeline, focus evidence, before/after screenshots, diagnosis, source trace, both diffs, deterministic gates, and the critic verdict under a `RECORDED` badge.
+
+Developers can run the same universal engine from the terminal:
+
+```sh
+pnpm explore -- --url https://example.com [--max-pages 3]
+```
+
+Local targets need an explicit opt-in (`A11YFORGE_ALLOW_PRIVATE_TARGETS=true`); see [.env.example](.env.example). Never enable it on an untrusted public deployment.
 
 **Live run (optional).** With `MODEL_API_KEY` exported on the API server, **Start Autonomous Repair** executes the real pipeline against Broken Shop and streams its events (at most 4 Meta calls; usage shown afterwards, no cost computed). Without the key, the console says so explicitly — `Live Meta execution unavailable — MODEL_API_KEY not configured` — and the recorded run stays fully inspectable.
 
@@ -135,9 +150,9 @@ docker run --rm -p 3000:3000 -p 3001:3001 -e MODEL_API_KEY="$MODEL_API_KEY" a11y
 
 Suites run with zero live model calls (deterministic fixtures and synthesized artifacts only):
 
-- Engine: scanner normalization, keyboard runner and assertions, diagnosis/trace/proposal validation, isolated workspace safety, verifier gates, revision safety, read-model projection, and the demo-bundle sanitizer/validator.
-- API: run routes and artifact allow-listing, live-run orchestration with a mock pipeline, and deployment behavior (data-dir resolution, recorded fallback, safe health, missing-key refusal, traversal rejection).
-- Fixture and console: strict typecheck, lint, and an axe-clean UI.
+- Engine: scanner normalization, keyboard runner and assertions, diagnosis/trace/proposal validation, isolated workspace safety, verifier gates, revision safety, read-model projection, demo-bundle sanitizer/validator, plus universal exploration (URL safety, surface discovery, probe applicability, findings projection, and an anti-fixture-coupling source scan).
+- API: run routes and artifact allow-listing, live-run orchestration with a mock pipeline, exploration routes with a stubbed engine (validation, cancel, SSE ordering, artifact allow-listing, honest failures), and deployment behavior (data-dir resolution, recorded fallback, safe health, missing-key refusal, traversal rejection).
+- Fixture and console: strict typecheck, lint, and an axe-clean UI. The controlled broken target (`fixtures/broken-shop`) is test infrastructure for the repair loop — production explorer code carries zero knowledge of it, enforced by an automated source scan.
 
 ```sh
 pnpm typecheck

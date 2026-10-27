@@ -141,6 +141,24 @@ with Playwright Chromium, `A11YFORGE_DATA_DIR`, startup validation, a safe
 architecture diagram, and deployment tests. Zero live model calls.
 Details: `docs/ARCHITECTURE.md`.
 
+## Phase 8 — universal accessibility explorer ✅ COMPLETE
+
+Product-first website testing with zero model calls: any safe http/https URL
+is validated SSRF-safe (DNS classification, redirect revalidation, private
+opt-in via `A11YFORGE_ALLOW_PRIVATE_TARGETS`), explored in real Chromium
+(bounded same-origin crawl, semantic surface discovery, stable element
+references), and probed generically (axe, Tab traversal, dialog, form, tab,
+disclosure — applicability from runtime semantics, safe-only interactions,
+`not-tested` where safety cannot be established). Human-readable findings
+via fixed templates; new landing (`/`), live progress + results
+(`/explore/:runId`), source placeholder (`/connect`), and the previous
+console preserved at `/console`. `pnpm explore -- --url …` runs the same
+engine from the CLI. The repair engine (Phases 2–5b), recorded demo,
+deployment behavior, and all existing tests are unchanged; the fixture is
+test infrastructure only, enforced by an automated anti-coupling scan.
+Validated against unrelated public targets plus the fixture (unknown to
+the explorer), with zero live Meta calls.
+
 ## Later — additional accessibility strategies + Meta open-weight critic
 
 More issue strategies beyond the first defect class, and an open-weight Meta

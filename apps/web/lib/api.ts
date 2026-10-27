@@ -1,15 +1,19 @@
 import {
+  ExplorationEventSchema,
+  ExplorationRunSchema,
   LiveRunEventSchema,
   LiveRunStatusSchema,
   RunViewModelSchema,
   type ApiHealth,
+  type ExplorationEvent,
+  type ExplorationRun,
   type LiveRunEvent,
   type LiveRunStatus,
   type RunSummary,
   type RunViewModel,
 } from "@a11yforge/shared";
 
-export type { ApiHealth, LiveRunEvent, LiveRunStatus, RunSummary, RunViewModel };
+export type { ApiHealth, ExplorationEvent, ExplorationRun, LiveRunEvent, LiveRunStatus, RunSummary, RunViewModel };
 
 export function apiBase(): string {
   const fromEnv = process.env["NEXT_PUBLIC_API_URL"];
@@ -130,4 +134,71 @@ export function subscribeRunEvents(
 /** Short display form of a run id for selectors. */
 export function shortRunId(runId: string): string {
   return runId.length > 24 ? runId.slice(0, 24) + "…" : runId;
+}
+
+// ---------------------------------------------------------------------------
+// Universal exploration client (Phase 8 product experience)
+// ---------------------------------------------------------------------------
+
+export async function startExploration(url: string): Promise<string> {
+  const res = await fetch(`${apiBase()}/explorations`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ url }),
+  });
+  const body = (await res.json().catch(() => ({}))) as { runId?: string; error?: string };
+  if (res.status === 202 && typeof body.runId === "string") return body.runId;
+  throw new Error(
+    typeof body.error === "string" && body.error !== ""
+      ? body.error
+      : `Could not start the test (${res.status}).`,
+  );
+}
+
+export async function fetchExploration(runId: string): Promise<ExplorationRun | null> {
+  const body = (await getJson(`/explorations/${encodeURIComponent(runId)}`)) as {
+    target?: unknown;
+  };
+  // While the run is still going the API returns a bare status stub; the
+  // finished run carries the full target + findings payload.
+  if (typeof body !== "object" || body === null || body.target === undefined) return null;
+  return ExplorationRunSchema.parse(body);
+}
+
+/** Subscribe to an exploration's event stream. Returns an unsubscribe fn. */
+export function subscribeExplorationEvents(
+  runId: string,
+  onEvent: (event: ExplorationEvent) => void,
+  onError: () => void,
+): () => void {
+  const source = new EventSource(`${apiBase()}/explorations/${encodeURIComponent(runId)}/events`);
+  source.onmessage = (message) => {
+    try {
+      const raw = JSON.parse(message.data as string) as unknown;
+      if (typeof raw === "object" && raw !== null && (raw as { done?: boolean }).done === true) {
+        return;
+      }
+      onEvent(ExplorationEventSchema.parse(raw));
+    } catch {
+      /* ignore one malformed frame; the run poll still converges */
+    }
+  };
+  source.onerror = () => {
+    onError();
+  };
+  return () => {
+    source.close();
+  };
+}
+
+export async function cancelExploration(runId: string): Promise<void> {
+  const res = await fetch(`${apiBase()}/explorations/${encodeURIComponent(runId)}/cancel`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error(`Could not cancel (${res.status}).`);
+}
+
+/** Absolute API URL for an exploration screenshot artifact. */
+export function explorationShotSrc(runId: string, name: string): string {
+  return `${apiBase()}/explorations/${encodeURIComponent(runId)}/screenshots/${encodeURIComponent(name)}`;
 }

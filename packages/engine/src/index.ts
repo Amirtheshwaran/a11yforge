@@ -190,6 +190,27 @@ export {
   type RepairWorkspace,
 } from "./verify/workspace.js";
 export {
+  createTargetGuard,
+  ipIsBlocked,
+  isPrivateTargetsAllowed,
+  TargetRejectedError,
+  validateTargetUrl,
+  type TargetRejectionCode,
+  type ValidatedTarget,
+  type ValidateTargetOptions,
+} from "./explore/target.js";
+export {
+  collectPageSurface,
+  filterNavigableSameOriginLinks,
+  waitForStablePage,
+} from "./explore/surface.js";
+export { projectFindings, traceToSteps } from "./explore/findings.js";
+export {
+  ExplorationCancelledError,
+  runExploration,
+  type RunExplorationOptions,
+} from "./explore/orchestrator.js";
+export {
   AUTORUN_STAGE_TIMEOUTS_MS,
   AutorunStageTimeoutError,
   collectSpendLedger,
