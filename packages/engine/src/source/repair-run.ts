@@ -361,5 +361,23 @@ async function finish(
     `${JSON.stringify(verification, null, 2)}\n`,
     "utf8",
   );
+  // Patch download artifact: the exact diff plus provenance metadata
+  // (rules: a patch without its base revision is not reliable).
+  // Written whenever anchors applied, whatever the outcome.
+  if (applied !== null) {
+    const header = [
+      `# A11yForge repair patch`,
+      `# baseRevision: ${args.baseRevision}`,
+      `# finding: ${args.findingId}`,
+      `# proposal: ${args.proposal.proposalId}`,
+      `# source: ${args.sourceId}`,
+      `# outcome: ${outcome}`,
+    ].join("\n");
+    await writeFile(
+      join(args.runDir, "repair-diff.patch"),
+      `${header}\n${applied.diffText.endsWith("\n") ? applied.diffText : `${applied.diffText}\n`}`,
+      "utf8",
+    );
+  }
   return { outcome, verification, applied, isolation, verificationOrigin };
 }

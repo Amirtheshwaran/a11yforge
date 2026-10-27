@@ -168,6 +168,13 @@ describe("generic repair verification", () => {
         hooks: PASS_HOOKS,
       });
       assert.equal(verified.outcome, "VERIFIED");
+      const { readFile } = await import("node:fs/promises");
+      const { join: joinPath } = await import("node:path");
+      const patch = await readFile(joinPath(runDir, "repair-diff.patch"), "utf8");
+      assert.ok(patch.includes("# baseRevision: abc"));
+      assert.ok(patch.includes("# finding: f1"));
+      assert.ok(patch.includes("# proposal: prop-1"));
+      assert.ok(patch.includes("+++ b/index.html"));
 
       const failing = await runSourceRepairVerification({
         verificationId: "v2",
