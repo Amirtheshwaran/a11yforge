@@ -22,7 +22,8 @@
     "recover:fixture": "node dist/recover-fixture.js",
     "demo:export": "node dist/demo-export.js",
     "demo:validate": "node dist/demo-validate.js",
-    "explore": "node dist/explore-cli.js"
+    "explore": "node dist/explore-cli.js",
+    "repair": "node dist/repair-cli.js"
   },
   "dependencies": {
     "@a11yforge/meta": "workspace:*",

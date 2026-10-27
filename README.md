@@ -2,9 +2,26 @@
 
 **Find. Fix. Prove accessibility.**
 
+### Test any website
+
+Paste a URL.
+
+### Repair with source
+
+Connect the repository or run A11yForge locally against your source tree.
+
 Paste a website and A11yForge tests it with a real browser, reproduces accessibility failures, and records exactly what happened.
 
-When source code is connected, A11yForge can trace a confirmed failure into the codebase, propose a repair, and deterministically verify whether the repair actually worked.
+When source code is connected, A11yForge traces a confirmed failure into the codebase, proposes a repair, and deterministically verifies whether the repair actually worked:
+
+Website
+→ Browser evidence
+→ Source trace
+→ Repair
+→ Same failure replayed
+→ Verified or rejected
+
+**Testing is framework-independent. Repairs are verified when the connected project can be built and run inside A11yForge's isolated environment.**
 
 ## Two layers
 
@@ -98,6 +115,15 @@ Developers can run the same universal engine from the terminal:
 ```sh
 pnpm explore -- --url https://example.com [--max-pages 3]
 ```
+
+Developers can connect source and trace a finding from the terminal:
+
+```sh
+pnpm --filter @a11yforge/engine repair -- --run <run-id> --finding <finding-id> --source .
+pnpm --filter @a11yforge/engine repair -- --run <run-id> --finding <finding-id> --git https://github.com/owner/repo
+```
+
+Untrusted repository code builds and runs only in isolation (Docker when available; hosted deployments can require it with `A11YFORGE_REQUIRE_DOCKER=true`). `MODEL_API_KEY` and credentials never enter the sandbox.
 
 Local targets need an explicit opt-in (`A11YFORGE_ALLOW_PRIVATE_TARGETS=true`); see [.env.example](.env.example). Never enable it on an untrusted public deployment.
 

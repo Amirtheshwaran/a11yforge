@@ -202,3 +202,103 @@ export async function cancelExploration(runId: string): Promise<void> {
 export function explorationShotSrc(runId: string, name: string): string {
   return `${apiBase()}/explorations/${encodeURIComponent(runId)}/screenshots/${encodeURIComponent(name)}`;
 }
+
+// ---------------------------------------------------------------------------
+// Source connection client (Phase 9 product experience)
+// ---------------------------------------------------------------------------
+
+export interface SourceConnectionState {
+  sourceId: string;
+  state: "CONNECTING" | "CONNECTED" | "FAILED";
+  error: string | null;
+  runId: string | null;
+  findingId: string | null;
+  target: {
+    sourceId: string;
+    kind: string;
+    revision: string;
+    connectedAt: string;
+  } | null;
+  inventory: {
+    fileCount: number;
+    directoryCount: number;
+    totalBytes: number;
+    manifestFiles: string[];
+    lockfiles: string[];
+    scripts: { name: string; command: string; source: string }[];
+    likelySourceDirs: string[];
+  } | null;
+  profile: {
+    adapter: string;
+    installCommand: { command: string; source: string } | null;
+    buildCommand: { command: string; source: string } | null;
+    startCommand: { command: string; source: string } | null;
+    testCommands: { command: string; source: string }[];
+    packageManager: string;
+    workingDirectory: string;
+    confidence: string;
+    explanation: string;
+  } | null;
+}
+
+export interface SourceTraceView {
+  traceId: string;
+  sourceId: string;
+  findingId: string;
+  status: "FOUND" | "AMBIGUOUS" | "NOT_FOUND";
+  reason: string;
+  searchTerms: string[];
+  candidates: {
+    filePath: string;
+    score: number;
+    matchedTerms: string[];
+    matchCount: number;
+    matchReasons: string[];
+    snippets: {
+      filePath: string;
+      startLine: number;
+      endLine: number;
+      content: string;
+      matchedTerms: string[];
+    }[];
+  }[];
+}
+
+/** Connect a public Git repository. 403 means a local path was supplied. */
+export async function connectSourceRepo(args: {
+  gitUrl: string;
+  runId?: string;
+  findingId?: string;
+}): Promise<string> {
+  const res = await fetch(`${apiBase()}/sources/connect`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(args),
+  });
+  const body = (await res.json().catch(() => ({}))) as {
+    sourceId?: string;
+    error?: string;
+  };
+  if (res.status === 202 && typeof body.sourceId === "string") return body.sourceId;
+  throw new Error(
+    typeof body.error === "string" && body.error !== ""
+      ? body.error
+      : `Could not connect source (${res.status}).`,
+  );
+}
+
+export async function fetchSourceConnection(
+  sourceId: string,
+): Promise<SourceConnectionState> {
+  return (await getJson(`/sources/${encodeURIComponent(sourceId)}`)) as SourceConnectionState;
+}
+
+export async function fetchSourceTrace(sourceId: string): Promise<SourceTraceView | null> {
+  try {
+    return (await getJson(
+      `/sources/${encodeURIComponent(sourceId)}/trace`,
+    )) as SourceTraceView;
+  } catch {
+    return null;
+  }
+}

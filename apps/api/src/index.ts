@@ -6,6 +6,7 @@ import type { ApiHealth } from "@a11yforge/shared";
 import { MODEL_API_KEY_ENV } from "@a11yforge/meta";
 import { registerRunRoutes, resolveDataDir, resolveRunsDirWithSource } from "./runs.js";
 import { registerExplorationRoutes } from "./explorations.js";
+import { registerSourceRoutes } from "./sources.js";
 import { registerLiveRunRoutes, type PipelineRunner } from "./live-runs.js";
 
 const PORT = Number(process.env["PORT"] ?? 3001);
@@ -61,6 +62,7 @@ export function buildServer(deps: { runner?: PipelineRunner } = {}) {
   registerRunRoutes(app);
   registerLiveRunRoutes(app, deps.runner !== undefined ? { runner: deps.runner } : {});
   registerExplorationRoutes(app);
+  registerSourceRoutes(app);
 
   return app;
 }

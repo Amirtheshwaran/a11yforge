@@ -76,7 +76,7 @@ function FindingCard({ finding, runId }: { finding: ExplorationFinding; runId: s
         >
           {open ? "Hide evidence" : "See evidence"}
         </button>
-        <Link href="/connect">Connect source to repair</Link>
+        <Link href={`/connect?run=${encodeURIComponent(runId)}&finding=${encodeURIComponent(finding.findingId)}`}>Connect source to repair</Link>
       </div>
       {open && (
         <div id={evidenceId} className="finding-evidence">

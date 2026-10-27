@@ -159,6 +159,22 @@ test infrastructure only, enforced by an automated anti-coupling scan.
 Validated against unrelated public targets plus the fixture (unknown to
 the explorer), with zero live Meta calls.
 
+## Phase 9 — generic source-connected repair ✅ COMPLETE
+
+One-sentence product: paste a website, A11yForge finds failures with a
+real browser, connect the source, and it fixes a confirmed issue and
+proves the repair worked. Any public Git repository (or local tree via
+the CLI) connects without framework/route/component knowledge: bounded
+shallow clone with SHA recorded, deterministic inventory, execution
+commands only from manifests or explicit user input, evidence-derived
+search with rarity weighting and FOUND/AMBIGUOUS/NOT_FOUND tracing,
+exact-anchor repair in an isolated workspace, same-location replay, and
+VERIFIED / REJECTED / UNVERIFIABLE outcomes with patch download.
+Untrusted code executes only in isolation with secrets stripped;
+prose-only matches can never authorize a repair. Validated against two
+unrelated public repositories plus a real browser-evidence workflow on a
+third, with zero live Meta calls. Details: `docs/ARCHITECTURE.md`.
+
 ## Later — additional accessibility strategies + Meta open-weight critic
 
 More issue strategies beyond the first defect class, and an open-weight Meta

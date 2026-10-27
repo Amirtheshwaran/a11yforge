@@ -482,3 +482,84 @@ blocklists of names); interaction safety is structural (only reversible
 or observational actions — never submit, purchase, delete, upload,
 message, or mutate — with popup/dialog semantics and submitter/form
 checks gating every activation). `not-tested` is a first-class result.
+
+## Phase 9 source-connected repair (implemented)
+
+```text
+ARBITRARY WEBSITE
+      ↓
+UNIVERSAL EXPLORER
+      ↓
+REAL FAILURE EVIDENCE
+      ↓
+optional SOURCE CONNECTION
+      ↓
+DETERMINISTIC SOURCE TRACE
+      ↓
+META REASONING
+      ↓
+EXACT-ANCHOR REPAIR
+      ↓
+ISOLATED SOURCE WORKSPACE
+      ↓
+RUN REPAIRED APPLICATION
+      ↓
+REPLAY SAME FAILURE
+      ↓
+DETERMINISTIC VERIFIER
+      ↓
+VERIFIED / REJECTED / UNVERIFIABLE
+```
+
+The controlled fixture appears only in testing documentation. The
+generic path carries zero fixture, framework, route, or application
+knowledge — enforced by an automated source scan
+(`source/anti-coupling.test.ts`) over every new generic module.
+
+```text
+finding card → Connect source to repair → public Git URL (or local CLI path)
+  → engine connectSource (shallow clone, no submodules/hooks; SHA recorded)
+  → deterministic inventory (bounded walk, manifests, lockfiles, scripts)
+  → execution profile (node/python/static adapters; commands cite sources)
+  → evidence-derived search terms (ids, names, aria, data-*, classes)
+  → weighted ranking (kind strength × corpus rarity; FOUND/AMBIGUOUS/NOT_FOUND)
+  → bounded source context → Repair this issue → exact-anchor proposal
+  → isolated workspace → launch repaired app where a profile exists
+  → replay SAME relative location → VERIFIED / REJECTED / UNVERIFIABLE
+```
+
+- `packages/shared/src/source.ts` — `SourceTarget`, `SourceInventory`,
+  `ExecutionProfile`, `GenericSourceTrace`, `ReproductionPlan`,
+  `GenericVerification` (outcomes `PROPOSED` … `VERIFIED` / `REJECTED` /
+  `UNVERIFIABLE`).
+- `packages/engine/src/source/` — `git-url` (https-only, no creds, no
+  private hosts in hosted mode), `acquire` (bounded clone/copy, partial
+  cleanup, symlink-escape refusal), `inventory` (deterministic facts,
+  never model output), `evidence-terms` + `term-weight` (browser
+  evidence only; stop-words dropped; rarity-weighted), `rank`
+  (deterministic scoring with human reasons; prose-only matches can
+  never be FOUND), `context` (bounded merged snippets),
+  `exec-profile` (commands only from manifests or the user),
+  `sandbox` (stripped env — never `MODEL_API_KEY`; Docker when
+  available, refused fallback under `A11YFORGE_REQUIRE_DOCKER`),
+  `reproduce` (relative-path replay, ordered re-resolution, ambiguous
+  fails), `diagnose-bundle` (finding + evidence + trace only),
+  `repair-run` (gated verification; VERIFIED only when the target
+  failure itself passes), `connect` (the one engine path for web + CLI).
+- `packages/engine/src/repair-cli.ts` — `a11yforge repair --run …
+  --finding … (--source . | --git URL)` with explicit
+  `--install/--build/--start/--test-command` overrides.
+- `apps/api/src/sources.ts` — `POST /sources/connect` (Git only; local
+  paths 403 with the CLI hint), `GET /sources/:id`,
+  `GET /sources/:id/trace`, `GET /sources/:id/patch` (base-revision
+  diff download; no pushes).
+- `apps/web` — finding cards link to `/connect?run=…&finding=…`; the
+  connect screen stays one URL field plus honest progress, commit SHA,
+  trace reasons, and `Repair this issue` only on FOUND.
+
+Trust model, unchanged and extended: untrusted source executes only in
+isolation; the deterministic verifier stays authoritative (the critic
+advises passing repairs only); `UNVERIFIABLE` ships the patch with an
+honest label instead of a green verdict. Model budget unchanged: at
+most 4 calls per selected repair (diagnosis, proposal, one bounded
+revision, critic if eligible) — validation in this phase spent zero.

@@ -211,6 +211,111 @@ export {
   type RunExplorationOptions,
 } from "./explore/orchestrator.js";
 export {
+  CLONE_MAX_BYTES,
+  CLONE_TIMEOUT_MS,
+  cleanSourceWorkspace,
+  cloneGitSource,
+  copyLocalSource,
+  gitCloneEnv,
+  LOCAL_COPY_MAX_BYTES,
+  LOCAL_COPY_MAX_FILES,
+} from "./source/acquire.js";
+export {
+  connectSource,
+  loadFindingEvidence,
+  traceFindingToSource,
+  writeSourceArtifacts,
+  type ConnectedSource,
+  type ConnectSourceArgs,
+  type TraceFindingArgs,
+} from "./source/connect.js";
+export {
+  extractSourceContext,
+  MAX_CONTEXT_FILES,
+  MAX_CONTEXT_TOTAL_CHARS,
+  MAX_CONTEXT_TOTAL_LINES,
+  mergeWindows,
+  SNIPPET_CONTEXT_LINES as SOURCE_SNIPPET_CONTEXT_LINES,
+  MAX_SNIPPETS_PER_FILE as SOURCE_MAX_SNIPPETS_PER_FILE,
+} from "./source/context.js";
+export {
+  buildSourceDiagnosisBundle,
+  MAX_DIAGNOSIS_ACTIONS,
+  MAX_DIAGNOSIS_CONTEXT_FILES,
+  MAX_DIAGNOSIS_EVIDENCE,
+  SourceDiagnosisBundleSchema,
+  SOURCE_EVIDENCE_ID_PATTERN,
+  validateSourceDiagnosisGrounding,
+  type SourceDiagnosisBundle,
+} from "./source/diagnose-bundle.js";
+export {
+  collectFingerprints,
+  EVIDENCE_STOPWORDS,
+  generateSearchTerms,
+  type EvidenceFingerprint,
+  type WeightedTerm,
+} from "./source/evidence-terms.js";
+export {
+  determineExecutionProfile,
+  detectPackageManager,
+  type ExecutionProfileInput,
+} from "./source/exec-profile.js";
+export { GitUrlRejectedError, parseGitSource, sanitizeGitError } from "./source/git-url.js";
+export {
+  buildSourceInventory,
+  INVENTORY_IGNORED_DIRS,
+  INVENTORY_LOCKFILES,
+  INVENTORY_MANIFEST_NAMES,
+  INVENTORY_MAX_FILES,
+  INVENTORY_MAX_FILE_BYTES,
+  INVENTORY_MAX_TEXT_BYTES,
+  INVENTORY_TEXT_EXTENSIONS,
+  type InventoryResult,
+} from "./source/inventory.js";
+export { assertPathWithin, defaultSourcesDir, requireAbsolutePath } from "./source/paths.js";
+export {
+  isTraceSufficientForRepair,
+  PROXIMITY_WINDOW_LINES,
+  searchAndRank,
+  STRONG_TERM_KINDS,
+  TRACE_FOUND_MIN_MARGIN,
+  TRACE_FOUND_MIN_SCORE,
+  TRACE_SUFFICIENT_DISTINCT_TERMS,
+  type RankedTrace,
+} from "./source/rank.js";
+export {
+  AmbiguousElementError,
+  buildReproductionPlan,
+  relativePagePath,
+  resolveElement,
+  verificationUrlFor,
+  type ResolvablePage,
+} from "./source/reproduce.js";
+export {
+  runSourceRepairVerification,
+  splitCommand,
+  type ReplayHooks,
+  type SourceRepairRunArgs,
+  type SourceRepairRunResult,
+  type VerificationGate,
+} from "./source/repair-run.js";
+export {
+  buildSandboxEnv,
+  isDockerAvailable,
+  runIsolated,
+  SANDBOX_BLOCKED_ENV_PATTERNS,
+  SANDBOX_DEFAULT_MAX_OUTPUT,
+  type SandboxIsolation,
+  type SandboxResult,
+  type SandboxRunOptions,
+} from "./source/sandbox.js";
+export {
+  capWeakWeight,
+  isWeakTerm,
+  WEAK_TERMS,
+  weightTerm,
+} from "./source/term-weight.js";
+export {
   AUTORUN_STAGE_TIMEOUTS_MS,
   AutorunStageTimeoutError,
   collectSpendLedger,
