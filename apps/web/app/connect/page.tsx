@@ -15,8 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { MetaGrid, StageSteps } from "@/components/domain";
+import { MetaGrid } from "@/components/domain";
 import {
   connectSourceRepo,
   fetchSourceConnection,
@@ -24,6 +23,7 @@ import {
   type SourceConnectionState,
   type SourceTraceView,
 } from "../../lib/api";
+import { drawLines } from "../../lib/motion";
 
 /**
  * Phase 9 source-connection screen on shadcn/ui primitives.
@@ -74,6 +74,11 @@ function ConnectSourceContent(): React.JSX.Element {
   const [connecting, setConnecting] = useState(false);
   const [copied, setCopied] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const layerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (layerRef.current !== null) void drawLines(layerRef.current, "[data-draw]");
+  }, [sourceId, trace?.status]);
 
   useEffect(
     () => () => {
@@ -146,8 +151,8 @@ function ConnectSourceContent(): React.JSX.Element {
   const traceSnippet = traceCandidate?.snippets[0] ?? null;
 
   return (
-    <main className="product">
-      <nav aria-label="Breadcrumb">
+    <main className="xp" ref={layerRef}>
+      <nav aria-label="Breadcrumb" style={{ paddingTop: 28 }}>
         <p className="run-url">
           <Link href={runId !== "" ? `/explore/${encodeURIComponent(runId)}` : "/"}>Results</Link>
           {" / "}
@@ -160,120 +165,128 @@ function ConnectSourceContent(): React.JSX.Element {
         </p>
       </nav>
 
-      <Badge variant="faint" aria-hidden="true">
-        Target mapping · phase: triage
-      </Badge>
+      <div className="source-layer">
+        <section aria-labelledby="connect-title">
+          <span className="mono-label">Browser layer — still visible</span>
+          <h1 id="connect-title" className="display-3" style={{ marginTop: 14 }}>
+            Connect the code behind this site.
+          </h1>
+          {findingId !== "" ? (
+            <p className="lede-xl" style={{ marginTop: 14 }}>
+              Tracing finding <code>{findingId}</code>
+              {runId !== "" && (
+                <>
+                  {" "}from test <code>{runId}</code>
+                </>
+              )}{" "}
+              into your codebase — another layer behind the webpage.
+            </p>
+          ) : (
+            <p className="lede-xl" style={{ marginTop: 14 }}>
+              A11yForge exposes the source layer behind the webpage, so a
+              browser problem can be traced to responsible code.
+            </p>
+          )}
 
-      <section aria-labelledby="connect-title" className="narrow">
-        <h1 id="connect-title">Connect source</h1>
-        {findingId !== "" && (
-          <p className="lede">
-            Tracing finding <code>{findingId}</code>
-            {runId !== "" && (
-              <>
-                {" "}from test <code>{runId}</code>
-              </>
-            )}{" "}
-            into your codebase.
-          </p>
-        )}
-
-        {sourceId === null && (
-          <form className="url-form" onSubmit={(event) => void onConnect(event)}>
-            <Label htmlFor="git-url" className="label-caps">
-              <span>Public Git repository</span>
-              <span className="label-note">https format</span>
-            </Label>
-            <div className="url-row">
-              <div className="input-wrap">
-                <span className="input-prompt" aria-hidden="true">&gt;</span>
-                <Input
-                  id="git-url"
-                  name="git-url"
-                  type="url"
-                  inputMode="url"
-                  autoComplete="url"
-                  placeholder="https://github.com/owner/repository"
-                  value={gitUrl}
-                  onChange={(event) => setGitUrl(event.target.value)}
-                  required
-                  aria-describedby={error !== null ? "connect-error git-help" : "git-help"}
-                  aria-invalid={error !== null}
-                  className="h-12 pl-9"
+          {sourceId !== null && (
+            <div className="repair-line" aria-label="Source progress">
+              <div className="repair-track">
+                <div
+                  className="repair-progress"
+                  style={{ width: `${(stageIndex / STEPS.length) * 100}%`, transition: "width 0.9s ease" }}
                 />
               </div>
-              <Button type="submit" size="lg" disabled={connecting}>
-                {connecting ? "Connecting…" : "Connect source →"}
-              </Button>
-            </div>
-            <p className="help" id="git-help">
-              Only public HTTPS repositories can be connected from the hosted
-              UI. Local paths are rejected here — use the CLI command below.
-            </p>
-            {connecting && (
-              <p className="loading" role="status" aria-live="polite">
-                [···] Connecting{gitUrl !== "" ? ` ${gitUrl}` : ""}…
-              </p>
-            )}
-            {error !== null && !connecting && (
-              <Alert variant="destructive" id="connect-error">
-                <AlertDescription>[✕] {error}</AlertDescription>
-              </Alert>
-            )}
-          </form>
-        )}
-
-        {sourceId === null && (
-          <section aria-labelledby="local-title" className="secondary">
-            <Badge variant="faint" aria-hidden="true">
-              [ALT] Local execution path
-            </Badge>
-            <h2 id="local-title">Testing a local project?</h2>
-            <p>
-              Run the repair worker directly against your workstation directory.
-              The local path is named, never browsed from the hosted UI:
-            </p>
-            <Card>
-              <CardHeader className="p-0">
-                <CardTitle className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em]">
-                  Terminal // runner CLI
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <pre className="diff" aria-label="CLI repair command" tabIndex={0}>
-                  <code>{cliCommand}</code>
-                </pre>
-                <p>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={onCopyCli}
-                    aria-live="polite"
+              <ol className="repair-stops">
+                {STEPS.map((step, index) => (
+                  <li
+                    key={step}
+                    data-state={index < stageIndex ? "done" : index === stageIndex ? "now" : undefined}
                   >
-                    {copied ? "[✓] Copied" : "Copy command"}
-                  </Button>
-                </p>
-              </CardContent>
-            </Card>
-          </section>
-        )}
+                    {step}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
 
-        {sourceId !== null && (
-          <div>
-            <Progress
-              value={(stageIndex / STEPS.length) * 100}
-              aria-label={`${stageIndex} of ${STEPS.length} source steps complete`}
-            />
-            <StageSteps
-              steps={STEPS.map((step, index) => ({
-                id: step,
-                label: step,
-                state: index < stageIndex ? "done" : index === stageIndex ? "running" : "pending",
-              }))}
-              ariaLabel="Source progress"
-            />
-          </div>
-        )}
+          {sourceId === null && (
+            <section aria-labelledby="local-title" style={{ marginTop: 32 }}>
+              <p className="mono-label" id="local-title">Local execution path</p>
+              <p className="help" style={{ marginTop: 8 }}>
+                Testing a local project? Run the repair worker directly against
+                your workstation directory. The local path is named, never
+                browsed from the hosted UI:
+              </p>
+              <Card style={{ marginTop: 12 }}>
+                <CardHeader className="p-0">
+                  <CardTitle className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em]">
+                    Terminal // runner CLI
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <pre className="diff" aria-label="CLI repair command" tabIndex={0}>
+                    <code>{cliCommand}</code>
+                  </pre>
+                  <p>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={onCopyCli}
+                      aria-live="polite"
+                    >
+                      {copied ? "[✓] Copied" : "Copy command"}
+                    </Button>
+                  </p>
+                </CardContent>
+              </Card>
+            </section>
+          )}
+        </section>
+
+        <div className="source-pane">
+          {sourceId === null && (
+            <form className="forge-url" style={{ marginTop: 0 }} onSubmit={(event) => void onConnect(event)}>
+              <Label htmlFor="git-url" className="mono-label">
+                Git repository
+              </Label>
+              <div className="forge-url-row url-row" style={{ marginTop: 6 }}>
+                <span className="input-wrap">
+                  <span className="input-prompt" aria-hidden="true">&gt;</span>
+                  <Input
+                    id="git-url"
+                    name="git-url"
+                    type="url"
+                    inputMode="url"
+                    autoComplete="url"
+                    placeholder="github.com/…"
+                    value={gitUrl}
+                    onChange={(event) => setGitUrl(event.target.value)}
+                    required
+                    aria-describedby={error !== null ? "connect-error git-help" : "git-help"}
+                    aria-invalid={error !== null}
+                  />
+                </span>
+                <button type="submit" className="forge-scan-btn" disabled={connecting}>
+                  {connecting ? "Connecting…" : "Connect source"}
+                  <span className="arrow" aria-hidden="true">→</span>
+                </button>
+              </div>
+              <p className="help forge-url-hint" id="git-help">
+                Only public HTTPS repositories can be connected from the hosted
+                UI. Local paths are rejected here — use the CLI command.
+              </p>
+              {connecting && (
+                <p className="loading" role="status" aria-live="polite">
+                  [···] Connecting{gitUrl !== "" ? ` ${gitUrl}` : ""}…
+                </p>
+              )}
+              {error !== null && !connecting && (
+                <Alert variant="destructive" id="connect-error">
+                  <AlertDescription>[✕] {error}</AlertDescription>
+                </Alert>
+              )}
+            </form>
+          )}
 
         {state !== null && state.state === "CONNECTED" && state.target !== null && (
           <Card aria-labelledby="connected-title" aria-live="polite" className="mt-4">
@@ -362,12 +375,25 @@ function ConnectSourceContent(): React.JSX.Element {
           <Card aria-labelledby="trace-title" aria-live="polite" className="mt-4">
             {traceCandidate !== null ? (
               <>
+                <svg className="source-trace-line" viewBox="0 0 400 46" aria-hidden="true" focusable="false">
+                  <path
+                    className="orbit-path-live"
+                    data-draw
+                    d="M 8 23 C 120 23, 140 8, 220 12 S 330 30, 392 22"
+                    strokeWidth="1.5"
+                    fill="none"
+                  />
+                  <circle cx="8" cy="23" r="4" fill="none" strokeWidth="1.5" className="orbit-ring" />
+                  <circle cx="392" cy="22" r="4" className="orbit-node-lime" />
+                </svg>
                 <Badge role="status">[✓] Trace found</Badge>
                 <CardTitle asChild className="mt-2">
-                  <h2 id="trace-title">Responsible code located</h2>
+                  <h2 id="trace-title">We found the code behind this problem</h2>
                 </CardTitle>
-                <CardDescription>
+                <p className="source-file">
                   <code>{traceCandidate.filePath}</code>
+                </p>
+                <CardDescription>
                   {traceSnippet !== null && (
                     <>
                       {" "}<Badge variant="faint">lines {traceSnippet.startLine}–{traceSnippet.endLine}</Badge>
@@ -386,7 +412,7 @@ function ConnectSourceContent(): React.JSX.Element {
                   ))}
                 </ul>
                 {traceSnippet !== null && (
-                  <pre className="diff" aria-label={`${traceSnippet.filePath} lines ${traceSnippet.startLine} through ${traceSnippet.endLine} source inspection`} tabIndex={0}>
+                  <pre className="diff source-snippet" aria-label={`${traceSnippet.filePath} lines ${traceSnippet.startLine} through ${traceSnippet.endLine} source inspection`} tabIndex={0}>
                     <code>{traceSnippet.content}</code>
                   </pre>
                 )}
@@ -457,14 +483,16 @@ function ConnectSourceContent(): React.JSX.Element {
           </Alert>
         )}
 
-        <p>
-          <Button variant="link" className="h-auto p-0" asChild>
-            <Link href="/console">
-              See a full verified repair
-            </Link>
-          </Button>
-        </p>
-      </section>
+        </div>
+      </div>
+
+      <p style={{ paddingBottom: 24 }}>
+        <Button variant="link" className="h-auto p-0" asChild>
+          <Link href="/console">
+            Watch a full verified repair in the demo theatre
+          </Link>
+        </Button>
+      </p>
     </main>
   );
 }

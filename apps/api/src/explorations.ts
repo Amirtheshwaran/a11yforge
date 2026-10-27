@@ -191,9 +191,15 @@ export function registerExplorationRoutes(app: FastifyInstance): void {
     if (record === undefined) {
       return reply.status(404).send({ error: "Unknown exploration run." });
     }
-    reply.header("content-type", "text/event-stream");
-    reply.header("cache-control", "no-cache");
-    reply.header("connection", "keep-alive");
+    // Hijacked raw stream: reply headers are never flushed otherwise,
+    // so write the full head here (including CORS for the browser client).
+    reply.hijack();
+    reply.raw.writeHead(200, {
+      "content-type": "text/event-stream",
+      "cache-control": "no-cache",
+      connection: "keep-alive",
+      "access-control-allow-origin": "*",
+    });
     for (const event of record.events) {
       reply.raw.write(`data: ${JSON.stringify(event)}\n\n`);
     }

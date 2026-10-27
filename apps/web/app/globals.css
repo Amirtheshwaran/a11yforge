@@ -17,16 +17,20 @@
 @import "tailwindcss/utilities.css" layer(utilities);
 
 @theme {
-  --color-canvas: #000000;
-  --color-raised: #0b0b0b;
-  --color-sunken: #0b0b0b;
-  --color-overlay: #141414;
-  --color-hover: #1f1f1f;
-  --color-line: #404040;
-  --color-linesoft: #262626;
-  --color-ink: #ffffff;
-  --color-inkdim: #a3a3a3;
-  --color-inkfaint: #8a8a8a;
+  --color-canvas: #0b0b0d;
+  --color-raised: #141417;
+  --color-sunken: #101013;
+  --color-overlay: #1b1b20;
+  --color-hover: #232329;
+  --color-line: #3a3a42;
+  --color-linesoft: #232329;
+  --color-ink: #f5f2ea;
+  --color-inkdim: #b7b3a8;
+  --color-inkfaint: #8f8c83;
+  --color-spark: #ff4b2e;
+  --color-lime: #c6ff4d;
+  --color-gold: #ffc53d;
+  --color-cyan: #5fe8ff;
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
     sans-serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas,
@@ -34,21 +38,29 @@
 }
 
 :root {
-  /* Canvas + surfaces (DESIGN.md dark default) */
-  --bg: #000000;
-  --bg-raised: #0b0b0b;
-  --bg-sunken: #0b0b0b;
-  --bg-overlay: #141414;
-  --bg-hover: #1f1f1f;
+  /* Canvas + surfaces: almost-black charcoal, never flat pure black */
+  --bg: #0b0b0d;
+  --bg-raised: #141417;
+  --bg-sunken: #101013;
+  --bg-overlay: #1b1b20;
+  --bg-hover: #232329;
 
   /* Borders */
-  --line: #404040;
-  --line-soft: #262626;
+  --line: #3a3a42;
+  --line-soft: #232329;
 
   /* Text (--ink-faint must stay >= 4.5:1 on the dark surfaces) */
-  --ink: #ffffff;
-  --ink-dim: #a3a3a3;
-  --ink-faint: #8a8a8a;
+  --ink: #f5f2ea;
+  --ink-dim: #b7b3a8;
+  --ink-faint: #8f8c83;
+
+  /* Restrained high-energy accent spectrum. Accents live in active nodes,
+   * animated paths, scanning rings, and selected states — never in body
+   * text, never as page-wide gradients. */
+  --spark: #ff4b2e;
+  --lime: #c6ff4d;
+  --gold: #ffc53d;
+  --cyan: #5fe8ff;
 
   /* Legacy hue names, pinned to monochrome (glyph + text carry status) */
   --accent: #ffffff;
@@ -79,10 +91,21 @@
 body {
   margin: 0;
   font-family: var(--sans);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.55;
   color: var(--ink);
-  background: var(--bg);
+  background:
+    radial-gradient(120% 90% at 70% -10%, rgba(245, 242, 234, 0.045), transparent 55%),
+    radial-gradient(100% 80% at 50% 110%, rgba(245, 242, 234, 0.03), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--spark);
+  color: #0b0b0d;
 }
 
 a {
@@ -751,65 +774,91 @@ footer.footnote {
   }
 }
 
-/* ---- Site header (layout.tsx): Stitch wordmark + primary nav ---- */
+/* ---- Forge chrome: thin restrained top nav, minimal footer ---- */
 
-.site-header {
+.forge-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(14px);
+  background: rgba(11, 11, 13, 0.72);
   border-bottom: 1px solid var(--line-soft);
-  background: var(--bg);
 }
 
-.site-header-inner {
-  max-width: var(--content-max);
+.forge-nav-inner {
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 0 16px;
-  min-height: 64px;
+  padding: 0 28px;
+  min-height: 58px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
 
-.site-wordmark {
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+.forge-wordmark {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   color: var(--ink);
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.site-nav {
+.forge-wordmark-mark {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--spark);
+  display: inline-block;
+  flex: none;
+}
+
+.forge-nav-links {
   display: flex;
   align-items: center;
-  gap: 4px 24px;
+  gap: 4px 28px;
   flex-wrap: wrap;
 }
 
-.site-nav a {
+.forge-nav-links a {
   color: var(--ink-dim);
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13.5px;
+  font-weight: 500;
+  position: relative;
+  padding: 4px 0;
 }
 
-.site-nav a:hover {
+.forge-nav-links a:hover {
   color: var(--ink);
-  text-decoration: underline;
 }
 
-.site-nav a[aria-current="page"] {
+.forge-nav-links a[aria-current="page"] {
   color: var(--ink);
-  font-weight: 600;
 }
 
-.site-footer {
+.forge-nav-links a[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: var(--spark);
+}
+
+.forge-foot {
   border-top: 1px solid var(--line-soft);
-  background: var(--bg);
-  margin-top: 48px;
+  margin-top: 0;
 }
 
-.site-footer-inner {
-  max-width: var(--content-max);
+.forge-foot-inner {
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 20px 16px;
+  padding: 22px 28px 28px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -817,14 +866,20 @@ footer.footnote {
   gap: 8px 16px;
   font-family: var(--mono);
   font-size: 11px;
+  letter-spacing: 0.04em;
   color: var(--ink-faint);
 }
 
-.site-footer-inner a {
+.forge-foot-inner a {
   color: var(--ink-dim);
   font-size: 11px;
   font-family: var(--mono);
 }
+
+/* Legacy aliases keep older routes rendering while they migrate. */
+.site-header { display: none; }
+.site-footer { display: none; }
+.site-nav a[aria-current="page"] { color: var(--ink); }
 
 /* ---- Reusable controls: buttons / inputs / cards / status ---- */
 
@@ -1052,9 +1107,9 @@ footer.footnote {
 
 .product,
 .landing {
-  max-width: 760px;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 24px 20px 64px;
+  padding: 0 28px 64px;
 }
 
 .landing-wide {
@@ -1142,18 +1197,23 @@ footer.footnote {
 .url-row input {
   flex: 1;
   min-width: 0;
-  min-height: 48px;
-  padding: 12px 14px 12px 36px;
+  min-height: 56px;
+  padding: 12px 6px 14px 34px;
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 17px;
+  letter-spacing: -0.01em;
   color: var(--ink);
-  background: var(--bg-raised);
-  border: 1px solid #333333;
-  border-radius: var(--radius-control);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
 }
 
 .url-row input::placeholder {
   color: var(--ink-faint);
+}
+
+.url-row input:focus {
+  outline: none;
 }
 
 .help {
@@ -1572,3 +1632,1121 @@ footer.footnote {
     gap: 4px 16px;
   }
 }
+
+/* Spatial accessibility map layout: the 3D scene dominates, the issue
+ * panel takes 25-35% on desktop and stacks below the scene on mobile.
+ * The scene is never decorative: it is the primary results interface. */
+.spatial {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 28px 48px;
+}
+
+.spatial-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 0 12px;
+}
+
+.spatial-layout {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 1024px) {
+  .spatial-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    align-items: start;
+  }
+  .spatial-panel {
+    position: sticky;
+    top: 16px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+}
+
+.spatial-panel {
+  min-width: 0;
+}
+
+.scene-wrap {
+  position: relative;
+  min-width: 0;
+  height: 68vh;
+  min-height: 440px;
+  max-height: 820px;
+  background: #060607;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+@media (max-width: 1023px) {
+  .scene-wrap {
+    height: 48vh;
+    min-height: 300px;
+  }
+}
+
+.scene-wrap canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: pan-y;
+}
+
+.scene-loading,
+.scene-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  background: #000;
+  padding: 24px;
+}
+
+.scene-fallback {
+  overflow-y: auto;
+  display: block;
+}
+
+.scene-chips {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.scene-chips > * {
+  pointer-events: auto;
+}
+
+.scene-summary {
+  position: absolute;
+  left: 12px;
+  bottom: 52px;
+  max-width: min(420px, calc(100% - 24px));
+  background: rgba(0, 0, 0, 0.88);
+  border: 1px solid var(--line);
+  padding: 16px;
+}
+
+.scene-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.88);
+  border-top: 1px solid var(--line-soft);
+}
+
+.scene-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.88);
+  border-top: 1px solid var(--line-soft);
+  color: var(--ink-dim);
+  font-size: 13px;
+}
+
+/* Landing composition: the 3D concept sits beside the headline as part
+ * of the composition, never as a background effect. */
+.landing-spatial {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .landing-spatial {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  }
+}
+
+.landing-scene {
+  min-width: 0;
+  height: 52vh;
+  min-height: 340px;
+  max-height: 560px;
+  background: #000;
+  border: 1px solid var(--line-soft);
+  overflow: hidden;
+}
+
+.landing-scene canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ================================================================
+ * A11yForge cinematic experience layer.
+ * One continuous spatial product: landing → scan → results →
+ * walkthrough → source → repair → verified → demo.
+ * ================================================================ */
+
+/* ---- Editorial display type ---- */
+
+.display-1,
+.display-2,
+.display-3 {
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.display-1 {
+  font-size: clamp(3.4rem, 8.2vw, 8.25rem);
+}
+
+.display-2 {
+  font-size: clamp(2.4rem, 5.2vw, 4.75rem);
+  line-height: 1.02;
+}
+
+.display-3 {
+  font-size: clamp(1.7rem, 3.2vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.display-accent {
+  color: var(--spark);
+}
+
+.display-dim {
+  color: var(--ink-dim);
+}
+
+.lede-xl {
+  font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+  line-height: 1.55;
+  color: var(--ink-dim);
+  max-width: 46ch;
+  margin: 0;
+}
+
+.mono-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.mono-label .dot-live {
+  color: var(--spark);
+}
+
+[data-reveal] {
+  will-change: transform, opacity;
+}
+
+/* ---- Landing hero: asymmetric editorial + orbital object ---- */
+
+.forge-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
+  align-items: center;
+  min-height: calc(100vh - 58px);
+  padding: 40px 0 56px;
+  position: relative;
+}
+
+@media (min-width: 1080px) {
+  .forge-hero {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 16px;
+  }
+}
+
+.forge-hero-copy {
+  position: relative;
+  z-index: 2;
+  max-width: 640px;
+}
+
+.forge-hero-copy .mono-label {
+  display: block;
+  margin-bottom: 22px;
+}
+
+.forge-hero-copy .lede-xl {
+  margin-top: 26px;
+}
+
+/* URL form embedded in the composition: rule lines, no card. */
+.forge-url {
+  margin-top: 40px;
+  max-width: 520px;
+}
+
+.forge-url-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+  transition: border-color 0.3s ease;
+}
+
+.forge-url-row:focus-within {
+  border-bottom-color: var(--ink);
+}
+
+.forge-url-row .input-wrap {
+  flex: 1;
+}
+
+.forge-url-hint {
+  margin-top: 12px;
+}
+
+.forge-scan-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 26px;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: #0b0b0d;
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.forge-scan-btn:hover:not(:disabled) {
+  background: #fff;
+}
+
+.forge-scan-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.forge-scan-btn .arrow {
+  font-family: var(--mono);
+  font-weight: 400;
+}
+
+/* ---- Orbital hero object (SVG, Anime.js driven) ---- */
+
+.orbit-stage {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  height: min(78vh, 760px);
+  min-height: 480px;
+}
+
+.orbit-stage svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.orbit-ring {
+  fill: none;
+  stroke: var(--ink-faint);
+  stroke-opacity: 0.28;
+}
+
+.orbit-ring-accent {
+  fill: none;
+  stroke: var(--spark);
+  stroke-opacity: 0.55;
+}
+
+.orbit-tick {
+  stroke: var(--ink-faint);
+  stroke-opacity: 0.4;
+}
+
+.orbit-path {
+  fill: none;
+  stroke: var(--ink-dim);
+  stroke-opacity: 0.6;
+}
+
+.orbit-path-live {
+  fill: none;
+  stroke: var(--spark);
+}
+
+.orbit-node {
+  fill: var(--bg);
+  stroke: var(--ink-dim);
+}
+
+.orbit-node-hot {
+  fill: var(--spark);
+  stroke: var(--spark);
+}
+
+.orbit-node-lime {
+  fill: var(--lime);
+  stroke: var(--lime);
+}
+
+.orbit-node-cyan {
+  fill: var(--cyan);
+  stroke: var(--cyan);
+}
+
+.orbit-focus-dot {
+  fill: var(--ink);
+}
+
+.orbit-plane {
+  fill: #101013;
+  stroke: var(--line);
+}
+
+.orbit-plane-bar {
+  fill: var(--line-soft);
+}
+
+.orbit-plane-line {
+  stroke: var(--line-soft);
+}
+
+.orbit-caption {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  fill: var(--ink-faint);
+  text-transform: uppercase;
+}
+
+.orbit-stage[data-active="true"] .orbit-ring-accent {
+  stroke-opacity: 0.9;
+}
+
+/* ---- Scroll story: camera moves through the system ---- */
+
+.story {
+  border-top: 1px solid var(--line-soft);
+}
+
+.story-scene {
+  min-height: 92vh;
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  padding: 72px 0;
+  max-width: 1600px;
+}
+
+.story-scene .display-2 {
+  max-width: 16ch;
+}
+
+.story-index {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--spark);
+}
+
+.story-finale {
+  padding: 96px 0 120px;
+  display: grid;
+  gap: 28px;
+  justify-items: start;
+}
+
+.workflow-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+}
+
+.workflow-strip .sep {
+  color: var(--spark);
+}
+
+/* ---- Experience shell (scan → results → walkthrough → repair) ---- */
+
+.xp {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 28px 72px;
+}
+
+.xp-stage-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 20px;
+  padding: 30px 0 18px;
+}
+
+.xp-float {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.xp-float-tl {
+  top: 22px;
+  left: 24px;
+}
+
+.xp-float-tr {
+  top: 22px;
+  right: 24px;
+  text-align: right;
+}
+
+.xp-float-bl {
+  bottom: 64px;
+  left: 24px;
+}
+
+.xp-float .mono-label {
+  display: block;
+}
+
+.xp-float-strong {
+  font-size: clamp(1.4rem, 2.4vw, 2.1rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  margin: 6px 0 0;
+}
+
+.xp-float-strong .n {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Thin minimal scan progress: a line, not a card. */
+.scan-line {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  z-index: 3;
+}
+
+.scan-line-track {
+  height: 1px;
+  background: var(--line-soft);
+  position: relative;
+  overflow: visible;
+}
+
+.scan-line-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--spark);
+}
+
+.scan-line-stages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.scan-line-stages [data-on="true"] {
+  color: var(--ink);
+}
+
+/* Giant results count + tier breakdown. */
+.xp-verdict {
+  padding: 34px 0 8px;
+  display: grid;
+  gap: 14px;
+}
+
+.xp-verdict .display-2 .n {
+  font-variant-numeric: tabular-nums;
+}
+
+.xp-tiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 26px;
+  font-size: 15px;
+  color: var(--ink-dim);
+}
+
+.xp-tiers strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.xp-tiers .t0::before,
+.xp-tiers .t1::before,
+.xp-tiers .t2::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.xp-tiers .t0::before { background: var(--spark); }
+.xp-tiers .t1::before { background: var(--gold); }
+.xp-tiers .t2::before { background: var(--ink-faint); }
+
+/* Thin horizontal typographic category filter. */
+.kat-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 26px;
+  align-items: baseline;
+  padding: 18px 0 4px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.kat-filter button {
+  background: none;
+  border: 0;
+  padding: 6px 0;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--ink-faint);
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.kat-filter button:hover {
+  color: var(--ink);
+  background: none;
+}
+
+.kat-filter button[aria-pressed="true"] {
+  color: var(--ink);
+  font-weight: 650;
+  box-shadow: inset 0 -2px 0 var(--spark);
+}
+
+.kat-filter .count {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: inherit;
+  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Issue walkthrough: clean typographic panel, never card-in-card. */
+.issue-sheet {
+  border-left: 1px solid var(--line);
+  padding: 4px 0 8px 28px;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.issue-pos {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+}
+
+.issue-pos .now {
+  color: var(--spark);
+  font-variant-numeric: tabular-nums;
+}
+
+.issue-title {
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.issue-why {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-dim);
+  margin: 0;
+  max-width: 52ch;
+}
+
+.issue-where {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.issue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  align-items: center;
+}
+
+.issue-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 16px;
+  margin-top: 4px;
+}
+
+.issue-nav-btn {
+  background: none;
+  border: 0;
+  padding: 8px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.issue-nav-btn:hover {
+  background: none;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.issue-nav-btn:disabled {
+  color: var(--ink-faint);
+  cursor: default;
+  text-decoration: none;
+  opacity: 1;
+}
+
+/* ---- Visual proof annotation (Show me) ---- */
+
+.proof-note {
+  border-left: 2px solid var(--spark);
+  padding: 2px 0 2px 14px;
+  margin: 4px 0 0;
+  font-size: 14.5px;
+  color: var(--ink);
+  max-width: 52ch;
+}
+
+.proof-note .mono-label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* ---- Source layer: slides in from depth beside the page ---- */
+
+.source-layer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  padding: 40px 0;
+}
+
+@media (min-width: 1080px) {
+  .source-layer {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  }
+}
+
+.source-pane {
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--bg-sunken);
+  padding: 26px 28px;
+  min-width: 0;
+}
+
+.source-pane .display-3 {
+  margin: 14px 0 8px;
+}
+
+.source-trace-line {
+  display: block;
+  width: 100%;
+  height: 46px;
+  margin: 6px 0 2px;
+}
+
+.source-file {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--cyan);
+  overflow-wrap: anywhere;
+  margin: 12px 0 0;
+}
+
+.source-snippet {
+  margin: 14px 0 0;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--ink-dim);
+  background: #060607;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* ---- Repair timeline: a thin line through stages, not checkboxes ---- */
+
+.repair-line {
+  padding: 34px 0 8px;
+}
+
+.repair-track {
+  position: relative;
+  height: 1px;
+  background: var(--line-soft);
+  margin: 26px 0 8px;
+}
+
+.repair-progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--lime);
+}
+
+.repair-stops {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.repair-stops li {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  position: relative;
+  padding-top: 16px;
+}
+
+.repair-stops li::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--ink-faint);
+}
+
+.repair-stops li[data-state="done"] {
+  color: var(--ink-dim);
+}
+
+.repair-stops li[data-state="done"]::before {
+  background: var(--ink-dim);
+  border-color: var(--ink-dim);
+}
+
+.repair-stops li[data-state="now"] {
+  color: var(--ink);
+}
+
+.repair-stops li[data-state="now"]::before {
+  background: var(--lime);
+  border-color: var(--lime);
+  width: 11px;
+  height: 11px;
+  top: -6px;
+}
+
+.repair-stops li[data-state="bad"] {
+  color: var(--spark);
+}
+
+.repair-stops li[data-state="bad"]::before {
+  background: var(--spark);
+  border-color: var(--spark);
+}
+
+/* Rejected repair: the line reverses, a revision branch appears. */
+.repair-fork {
+  margin: 18px 0 0;
+  border-left: 2px solid var(--spark);
+  padding: 4px 0 4px 16px;
+  display: grid;
+  gap: 8px;
+}
+
+/* Verified payoff. */
+.verify-hero {
+  padding: 56px 0 24px;
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+}
+
+.verify-mark {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 2px solid var(--lime);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  color: var(--lime);
+}
+
+/* Before / after: one fluid plane, toggled — never two static cards. */
+.before-after {
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-sunken);
+}
+
+.before-after-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.before-after-bar button {
+  flex: 1;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.before-after-bar button[aria-pressed="true"] {
+  color: var(--ink);
+  background: var(--bg-hover);
+}
+
+.before-after-body {
+  position: relative;
+  min-height: 220px;
+  padding: 28px;
+  display: grid;
+  gap: 12px;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+/* ---- Recorded demo theatre ---- */
+
+.demo-theatre {
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #060607;
+}
+
+.demo-stage {
+  position: relative;
+  min-height: 46vh;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 14px;
+  padding: 48px 24px 72px;
+  text-align: center;
+}
+
+.demo-scrub {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--line-soft);
+  background: rgba(11, 11, 13, 0.9);
+}
+
+.demo-scrub input[type="range"] {
+  flex: 1;
+  accent-color: var(--spark);
+}
+
+.demo-scrub .t {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---- Developer details: dense doc layer, kept secondary ---- */
+
+.doc-panel {
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--bg-sunken);
+  overflow: hidden;
+}
+
+.doc-panel-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 4px;
+  border-bottom: 1px solid var(--line-soft);
+  padding: 8px 12px;
+}
+
+.doc-panel-nav button {
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.doc-panel-nav button[aria-selected="true"] {
+  color: var(--ink);
+  background: var(--bg-hover);
+}
+
+.doc-panel-nav a {
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-faint);
+  text-decoration: none;
+}
+
+.doc-panel-nav a:hover {
+  color: var(--ink);
+  background: var(--bg-hover);
+}
+
+.doc-panel-body {
+  padding: 20px 22px;
+}
+
+/* ---- Experience responsive + reduced motion ---- */
+
+@media (max-width: 1079px) {
+  .orbit-stage {
+    height: 52vh;
+    min-height: 360px;
+  }
+
+  .forge-hero {
+    min-height: 0;
+  }
+
+  .issue-sheet {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding: 20px 0 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .forge-nav-inner,
+  .forge-foot-inner,
+  .xp,
+  .landing {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .display-1 {
+    font-size: clamp(2.9rem, 15vw, 4rem);
+  }
+
+  .forge-url-row {
+    flex-wrap: wrap;
+    border-bottom: 0;
+  }
+
+  .forge-url-row .input-wrap {
+    flex-basis: 100%;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .xp-float-bl {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit-stage svg * {
+    animation: none !important;
+  }
+
+  [data-reveal],
+  [data-enter],
+  [data-exit] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><title>A11yForge — Autonomous Accessibility Engineering</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;background:#131313;color:#e2e2e2;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #ffffff!important;outline-offset:2px!important;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "inverse-surface": "#e2e2e2", "on-tertiary-fixed": "#1a1c1c", "tertiary-container": "#e2e2e2", "secondary": "#c7c6c6", "on-tertiary": "#2f3131", "on-secondary": "#303031", "surface-container": "#1f1f1f", "on-primary": "#2f3131", "on-error": "#690005", "surface-container-highest": "#353535", "outline-variant": "#444748", "primary-fixed": "#e2e2e2", "surface-container-high": "#2a2a2a", "error-container": "#93000a", "secondary-container": "#464747", "surface-tint": "#c6c6c7", "primary-fixed-dim": "#c6c6c7", "surface-bright": "#393939", "surface-container-low": "#1b1b1b", "secondary-fixed-dim": "#c7c6c6", "tertiary-fixed": "#e2e2e2", "on-primary-container": "#636565", "primary": "#ffffff", "secondary-fixed": "#e3e2e2", "on-primary-fixed-variant": "#454747", "on-background": "#e2e2e2", "surface": "#131313", "on-surface-variant": "#c4c7c8", "on-secondary-container": "#b5b5b5", "surface-variant": "#353535", "inverse-primary": "#5d5f5f", "on-primary-fixed": "#1a1c1c", "on-tertiary-fixed-variant": "#454747", "outline": "#8e9192", "surface-container-lowest": "#0e0e0e", "on-error-container": "#ffdad6", "surface-dim": "#131313", "error": "#ffb4ab", "on-secondary-fixed": "#1b1c1c", "on-surface": "#e2e2e2", "background": "#131313", "primary-container": "#e2e2e2", "inverse-on-surface": "#303030", "tertiary": "#ffffff", "on-tertiary-container": "#636565", "on-secondary-fixed-variant": "#464747", "tertiary-fixed-dim": "#c6c6c7" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xl": "1.5rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-md": "0.75rem", "gutter": "1rem", "space-2xs": "0.125rem", "margin": "1rem", "gutter-desktop": "1.5rem", "space-3xl": "3rem", "space-lg": "1rem", "space-2xl": "2rem", "margin-desktop": "2rem" }, "fontFamily": { "body-lg": ["Inter"], "body-sm": ["Inter"], "display-lg": ["Inter"], "label-caps": ["JetBrains Mono"], "mono-sm": ["JetBrains Mono"], "headline-lg": ["Inter"], "headline-md": ["Inter"], "display-lg-mobile": ["Inter"], "mono-md": ["JetBrains Mono"], "mono-lg": ["JetBrains Mono"], "body-md": ["Inter"], "headline-sm": ["Inter"] }, "fontSize": { "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }], "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }], "mono-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "400" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "mono-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }], "mono-lg": ["15px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-primary selection:text-surface"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-margin lg:px-margin-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><a class="flex items-center gap-space-sm text-primary group focus-visible:outline-none" data-path="test-a-site" href="#"><span class="font-headline-sm text-headline-sm uppercase tracking-tight text-primary font-semibold">A11yForge</span></a><span class="font-label-caps text-label-caps uppercase px-space-xs py-space-2xs bg-surface-container-high text-on-surface-variant rounded">v1.0 // AUTONOMOUS</span></div><nav class="hidden md:flex items-center gap-space-sm" data-active-classes="bg-primary text-surface font-headline-sm"><a class="px-space-md py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="test-a-site" href="#">Test a site</a><a aria-current="page" class="px-space-md py-space-xs rounded transition-colors bg-primary text-surface font-headline-sm" data-path="demo" href="#">Demo</a><a class="px-space-md py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="technical-evidence" href="#">Technical evidence</a><a class="px-space-md py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" href="https://github.com" rel="noopener noreferrer" target="_blank">GitHub</a></nav><div class="flex items-center gap-space-md"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-4rem)] max-w-7xl mx-auto px-margin lg:px-margin-desktop"><div class="flex flex-col w-full">
+<!-- Context Bar: Session Diagnostic Anchor -->
+<div class="w-full bg-surface-container-lowest px-margin lg:px-margin-desktop py-space-md flex flex-wrap items-center justify-between gap-space-md mb-space-xl">
+<div class="flex flex-wrap items-center gap-space-md">
+<div class="flex items-center gap-space-xs bg-surface-container-high px-space-sm py-space-2xs rounded">
+<span class="material-symbols-outlined text-primary text-[16px]">terminal</span>
+<span class="font-label-caps text-label-caps text-primary tracking-wider">A11Y-RUNNER // PID: 84920</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">TARGET:</span>
+<span class="font-mono-sm text-mono-sm text-primary">github.com/supamarket/web-checkout</span>
+<span class="font-mono-sm text-mono-sm text-outline">@</span>
+<span class="font-mono-sm text-mono-sm bg-surface-container-high px-space-xs py-space-2xs rounded text-primary">main</span>
+</div>
+<span class="font-mono-sm text-mono-sm text-outline hidden md:inline">|</span>
+<div class="flex items-center gap-space-xs">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">SHA:</span>
+<span class="font-mono-sm text-mono-sm text-primary">8f4c21e</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="inline-flex items-center gap-space-xs bg-primary text-surface px-space-sm py-space-2xs rounded font-label-caps text-label-caps font-semibold">
+        [✓] SOURCE CONNECTED
+      </span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">HEADLESS SANDBOX READY</span>
+</div>
+</div>
+<!-- Primary Header & Issue Statement -->
+<div class="w-full flex flex-col gap-space-sm mb-space-2xl">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">WCAG 2.2 · CRITERION 2.1.2 NO KEYBOARD TRAP · LEVEL A</span>
+<span class="font-mono-sm text-mono-sm text-outline">/</span>
+<span class="font-label-caps text-label-caps text-primary">CONFIRMED VULNERABILITY #AF-204</span>
+</div>
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg">
+<div class="flex flex-col gap-space-2xs max-w-4xl">
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight">Focus left this dialog</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+          During browser execution, pressing <kbd class="px-space-xs py-space-2xs bg-surface-container-high rounded font-mono-sm text-mono-sm text-primary">Tab</kbd> leaked user focus outside the modal into background canvas DOM elements, violating modal containment barriers.
+        </p>
+</div>
+<div class="flex flex-col items-start lg:items-end gap-space-2xs bg-surface-container px-space-md py-space-sm rounded min-w-[260px]">
+<span class="font-label-caps text-label-caps text-outline uppercase">LOCATED COMPONENT</span>
+<span class="font-mono-md text-mono-md text-primary">src/components/checkout/OrderModal.tsx:42</span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">[Synthetic Trace: ModalDOMMount]</span>
+</div>
+</div>
+</div>
+<!-- Main Grid: Code Diff + Automated Sandbox Proof -->
+<div class="w-full grid grid-cols-1 lg:grid-cols-12 gap-space-xl mb-space-3xl">
+<!-- Left Pane: Code Diff (7 cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-md">
+<!-- Section Tag -->
+<div class="flex items-center justify-between bg-surface-container-low px-space-md py-space-sm rounded">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-caps text-label-caps text-primary font-semibold">SYNTHESIZED CODE DIFF</span>
+<span class="font-mono-sm text-mono-sm text-outline">OrderModal.tsx</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">Unified 4 lines</span>
+<span class="font-label-caps text-label-caps bg-surface-container-high px-space-xs py-space-2xs rounded text-primary">AUTONOMOUS PATCH</span>
+</div>
+</div>
+<!-- Diff Container -->
+<div class="w-full bg-surface-container-lowest rounded p-space-md overflow-x-auto flex flex-col gap-space-2xs shadow-xl">
+<!-- Diff Header Meta -->
+<div class="font-mono-sm text-mono-sm text-outline pb-space-xs mb-space-xs flex justify-between bg-surface-container px-space-sm py-space-2xs rounded">
+<span>--- a/src/components/checkout/OrderModal.tsx</span>
+<span>+++ b/src/components/checkout/OrderModal.tsx</span>
+</div>
+<div class="font-mono-sm text-mono-sm text-outline py-space-2xs">
+          @@ -39,7 +39,10 @@ export const OrderModal = ({ isOpen, onClose, cart }: Props) =&gt; {
+        </div>
+<!-- Diff Body -->
+<div class="flex flex-col font-mono-md text-mono-md leading-relaxed select-text">
+<div class="flex items-start text-on-surface-variant py-space-2xs">
+<span class="w-10 select-none text-outline font-mono-sm text-mono-sm text-right pr-space-md">39</span>
+<span class="w-10 select-none text-outline font-mono-sm text-mono-sm text-right pr-space-md">39</span>
+<span class="w-6 select-none text-on-surface-variant"> </span>
+<span class="text-on-surface-variant">  if (!isOpen) return null;</span>
+</div>
+<div class="flex items-start text-on-surface-variant py-space-2xs">
+<span class="w-10 select-none text-outline font-mono-sm text-mono-sm text-right pr-space-md">40</span>
+<span class="w-10 select-none text-outline font-mono-sm text-mono-sm text-right pr-space-md">40</span>
+<span class="w-6 select-none text-on-surface-variant"> </span>
+<span class="text-on-surface-variant"></span>
+</div>
+<!-- Added Line 1 -->
+<div class="flex items-start bg-surface-container py-space-2xs font-semibold text-primary">
+<span class="w-10 select-none text-outline font-mono-sm text-mono-sm text-right pr-space-md"></span>
+<span class="w-10 select-none text-primary font-mono-sm text-mono-sm text-right pr-space-md">41</span>
+<span class="w-6 select-none font-bold text-primary">[+]</span>
+<span>  import { useFocusTrap } from '@/hooks/useFocusTrap';</span>
+</div>
+<!-- Added Line 2 -->
+<div class="flex items-start bg-surface-container py-space-2xs font-semibold text-primary">
+<span class="w-10 select-none text-outline font-mono-sm text-mono-sm text-right pr-space-md"></span>
+<span class="w-10 select-none text-primary font-mono-sm text-mono-sm text-right pr-space-md">42</span>
+<span class="w-6 select-none font-bold text-primary">[+]</span>
+<span>  const modalRef = useFocusTrap({ active: isOpen, onEscape: onClose });</span>
+</div>
+<div class="flex items-start text-on-surface-variant py-space-2xs">
+<span class="w-10 select-none text-outline font-mono-sm text-mono-sm text-right pr-space-md">41</span>
+<span class="w-10 select-none text-outline font-mono-sm text-mono-sm text-right pr-space-md">43</span>
+<span class="w-6 select-none text-on-surface-variant"> </span>
+<span class="text-on-surface-variant"></span>
+</div>
+<!-- Removed Line -->
+<div class="flex items-start bg-surface-container-high py-space-2xs text-secondary-container line-through">
+<span class="w-10 select-none text-outline font-mono-sm text-mono-sm text-right pr-space-md">42</span>
+<span class="w-10 select-none text-outline font-mono-sm text-mono-sm text-right pr-space-md"></span>
+<span class="w-6 select-none font-bold text-on-surface-variant">[-]</span>
+<span class="text-on-surface-variant">  &lt;div role="dialog" aria-modal="true" className="modal-container"&gt;</span>
+</div>
+<!-- Added Replacement Line -->
+<div class="flex items-start bg-surface-container py-space-2xs font-semibold text-primary">
+<span class="w-10 select-none text-outline font-mono-sm text-mono-sm text-right pr-space-md"></span>
+<span class="w-10 select-none text-primary font-mono-sm text-mono-sm text-right pr-space-md">44</span>
+<span class="w-6 select-none font-bold text-primary">[+]</span>
+<span>  &lt;div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="dialog-title" className="modal-container"&gt;</span>
+</div>
+<div class="flex items-start text-on-surface-variant py-space-2xs">
+<span class="w-10 select-none text-outline font-mono-sm text-mono-sm text-right pr-space-md">43</span>
+<span class="w-10 select-none text-outline font-mono-sm text-mono-sm text-right pr-space-md">45</span>
+<span class="w-6 select-none text-on-surface-variant"> </span>
+<span class="text-on-surface-variant">    &lt;h2 id="dialog-title" className="modal-title"&gt;Review Order&lt;/h2&gt;</span>
+</div>
+</div>
+</div>
+<!-- Explanation Box -->
+<div class="w-full bg-surface-container p-space-md rounded flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+<span class="font-headline-sm text-headline-sm text-primary">Engineering Rationale</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+          Added focus containment trap and bound Escape key listener to return focus to activating trigger upon dismissal. The injected hook attaches mutation listeners to maintain a closed tab ring between first and last focusable DOM elements inside <code class="font-mono-sm text-mono-sm bg-surface-container-high px-space-xs rounded text-primary">&lt;div ref={modalRef}&gt;</code>.
+        </p>
+</div>
+<!-- Live Terminal Output Strip -->
+<div class="w-full bg-surface-container-lowest p-space-md rounded flex flex-col gap-space-xs">
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">LOCAL AST VERIFIER</span>
+<span class="font-mono-sm text-mono-sm text-primary">[STATUS: 0 ERRORS]</span>
+</div>
+<div class="font-mono-sm text-mono-sm text-on-surface-variant flex flex-col gap-space-2xs">
+<p class="text-primary">$ ts-node --check src/components/checkout/OrderModal.tsx</p>
+<p>&gt; Validating AST subtree: 1 node injected, 1 ref bound to RootNode</p>
+<p>&gt; Synthetic keyboard dispatch: KeyDown("Tab") clamped to 4 inner elements</p>
+</div>
+</div>
+</div>
+<!-- Right Pane: Verification Headless Sandbox Result (5 cols) -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<!-- Status Banner -->
+<div class="w-full bg-primary text-surface p-space-md rounded flex items-center justify-between shadow-xl">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-surface text-[24px]">task_alt</span>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-semibold text-surface">[✓] FIXED AND VERIFIED</span>
+<span class="font-label-caps text-label-caps text-surface uppercase">SANDBOX RUN #8902 · PASSED</span>
+</div>
+</div>
+<span class="font-mono-sm text-mono-sm text-surface font-semibold">100% WCAG PASS</span>
+</div>
+<!-- Headless Sandbox Report Card -->
+<div class="w-full bg-surface-container-low p-space-md rounded flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-primary">Headless Re-run Report</span>
+<span class="font-mono-sm text-mono-sm text-outline">Isolated Chromium 128.0.6613 · Emulated Keyboard</span>
+</div>
+<span class="bg-surface-container-high px-space-xs py-space-2xs rounded font-label-caps text-label-caps text-primary">4/4 PASSED</span>
+</div>
+<!-- Verification Checklist Items -->
+<div class="flex flex-col gap-space-sm">
+<!-- Item 1 -->
+<div class="bg-surface-container p-space-sm rounded flex items-start justify-between gap-space-sm">
+<div class="flex flex-col gap-space-2xs">
+<span class="font-body-md text-body-md text-primary font-medium">Testing keyboard interactions: Tab cycle remains inside dialog</span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">Trace: OrderModal -&gt; #submit-btn -&gt; #cancel-btn -&gt; #input-zip (Loop locked)</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary bg-surface-container-highest px-space-xs py-space-2xs rounded shrink-0">[✓] Passed</span>
+</div>
+<!-- Item 2 -->
+<div class="bg-surface-container p-space-sm rounded flex items-start justify-between gap-space-sm">
+<div class="flex flex-col gap-space-2xs">
+<span class="font-body-md text-body-md text-primary font-medium">Shift+Tab backward cycle wraps to final focusable button</span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">Reverse loop verified on KeyDown("Tab", { shiftKey: true })</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary bg-surface-container-highest px-space-xs py-space-2xs rounded shrink-0">[✓] Passed</span>
+</div>
+<!-- Item 3 -->
+<div class="bg-surface-container p-space-sm rounded flex items-start justify-between gap-space-sm">
+<div class="flex flex-col gap-space-2xs">
+<span class="font-body-md text-body-md text-primary font-medium">Escape key dismisses dialog and restores focus to #open-checkout-btn</span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">Trigger element activeElement identity maintained</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary bg-surface-container-highest px-space-xs py-space-2xs rounded shrink-0">[✓] Passed</span>
+</div>
+<!-- Item 4 -->
+<div class="bg-surface-container p-space-sm rounded flex items-start justify-between gap-space-sm">
+<div class="flex flex-col gap-space-2xs">
+<span class="font-body-md text-body-md text-primary font-medium">Zero regression on existing 14 checks</span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant">WCAG 1.4.3, 4.1.2, 1.3.1, 2.4.7 status unaffected</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary bg-surface-container-highest px-space-xs py-space-2xs rounded shrink-0">[✓] Passed</span>
+</div>
+</div>
+<!-- Inline Data Visualizer: Tab Ring Graph (Monochrome Inline SVG) -->
+<div class="w-full bg-surface-container-lowest p-space-md rounded flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-outline uppercase">FOCUS CYCLE GRAPH (INSPECTOR TRACE)</span>
+<span class="font-mono-sm text-mono-sm text-primary">0% LEAKAGE</span>
+</div>
+<div class="w-full flex items-center justify-center py-space-sm">
+<svg class="w-full max-w-[280px] h-32" fill="none" viewbox="0 0 280 120" xmlns="http://www.w3.org/2000/svg">
+<!-- Bounding box representing modal boundary -->
+<rect fill="#1f1f1f" height="100" rx="4" stroke="#444748" stroke-dasharray="3 3" stroke-width="1" width="240" x="20" y="10"></rect>
+<text fill="#8e9192" font-family="JetBrains Mono" font-size="9" x="30" y="26">aria-modal="true"</text>
+<!-- Nodes -->
+<circle cx="60" cy="65" fill="#353535" r="14"></circle>
+<text fill="#ffffff" font-family="JetBrains Mono" font-size="10" text-anchor="middle" x="60" y="69">#1</text>
+<circle cx="140" cy="65" fill="#353535" r="14"></circle>
+<text fill="#ffffff" font-family="JetBrains Mono" font-size="10" text-anchor="middle" x="140" y="69">#2</text>
+<circle cx="220" cy="65" fill="#353535" r="14"></circle>
+<text fill="#ffffff" font-family="JetBrains Mono" font-size="10" text-anchor="middle" x="220" y="69">#3</text>
+<!-- Cycle paths -->
+<path d="M74 65 H126" marker-end="url(#arrow)" stroke="#ffffff" stroke-width="1.5"></path>
+<path d="M154 65 H206" stroke="#ffffff" stroke-width="1.5"></path>
+<!-- Looping return arc -->
+<path d="M220 51 C220 32, 60 32, 60 51" stroke="#ffffff" stroke-width="1.5"></path>
+<!-- Active wrap marker text -->
+<text fill="#e2e2e2" font-family="JetBrains Mono" font-size="8" text-anchor="middle" x="140" y="42">Tab Cycle Wrapped [✓]</text>
+</svg>
+</div>
+<div class="flex items-center justify-between font-mono-sm text-mono-sm text-on-surface-variant">
+<span>Cycle Path: Input(Zip) ➔ Button(Submit) ➔ Button(Close)</span>
+<span class="text-primary font-semibold">T = 18ms</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Action Toolbar & Regulatory Guardrail Notice -->
+<div class="w-full bg-surface-container-low p-space-lg rounded flex flex-col md:flex-row items-center justify-between gap-space-lg mb-space-2xl">
+<div class="flex flex-col gap-space-2xs max-w-xl">
+<div class="flex items-center gap-space-xs text-primary">
+<span class="material-symbols-outlined text-[18px]">gavel</span>
+<span class="font-headline-sm text-headline-sm font-semibold">Pre-Issuance Verification Guarantee</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        All verification steps re-executed in an isolated Chromium session before patch issuance. Deterministic DOM re-runs prevent accessibility regressions on continuous deployment pipelines.
+      </p>
+</div>
+<!-- Buttons -->
+<div class="flex flex-wrap items-center gap-space-sm w-full md:w-auto justify-start md:justify-end">
+<!-- Button 1: Download patch -->
+<button class="h-9 px-space-md rounded bg-surface-container-high hover:bg-surface-container-highest text-primary font-body-md text-body-md transition-colors flex items-center gap-space-xs focus-visible:outline-none" id="btn-download-patch" type="button">
+<span class="material-symbols-outlined text-[16px]">download</span>
+<span>Download patch</span>
+</button>
+<!-- Button 2: Configure verification -->
+<button class="h-9 px-space-md rounded bg-surface-container-high hover:bg-surface-container-highest text-primary font-body-md text-body-md transition-colors flex items-center gap-space-xs focus-visible:outline-none" type="button">
+<span class="material-symbols-outlined text-[16px]">settings</span>
+<span>Configure verification</span>
+</button>
+<!-- Button 3: Try another site -->
+<a class="h-9 px-space-md rounded bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant hover:text-primary font-body-md text-body-md transition-colors flex items-center gap-space-xs focus-visible:outline-none" data-path="test-a-site" href="#">
+<span>Try another site</span>
+</a>
+<!-- Button 4 (Primary CTA): Repair this issue -->
+<button class="h-9 px-space-lg rounded bg-primary hover:bg-inverse-surface text-surface font-body-md text-body-md font-semibold transition-colors flex items-center gap-space-xs focus-visible:outline-none" id="btn-repair-pr" type="button">
+<span class="material-symbols-outlined text-[18px]">commit</span>
+<span>Repair this issue (Open PR)</span>
+</button>
+</div>
+</div>
+<!-- Pull Request Generation Modal (Interactive Drawer Overlay) -->
+<div class="hidden fixed inset-0 z-50 bg-surface/80 backdrop-blur-sm flex items-center justify-center p-margin" id="pr-modal">
+<div class="w-full max-w-xl bg-surface-container-low rounded p-space-xl flex flex-col gap-space-lg shadow-2xl">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">fork_right</span>
+<span class="font-headline-sm text-headline-sm text-primary">Autonomous PR Generation</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary focus-visible:outline-none" id="btn-close-modal" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-space-sm">
+<label class="font-mono-sm text-mono-sm text-on-surface-variant">BRANCH NAME</label>
+<input class="h-9 bg-surface-container-lowest px-space-sm rounded font-mono-sm text-mono-sm text-primary focus-visible:outline-none" readonly="" type="text" value="fix/a11y-focus-trap-order-modal"/>
+</div>
+<div class="flex flex-col gap-space-sm">
+<label class="font-mono-sm text-mono-sm text-on-surface-variant">COMMIT MESSAGE</label>
+<div class="p-space-sm bg-surface-container-lowest rounded font-mono-sm text-mono-sm text-primary flex flex-col gap-space-2xs">
+<span>fix(modal): encapsulate keyboard focus trap on OrderModal</span>
+<span class="text-on-surface-variant text-body-sm">- Implements WCAG 2.2 2.1.2 compliance via useFocusTrap hook</span>
+<span class="text-on-surface-variant text-body-sm">- Restores focus to activating element on Escape dismiss</span>
+<span class="text-outline text-body-sm">Verified by A11yForge Headless Sandbox #8902</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-space-md pt-space-sm">
+<button class="h-9 px-space-md rounded bg-surface-container hover:bg-surface-container-high text-primary font-body-md text-body-md focus-visible:outline-none" id="btn-cancel-modal" type="button">
+          Cancel
+        </button>
+<button class="h-9 px-space-lg rounded bg-primary text-surface hover:bg-inverse-surface font-body-md text-body-md font-semibold focus-visible:outline-none flex items-center gap-space-xs" id="btn-confirm-pr" type="button">
+<span class="material-symbols-outlined text-[16px]">send</span>
+<span>Submit Pull Request</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Notification Toast -->
+<div class="hidden fixed bottom-6 right-6 z-50 bg-primary text-surface px-space-lg py-space-sm rounded shadow-2xl font-mono-sm text-mono-sm flex items-center gap-space-sm" id="toast">
+<span class="material-symbols-outlined text-surface text-[18px]">done</span>
+<span id="toast-text">Action executed successfully.</span>
+</div>
+</div>
+<script>
+  (function() {
+    const prModal = document.getElementById('pr-modal');
+    const btnRepairPr = document.getElementById('btn-repair-pr');
+    const btnCloseModal = document.getElementById('btn-close-modal');
+    const btnCancelModal = document.getElementById('btn-cancel-modal');
+    const btnConfirmPr = document.getElementById('btn-confirm-pr');
+    const btnDownloadPatch = document.getElementById('btn-download-patch');
+    const toast = document.getElementById('toast');
+    const toastText = document.getElementById('toast-text');
+
+    function showToast(message) {
+      toastText.textContent = message;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3500);
+    }
+
+    if (btnRepairPr) {
+      btnRepairPr.addEventListener('click', () => {
+        prModal.classList.remove('hidden');
+      });
+    }
+
+    function closeModal() {
+      prModal.classList.add('hidden');
+    }
+
+    if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+    if (btnCancelModal) btnCancelModal.addEventListener('click', closeModal);
+
+    if (btnConfirmPr) {
+      btnConfirmPr.addEventListener('click', () => {
+        closeModal();
+        showToast('Pull Request created: supamarket/web-checkout#142');
+      });
+    }
+
+    if (btnDownloadPatch) {
+      btnDownloadPatch.addEventListener('click', () => {
+        const patchContent = `--- a/src/components/checkout/OrderModal.tsx\n+++ b/src/components/checkout/OrderModal.tsx\n@@ -39,7 +39,10 @@\n+import { useFocusTrap } from '@/hooks/useFocusTrap';\n+const modalRef = useFocusTrap({ active: isOpen, onEscape: onClose });\n-<div role="dialog" aria-modal="true" className="modal-container">\n+<div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="dialog-title" className="modal-container">`;
+        const blob = new Blob([patchContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'a11yforge-repair-order-modal.patch';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Downloaded: a11yforge-repair-order-modal.patch');
+      });
+    }
+  })();
+</script></main><footer class="w-full bg-surface-container-lowest mt-space-3xl"><div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop py-space-2xl flex flex-col md:flex-row items-center justify-between gap-space-lg"><div class="flex flex-col gap-space-2xs"><span class="font-mono-sm text-mono-sm text-on-surface-variant">[✓] WCAG AAA STRICT MONOCHROME COMPLIANCE</span><span class="font-mono-sm text-mono-sm text-outline">Press ? or Tab to navigate • Zero-Hue Diagnostic Architecture</span></div><div class="flex items-center gap-space-xl"><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" data-path="ruleset" href="#">Ruleset Spec</a><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" data-path="technical-evidence" href="#">Audit Traces</a><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" data-path="documentation" href="#">CLI Documentation</a><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" href="https://github.com" rel="noopener noreferrer" target="_blank">Repository</a></div></div></footer></body></html>

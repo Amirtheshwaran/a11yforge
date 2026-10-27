@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><title>A11yForge — Autonomous Accessibility Engineering</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;background:#131313;color:#e2e2e2;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #ffffff!important;outline-offset:2px!important;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "inverse-surface": "#e2e2e2", "on-tertiary-fixed": "#1a1c1c", "tertiary-container": "#e2e2e2", "secondary": "#c7c6c6", "on-tertiary": "#2f3131", "on-secondary": "#303031", "surface-container": "#1f1f1f", "on-primary": "#2f3131", "on-error": "#690005", "surface-container-highest": "#353535", "outline-variant": "#444748", "primary-fixed": "#e2e2e2", "surface-container-high": "#2a2a2a", "error-container": "#93000a", "secondary-container": "#464747", "surface-tint": "#c6c6c7", "primary-fixed-dim": "#c6c6c7", "surface-bright": "#393939", "surface-container-low": "#1b1b1b", "secondary-fixed-dim": "#c7c6c6", "tertiary-fixed": "#e2e2e2", "on-primary-container": "#636565", "primary": "#ffffff", "secondary-fixed": "#e3e2e2", "on-primary-fixed-variant": "#454747", "on-background": "#e2e2e2", "surface": "#131313", "on-surface-variant": "#c4c7c8", "on-secondary-container": "#b5b5b5", "surface-variant": "#353535", "inverse-primary": "#5d5f5f", "on-primary-fixed": "#1a1c1c", "on-tertiary-fixed-variant": "#454747", "outline": "#8e9192", "surface-container-lowest": "#0e0e0e", "on-error-container": "#ffdad6", "surface-dim": "#131313", "error": "#ffb4ab", "on-secondary-fixed": "#1b1c1c", "on-surface": "#e2e2e2", "background": "#131313", "primary-container": "#e2e2e2", "inverse-on-surface": "#303030", "tertiary": "#ffffff", "on-tertiary-container": "#636565", "on-secondary-fixed-variant": "#464747", "tertiary-fixed-dim": "#c6c6c7" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xl": "1.5rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-md": "0.75rem", "gutter": "1rem", "space-2xs": "0.125rem", "margin": "1rem", "gutter-desktop": "1.5rem", "space-3xl": "3rem", "space-lg": "1rem", "space-2xl": "2rem", "margin-desktop": "2rem" }, "fontFamily": { "body-lg": ["Inter"], "body-sm": ["Inter"], "display-lg": ["Inter"], "label-caps": ["JetBrains Mono"], "mono-sm": ["JetBrains Mono"], "headline-lg": ["Inter"], "headline-md": ["Inter"], "display-lg-mobile": ["Inter"], "mono-md": ["JetBrains Mono"], "mono-lg": ["JetBrains Mono"], "body-md": ["Inter"], "headline-sm": ["Inter"] }, "fontSize": { "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }], "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }], "mono-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "400" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "mono-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }], "mono-lg": ["15px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-primary selection:text-surface"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-margin lg:px-margin-desktop flex items-center justify-between"><div class="flex items-center"><a class="font-headline-sm text-headline-sm text-primary font-semibold tracking-tight hover:text-on-surface transition-colors focus-visible:outline-none" data-path="test-a-site" href="#">A11yForge</a></div><nav class="flex items-center gap-space-xl" data-active-classes="text-primary font-semibold"><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="test-a-site" href="#">Test a site</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="demo" href="#">Demo</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="technical-evidence" href="#">Technical evidence</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="https://github.com" rel="noopener noreferrer" target="_blank">GitHub</a></nav></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-4rem)] max-w-7xl mx-auto px-margin lg:px-margin-desktop"><div class="flex flex-col w-full">
+<!-- Top Notice / Historical Session Banner -->
+<section class="w-full bg-surface-container-low rounded-lg p-space-md sm:p-space-lg mb-space-2xl">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-start sm:items-center gap-space-md">
+<span class="inline-flex items-center gap-space-xs px-space-sm py-space-2xs bg-surface-container-highest text-primary font-label-caps text-label-caps tracking-widest uppercase rounded">
+<span class="material-symbols-outlined text-[13px] leading-none">history</span>
+          RECORDED REAL RUN
+        </span>
+<p class="font-body-md text-body-md text-on-surface-variant">
+          This is a real historical A11yForge repair run bundled with the project. It is not executing now.
+        </p>
+</div>
+<div class="flex items-center gap-space-lg font-mono-sm text-mono-sm text-outline shrink-0">
+<span>RUN ID #AF-89104-HIST</span>
+<span class="text-surface-variant">/</span>
+<span>DURATION: 4.82s</span>
+</div>
+</div>
+</section>
+<!-- Execution Header -->
+<header class="w-full mb-space-3xl">
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-xl">
+<div class="space-y-space-xs max-w-3xl">
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Historical Audit • Patch Loop Verification</span>
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight">Autonomous Repair: Modal Keyboard Trap</h1>
+<div class="flex flex-wrap items-center gap-x-space-md gap-y-space-xs pt-space-xs">
+<span class="font-mono-md text-mono-md text-on-surface">Target:</span>
+<code class="font-mono-md text-mono-md bg-surface-container px-space-xs py-space-2xs rounded text-primary">
+            demo.a11yforge.dev/checkout-modal (React / TypeScript)
+          </code>
+</div>
+</div>
+<!-- Quick Metrics Telemetry (Monochrome Instrument Display) -->
+<div class="grid grid-cols-3 gap-space-sm p-space-md bg-surface-container rounded-lg min-w-full sm:min-w-[340px] lg:min-w-[380px]">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase">Iter. Bound</span>
+<span class="font-mono-lg text-mono-lg text-primary font-semibold">2 / 2 MAX</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase">Regression Gate</span>
+<span class="font-mono-lg text-mono-lg text-primary font-semibold">[✓] 14 PASSED</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase">Status</span>
+<span class="font-mono-lg text-mono-lg text-primary font-semibold">TERMINATED_OK</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Interactive Timeline Filter & Execution Track -->
+<section aria-label="Chronological Step Verification Track" class="w-full mb-space-3xl">
+<div class="flex items-center justify-between pb-space-md mb-space-xl">
+<div class="flex items-center gap-space-md">
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-outline">Execution Sequence</span>
+<span class="font-mono-sm text-mono-sm text-outline">[9/9 Completed Events]</span>
+</div>
+<button class="inline-flex items-center gap-space-xs font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors focus-visible:outline-none" id="toggle-details" type="button">
+<span class="material-symbols-outlined text-[15px]">unfold_more</span>
+<span>Toggle Diagnostic Payloads</span>
+</button>
+</div>
+<!-- Timeline Root -->
+<div class="relative flex flex-col space-y-space-lg">
+<!-- Structural Timeline Spine -->
+<div class="absolute left-4 top-3 bottom-6 w-0.5 bg-surface-container-highest -translate-x-1/2 pointer-events-none hidden sm:block"></div>
+<!-- STEP 1 -->
+<article class="relative flex flex-col sm:flex-row items-start gap-space-lg bg-surface-container-low p-space-lg rounded-lg">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-highest text-primary font-mono-md text-mono-md shrink-0 sm:z-10">
+          01
+        </div>
+<div class="flex-1 w-full space-y-space-xs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs">
+<span class="font-mono-md">[✓]</span> Accessibility failure reproduced
+            </h2>
+<span class="font-mono-sm text-mono-sm text-outline">T+0.21s • CHROMIUM_AXE</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Synthetic headless Chromium runner dispatched 4 Tab keys. Focus escaped dialog boundary to background link <code class="font-mono-sm text-on-surface bg-surface-container px-1 py-0.5 rounded">#cancel-order</code>.
+          </p>
+<div class="mt-space-md diagnostic-payload hidden bg-surface-container p-space-md rounded font-mono-sm text-mono-sm text-secondary space-y-1">
+<div class="text-outline">TRACE: Focused Node History:</div>
+<div>[0] &lt;button id="confirm-cart"&gt; → Dialog Trigger</div>
+<div>[1] &lt;input name="shipping_address"&gt; → Inside #modal-root</div>
+<div>[2] &lt;button id="submit-order"&gt; → Inside #modal-root</div>
+<div class="text-primary font-semibold">[!] &lt;a href="/cart" id="cancel-order"&gt; → VIOLATION: Escaped Aria Modal Boundary</div>
+</div>
+</div>
+</article>
+<!-- STEP 2 -->
+<article class="relative flex flex-col sm:flex-row items-start gap-space-lg bg-surface-container-low p-space-lg rounded-lg">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-highest text-primary font-mono-md text-mono-md shrink-0 sm:z-10">
+          02
+        </div>
+<div class="flex-1 w-full space-y-space-xs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs">
+<span class="font-mono-md">[✓]</span> Responsible source located
+            </h2>
+<span class="font-mono-sm text-mono-sm text-outline">T+0.84s • AST_RESOLVER</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            AST resolver matched accessible name <span class="text-on-surface font-medium">'Order Confirmation'</span> to <code class="font-mono-sm text-primary bg-surface-container px-1 py-0.5 rounded">src/components/OrderModal.tsx:42</code>.
+          </p>
+<div class="mt-space-md diagnostic-payload hidden bg-surface-container p-space-md rounded font-mono-sm text-mono-sm text-secondary">
+<span class="text-outline">TARGET NODE:</span> TSXElement: JSXOpeningElement &lt;div role="dialog" aria-modal="true" aria-labelledby="modal-title"&gt;
+          </div>
+</div>
+</article>
+<!-- STEP 3 -->
+<article class="relative flex flex-col sm:flex-row items-start gap-space-lg bg-surface-container-low p-space-lg rounded-lg">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-highest text-primary font-mono-md text-mono-md shrink-0 sm:z-10">
+          03
+        </div>
+<div class="flex-1 w-full space-y-space-xs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs">
+<span class="font-mono-md">[✓]</span> First repair created
+            </h2>
+<span class="font-mono-sm text-mono-sm text-outline">T+1.45s • PATCH_GEN_v1</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Generated initial patch implementing inline keydown listener.
+          </p>
+<div class="mt-space-md diagnostic-payload hidden bg-surface-container p-space-md rounded font-mono-sm text-mono-sm space-y-1">
+<div class="text-outline">PATCH DIFF ITERATION 1:</div>
+<div class="line-through opacity-70">[-] onKeyDown={(e) =&gt; { if (e.key === 'Escape') onClose(); }}</div>
+<div class="font-semibold text-primary">[+] onKeyDown={(e) =&gt; { containerRef.current?.trapFocus(e); }}</div>
+</div>
+</div>
+</article>
+<!-- STEP 4 (Rejection step) -->
+<article class="relative flex flex-col sm:flex-row items-start gap-space-lg bg-surface-container-high p-space-lg rounded-lg">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-highest text-primary font-mono-md text-mono-md shrink-0 sm:z-10">
+          04
+        </div>
+<div class="flex-1 w-full space-y-space-xs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs">
+<span class="font-mono-md text-primary font-bold">[!]</span> First repair rejected
+            </h2>
+<span class="font-mono-sm text-mono-sm text-outline">T+1.98s • TYPE_VERIFY</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+<span class="text-primary font-medium">Reason:</span> TypeScript verification failed <code class="font-mono-sm text-primary bg-surface-container-lowest px-1 py-0.5 rounded">(TS2339: Property 'trapFocus' does not exist on type 'HTMLElement')</code>.
+          </p>
+<div class="mt-space-md bg-surface-container-lowest p-space-md rounded font-mono-sm text-mono-sm text-secondary">
+<div class="text-outline uppercase text-label-caps font-label-caps mb-1">Compiler Diagnostic Log</div>
+<div>src/components/OrderModal.tsx:58:32 - error TS2339: Property 'trapFocus' does not exist on type 'HTMLDivElement'.</div>
+<div class="text-outline">58 | containerRef.current?.trapFocus(e);</div>
+<div class="text-outline">   |                        ^^^^^^^^^</div>
+<div class="mt-2 text-primary font-medium">[!] REJECTION VERDICT: Deterministic rule violated. Halting patch commit; invoking iteration 2 feedback.</div>
+</div>
+</div>
+</article>
+<!-- STEP 5 -->
+<article class="relative flex flex-col sm:flex-row items-start gap-space-lg bg-surface-container-low p-space-lg rounded-lg">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-highest text-primary font-mono-md text-mono-md shrink-0 sm:z-10">
+          05
+        </div>
+<div class="flex-1 w-full space-y-space-xs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs">
+<span class="font-mono-md">[✓]</span> Verifier feedback used for one bounded revision
+            </h2>
+<span class="font-mono-sm text-mono-sm text-outline">T+2.60s • REFINER_CORE</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Compiler diagnostics passed back into deterministic repair engine. Applied typed <code class="font-mono-sm text-primary bg-surface-container px-1 py-0.5 rounded">useFocusTrap</code> hook.
+          </p>
+<div class="mt-space-md diagnostic-payload hidden bg-surface-container p-space-md rounded font-mono-sm text-mono-sm text-secondary">
+<div>RESOLVED: Injected typed helper hook import • Verified DOM Node binding</div>
+<div class="text-primary mt-1">[+] import { useFocusTrap } from '@/hooks/useFocusTrap';</div>
+<div class="text-primary">[+] const modalRef = useFocusTrap&lt;HTMLDivElement&gt;({ active: isOpen, escapeDeactivates: true });</div>
+</div>
+</div>
+</article>
+<!-- STEP 6 -->
+<article class="relative flex flex-col sm:flex-row items-start gap-space-lg bg-surface-container-low p-space-lg rounded-lg">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-highest text-primary font-mono-md text-mono-md shrink-0 sm:z-10">
+          06
+        </div>
+<div class="flex-1 w-full space-y-space-xs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs">
+<span class="font-mono-md">[✓]</span> Second repair built successfully
+            </h2>
+<span class="font-mono-sm text-mono-sm text-outline">T+3.40s • BUILD_VERIFY</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            TypeScript compilation zero errors, bundling succeeded in 1.4s.
+          </p>
+<div class="mt-space-md diagnostic-payload hidden bg-surface-container p-space-md rounded font-mono-sm text-mono-sm text-secondary">
+<div>$ tsc --noEmit --project tsconfig.json</div>
+<div class="text-primary font-semibold">[✓] Exit status 0 (0 warnings, 0 type errors)</div>
+<div>$ vite build --mode production → 12 modules transformed (1.42s)</div>
+</div>
+</div>
+</article>
+<!-- STEP 7 -->
+<article class="relative flex flex-col sm:flex-row items-start gap-space-lg bg-surface-container-low p-space-lg rounded-lg">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-highest text-primary font-mono-md text-mono-md shrink-0 sm:z-10">
+          07
+        </div>
+<div class="flex-1 w-full space-y-space-xs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs">
+<span class="font-mono-md">[✓]</span> Original accessibility failure replayed successfully
+            </h2>
+<span class="font-mono-sm text-mono-sm text-outline">T+4.12s • PLAYBACK_RETEST</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Headless re-run executed: Focus reliably cycles inside dialog, Escape key dismisses.
+          </p>
+<div class="mt-space-md diagnostic-payload hidden bg-surface-container p-space-md rounded font-mono-sm text-mono-sm space-y-1">
+<div class="text-outline">SYNTHETIC KEYBOARD HARNESS:</div>
+<div>[PASS] Cycle loop forward: Final interactive element loops to First interactive element</div>
+<div>[PASS] Shift+Tab backwards cycle verified</div>
+<div>[PASS] Escape key listener captures event &amp; restorer shifts focus to trigger button</div>
+</div>
+</div>
+</article>
+<!-- STEP 8 -->
+<article class="relative flex flex-col sm:flex-row items-start gap-space-lg bg-surface-container-low p-space-lg rounded-lg">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-highest text-primary font-mono-md text-mono-md shrink-0 sm:z-10">
+          08
+        </div>
+<div class="flex-1 w-full space-y-space-xs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs">
+<span class="font-mono-md">[✓]</span> No accessibility regression introduced
+            </h2>
+<span class="font-mono-sm text-mono-sm text-outline">T+4.65s • AXE_REGRESSION</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Axe-core 4.8.2 suite re-run: 14 existing rules passed.
+          </p>
+<div class="mt-space-md diagnostic-payload hidden bg-surface-container p-space-md rounded font-mono-sm text-mono-sm text-secondary">
+<div>Rules evaluated: document-title, color-contrast, aria-required-children, focus-order-semantics, bypass, label...</div>
+<div class="text-primary font-medium">[✓] 14 PASSED / 0 FAILED / 0 INAPPLICABLE / 0 INCOMPLETE</div>
+</div>
+</div>
+</article>
+<!-- STEP 9 (Accepted) -->
+<article class="relative flex flex-col sm:flex-row items-start gap-space-lg bg-surface-container p-space-lg rounded-lg shadow-md">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-surface font-mono-md text-mono-md shrink-0 sm:z-10">
+          09
+        </div>
+<div class="flex-1 w-full space-y-space-xs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs font-semibold">
+<span class="font-mono-md">[✓]</span> Repair accepted
+            </h2>
+<span class="font-mono-sm text-mono-sm text-outline">T+4.82s • COMMIT_READY</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface">
+            Verification gate confirmed: Patch ready for pull request issuance.
+          </p>
+<div class="mt-space-md p-space-md bg-surface-container-lowest rounded font-mono-sm text-mono-sm flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm text-primary">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span>BRANCH: patch/a11yforge-modal-trap-fix-TS</span>
+</div>
+<div class="text-outline">SHA256: e8b941cd09a...</div>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- Evidence Code Inspector View -->
+<section class="w-full bg-surface-container-low rounded-lg p-space-xl mb-space-3xl">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-space-sm">
+<div class="space-y-1">
+<h3 class="font-headline-sm text-headline-sm text-primary">Generated Git Patch Payload</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Deterministic output verified against WCAG 2.2 Criterion 2.1.2 (No Keyboard Trap).</p>
+</div>
+<span class="font-mono-sm text-mono-sm bg-surface-container px-space-sm py-space-2xs rounded text-outline">
+        UNIFIED DIFF
+      </span>
+</div>
+<!-- Code Block -->
+<div class="bg-surface-container-lowest p-space-md sm:p-space-lg rounded font-mono-sm text-mono-sm overflow-x-auto leading-relaxed">
+<div class="text-outline">--- a/src/components/OrderModal.tsx</div>
+<div class="text-outline">+++ b/src/components/OrderModal.tsx</div>
+<div class="text-outline">@@ -12,4 +12,5 @@</div>
+<div class="text-outline"> import React, { useRef } from 'react';</div>
+<div class="text-primary font-semibold">[+] import { useFocusTrap } from '../hooks/useFocusTrap';</div>
+<div class="text-outline"> </div>
+<div class="text-outline">@@ -41,6 +42,7 @@ export const OrderModal = ({ isOpen, onClose, items }: OrderModalProps) =&gt; {</div>
+<div class="line-through text-outline">[-]   const modalRef = useRef&lt;HTMLDivElement&gt;(null);</div>
+<div class="text-primary font-semibold">[+]   const modalRef = useFocusTrap&lt;HTMLDivElement&gt;({ active: isOpen, onEscape: onClose });</div>
+<div class="text-outline"> </div>
+<div class="text-outline">     return (</div>
+<div class="text-outline">       &lt;div role="dialog" aria-modal="true" aria-labelledby="modal-title" ref={modalRef}&gt;</div>
+</div>
+</section>
+<!-- Action CTAs -->
+<section class="w-full bg-surface-container p-space-xl sm:p-space-2xl rounded-lg mb-space-3xl flex flex-col md:flex-row md:items-center justify-between gap-space-xl">
+<div class="space-y-space-xs max-w-xl">
+<h3 class="font-headline-md text-headline-md text-primary tracking-tight">Run verification on your codebase</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+        Execute full autonomous audits with deterministic headless verification, zero hallucinated properties, and regression test suites.
+      </p>
+</div>
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-space-md shrink-0">
+<a class="inline-flex items-center justify-center px-space-lg py-space-sm bg-primary text-on-primary font-headline-sm text-headline-sm rounded hover:opacity-90 transition-opacity focus-visible:outline-none" data-path="test-a-site" href="#">
+        Test your own site
+      </a>
+<a class="inline-flex items-center justify-center px-space-lg py-space-sm bg-surface-container-high text-primary font-headline-sm text-headline-sm rounded hover:bg-surface-container-highest transition-colors focus-visible:outline-none" data-path="technical-evidence" href="#">
+        Technical evidence
+      </a>
+</div>
+</section>
+<!-- Micro-interaction Script for Diagnostic Expansion -->
+<script>
+    (function () {
+      const toggleBtn = document.getElementById('toggle-details');
+      if (!toggleBtn) return;
+      
+      let expanded = false;
+      toggleBtn.addEventListener('click', function () {
+        expanded = !expanded;
+        const payloads = document.querySelectorAll('.diagnostic-payload');
+        payloads.forEach(function (el) {
+          if (expanded) {
+            el.classList.remove('hidden');
+          } else {
+            el.classList.add('hidden');
+          }
+        });
+        
+        const label = toggleBtn.querySelector('span:last-child');
+        if (label) {
+          label.textContent = expanded ? 'Collapse Diagnostic Payloads' : 'Toggle Diagnostic Payloads';
+        }
+      });
+    })();
+  </script>
+</div></main><footer class="w-full bg-surface-container-lowest mt-space-3xl"><div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop py-space-xl flex flex-col sm:flex-row items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><span class="font-mono-sm text-mono-sm text-outline">a11yforge.engine // wcag aaa strict</span></div><div class="flex items-center gap-space-lg"><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" data-path="technical-evidence" href="#">Evidence Log</a><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" href="https://github.com" rel="noopener noreferrer" target="_blank">GitHub</a></div></div></footer></body></html>

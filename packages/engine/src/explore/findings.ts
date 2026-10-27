@@ -62,6 +62,8 @@ interface HighlightBox {
   height: number;
   viewportWidth: number;
   viewportHeight: number;
+  /** Present on newer runs: steps at another scroll offset do not align. */
+  scrollY?: number;
 }
 
 function isHighlightBox(value: unknown): value is HighlightBox {
@@ -155,22 +157,62 @@ function projectSingle(
       : typeof anomalyRole === "string" && anomalyRole !== ""
         ? anomalyRole
         : "focused element";
-  const highlights =
-    screenshot === "" || !isHighlightBox(anomalyBox)
+  const anomalySelector =
+    typeof anomaly?.data["selector"] === "string" ? (anomaly?.data["selector"] as string) : "";
+  // Recorded focus sequence, in traversal order: only steps measured at
+  // the failure shot's scroll position align to it. Steps without scroll
+  // data (older runs) attach as before so legacy evidence keeps working.
+  const finalScrollY =
+    isHighlightBox(anomalyBox) && typeof anomalyBox.scrollY === "number" ? anomalyBox.scrollY : null;
+  const recorded = anomaly?.data["focusSteps"];
+  const sequence =
+    screenshot === "" || !Array.isArray(recorded)
       ? []
-      : [
-          {
-            screenshot,
-            x: anomalyBox.x,
-            y: anomalyBox.y,
-            width: anomalyBox.width,
-            height: anomalyBox.height,
-            viewportWidth: anomalyBox.viewportWidth,
-            viewportHeight: anomalyBox.viewportHeight,
-            label: anomalyLabel,
-            selector: typeof anomaly?.data["selector"] === "string" ? (anomaly?.data["selector"] as string) : "",
-          },
-        ];
+      : recorded.flatMap((step: unknown) => {
+          if (typeof step !== "object" || step === null) return [];
+          const entry = step as Record<string, unknown>;
+          if (typeof entry["label"] !== "string" || entry["label"] === "") return [];
+          const box: unknown = entry["box"];
+          if (!isHighlightBox(box)) return [];
+          if (
+            finalScrollY !== null &&
+            typeof box["scrollY"] === "number" &&
+            Math.abs(box["scrollY"] - finalScrollY) > 2
+          ) {
+            return [];
+          }
+          return [
+            {
+              screenshot,
+              x: box.x,
+              y: box.y,
+              width: box.width,
+              height: box.height,
+              viewportWidth: box.viewportWidth,
+              viewportHeight: box.viewportHeight,
+              label: entry["label"],
+              selector: typeof entry["selector"] === "string" ? (entry["selector"] as string) : "",
+            },
+          ];
+        });
+  const highlights =
+    sequence.length > 0
+      ? sequence
+      : screenshot === "" || !isHighlightBox(anomalyBox)
+        ? []
+        : [
+            {
+              screenshot,
+              x: anomalyBox.x,
+              y: anomalyBox.y,
+              width: anomalyBox.width,
+              height: anomalyBox.height,
+              viewportWidth: anomalyBox.viewportWidth,
+              viewportHeight: anomalyBox.viewportHeight,
+              label: anomalyLabel,
+              selector: anomalySelector,
+            },
+          ];
   return {
     findingId: `${result.probeId}-${index}`,
     category,

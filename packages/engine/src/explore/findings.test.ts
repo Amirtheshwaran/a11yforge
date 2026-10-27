@@ -158,4 +158,72 @@ describe("projectFindings", () => {
       { screenshot: "screenshot-1.png", ...box, label: "iframe", selector: "iframe" },
     ]);
   });
+
+  it("projects the recorded focus sequence in order, skipping scrolled and unmeasured steps", () => {
+    const atTop = { x: 10, y: 10, width: 40, height: 20, viewportWidth: 1280, viewportHeight: 720, scrollY: 0 };
+    const scrolled = { x: 10, y: 900, width: 40, height: 20, viewportWidth: 1280, viewportHeight: 720, scrollY: 400 };
+    const failed = baseResult({
+      status: "failed",
+      title: "Keyboard focus moved to content hidden from assistive technology.",
+      screenshots: ["screenshot-1.png"],
+      evidence: [
+        {
+          kind: "keyboard-focus-anomaly",
+          summary: "focus landed on hidden content at step 3",
+          data: {
+            role: "link",
+            name: "Help",
+            selector: "#background-help",
+            box: { ...atTop, x: 200 },
+            startLabel: "body",
+            steps: 3,
+            focusSteps: [
+              { label: 'button "Menu" (button.menu)', selector: "button.menu", box: atTop },
+              { label: 'link "Help" (#background-help)', selector: "#background-help", box: { ...atTop, x: 200 } },
+              // Measured at another scroll position: not on this screenshot.
+              { label: 'control "Later" (#later)', selector: "#later", box: scrolled },
+              // Never measurable: text only.
+              { label: "the page body", selector: "body", box: null },
+            ],
+          },
+        },
+      ],
+    });
+    const [finding] = projectFindings([failed]);
+    assert.ok(finding !== undefined);
+    assert.deepEqual(
+      finding.highlights.map((highlight) => highlight.label),
+      ['button "Menu" (button.menu)', 'link "Help" (#background-help)'],
+    );
+    assert.ok(
+      finding.highlights.every((highlight) => highlight.screenshot === "screenshot-1.png"),
+    );
+  });
+
+  it("attaches legacy anomaly boxes without scroll data instead of dropping them", () => {
+    const box = { x: 5, y: 5, width: 50, height: 20, viewportWidth: 1280, viewportHeight: 720 };
+    const failed = baseResult({
+      status: "failed",
+      title: "Keyboard focus moved to content hidden from assistive technology.",
+      screenshots: ["screenshot-1.png"],
+      evidence: [
+        {
+          kind: "keyboard-focus-anomaly",
+          summary: "focus landed on hidden content at step 3",
+          data: {
+            role: "iframe",
+            name: "",
+            selector: "iframe",
+            box,
+            startLabel: "body",
+            steps: 3,
+            focusSteps: [{ label: "iframe", selector: "iframe", box }],
+          },
+        },
+      ],
+    });
+    const [finding] = projectFindings([failed]);
+    assert.ok(finding !== undefined);
+    assert.equal(finding.highlights.length, 1);
+  });
 });

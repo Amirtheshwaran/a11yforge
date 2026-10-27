@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><title>A11yForge — Autonomous Accessibility Engineering</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;background:#131313;color:#e2e2e2;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #ffffff!important;outline-offset:2px!important;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "inverse-surface": "#e2e2e2", "on-tertiary-fixed": "#1a1c1c", "tertiary-container": "#e2e2e2", "secondary": "#c7c6c6", "on-tertiary": "#2f3131", "on-secondary": "#303031", "surface-container": "#1f1f1f", "on-primary": "#2f3131", "on-error": "#690005", "surface-container-highest": "#353535", "outline-variant": "#444748", "primary-fixed": "#e2e2e2", "surface-container-high": "#2a2a2a", "error-container": "#93000a", "secondary-container": "#464747", "surface-tint": "#c6c6c7", "primary-fixed-dim": "#c6c6c7", "surface-bright": "#393939", "surface-container-low": "#1b1b1b", "secondary-fixed-dim": "#c7c6c6", "tertiary-fixed": "#e2e2e2", "on-primary-container": "#636565", "primary": "#ffffff", "secondary-fixed": "#e3e2e2", "on-primary-fixed-variant": "#454747", "on-background": "#e2e2e2", "surface": "#131313", "on-surface-variant": "#c4c7c8", "on-secondary-container": "#b5b5b5", "surface-variant": "#353535", "inverse-primary": "#5d5f5f", "on-primary-fixed": "#1a1c1c", "on-tertiary-fixed-variant": "#454747", "outline": "#8e9192", "surface-container-lowest": "#0e0e0e", "on-error-container": "#ffdad6", "surface-dim": "#131313", "error": "#ffb4ab", "on-secondary-fixed": "#1b1c1c", "on-surface": "#e2e2e2", "background": "#131313", "primary-container": "#e2e2e2", "inverse-on-surface": "#303030", "tertiary": "#ffffff", "on-tertiary-container": "#636565", "on-secondary-fixed-variant": "#464747", "tertiary-fixed-dim": "#c6c6c7" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xl": "1.5rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-md": "0.75rem", "gutter": "1rem", "space-2xs": "0.125rem", "margin": "1rem", "gutter-desktop": "1.5rem", "space-3xl": "3rem", "space-lg": "1rem", "space-2xl": "2rem", "margin-desktop": "2rem" }, "fontFamily": { "body-lg": ["Inter"], "body-sm": ["Inter"], "display-lg": ["Inter"], "label-caps": ["JetBrains Mono"], "mono-sm": ["JetBrains Mono"], "headline-lg": ["Inter"], "headline-md": ["Inter"], "display-lg-mobile": ["Inter"], "mono-md": ["JetBrains Mono"], "mono-lg": ["JetBrains Mono"], "body-md": ["Inter"], "headline-sm": ["Inter"] }, "fontSize": { "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }], "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }], "mono-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "400" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "mono-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }], "mono-lg": ["15px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-primary selection:text-surface"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-margin lg:px-margin-desktop flex items-center justify-between"><div class="flex items-center"><a class="font-headline-sm text-headline-sm text-primary font-semibold tracking-tight hover:text-on-surface transition-colors focus-visible:outline-none" data-path="test-a-site" href="#">A11yForge</a></div><nav class="flex items-center gap-space-xl" data-active-classes="text-primary font-semibold"><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="test-a-site" href="#">Test a site</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="demo" href="#">Demo</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="technical-evidence" href="#">Technical evidence</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="https://github.com" rel="noopener noreferrer" target="_blank">GitHub</a></nav></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-4rem)] max-w-7xl mx-auto px-margin lg:px-margin-desktop"><div class="flex flex-col w-full">
+<!-- Top Utility Context Bar & Breadcrumb -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-lg">
+<nav aria-label="Breadcrumb" class="flex items-center gap-space-xs font-mono-sm text-mono-sm text-on-surface-variant">
+<a class="hover:text-primary transition-colors focus-visible:outline-none" href="#">Results</a>
+<span class="text-outline">/</span>
+<a class="hover:text-primary transition-colors focus-visible:outline-none" href="#">Selected issue</a>
+<span class="text-outline">/</span>
+<a class="hover:text-primary transition-colors focus-visible:outline-none" href="#">Verified repair</a>
+<span class="text-outline">/</span>
+<span aria-current="page" class="text-primary font-medium">Patch</span>
+</nav>
+<div class="flex items-center gap-space-md font-mono-sm text-mono-sm text-on-surface-variant">
+<span class="flex items-center gap-space-2xs text-outline">
+<span class="material-symbols-outlined text-[14px]">commit</span>
+        Source rev:
+      </span>
+<span class="px-space-xs py-space-2xs bg-surface-container text-primary rounded font-mono-sm">abc1234</span>
+<span class="w-1 h-1 bg-outline rounded-full hidden sm:inline-block"></span>
+<span class="text-outline hidden sm:inline-block">Engine v4.9.2</span>
+</div>
+</div>
+<!-- Primary Header & Technical Specification -->
+<header class="flex flex-col gap-space-md pb-space-xl">
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg">
+<div>
+<div class="flex items-center gap-space-sm mb-space-2xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant tracking-wider uppercase">Verification Artifact</span>
+<span class="px-space-xs py-space-2xs bg-surface-container-highest text-primary font-mono-sm text-mono-sm rounded">WCAG 2.2 · 2.4.3</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight">Repair</h1>
+</div>
+<!-- Target File Registry Card -->
+<div class="bg-surface-container-low p-space-md rounded flex items-center justify-between gap-space-xl shadow-sm min-w-[280px]">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-outline">description</span>
+<div class="min-w-0">
+<div class="font-mono-sm text-mono-sm text-outline uppercase tracking-wider">Target File</div>
+<div class="font-mono-md text-mono-md text-primary truncate" title="src/components/Dialog.tsx">src/components/Dialog.tsx</div>
+</div>
+</div>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant bg-surface-container px-space-xs py-space-2xs rounded shrink-0">TSX</span>
+</div>
+</div>
+<!-- Reason for Change Banner -->
+<div class="bg-surface-container p-space-lg rounded shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-start md:items-center gap-space-md">
+<span class="material-symbols-outlined text-primary text-[20px] mt-0.5 md:mt-0">flag</span>
+<div>
+<span class="font-mono-sm text-mono-sm text-outline uppercase tracking-wide mr-space-xs">Reason for change:</span>
+<span class="font-body-md text-body-md text-primary font-medium">Keep keyboard focus inside the active dialog.</span>
+</div>
+</div>
+<div class="flex items-center gap-space-lg font-mono-sm text-mono-sm text-on-surface-variant">
+<span>+4 lines added</span>
+<span class="w-1 h-1 bg-outline rounded-full"></span>
+<span>-1 line removed</span>
+</div>
+</div>
+</header>
+<!-- Focused Unified Monochrome Diff Viewer -->
+<section aria-label="Patch Unified Diff" class="flex flex-col bg-surface-container-lowest rounded shadow-xl overflow-hidden mb-space-xl">
+<!-- Diff Header Bar -->
+<div class="bg-surface-container-high px-space-lg py-space-sm flex items-center justify-between select-none">
+<div class="flex items-center gap-space-md font-mono-sm text-mono-sm text-primary">
+<span class="flex items-center gap-space-2xs">
+<span class="material-symbols-outlined text-[16px] text-outline">difference</span>
+          unified diff
+        </span>
+<span class="text-outline">src/components/Dialog.tsx</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<button aria-label="Copy unified patch text" class="px-space-sm py-space-2xs bg-surface-container text-on-surface hover:text-primary hover:bg-surface-container-highest transition-colors rounded font-mono-sm text-mono-sm flex items-center gap-space-xs focus-visible:outline-none" id="btn-copy-raw">
+<span class="material-symbols-outlined text-[14px]">content_copy</span>
+<span id="copy-label">Copy Patch</span>
+</button>
+</div>
+</div>
+<!-- Diff Code View -->
+<div aria-label="Unified Diff Source" class="overflow-x-auto w-full font-mono-md text-mono-md leading-relaxed select-text" role="region" tabindex="0">
+<!-- Chunk Header -->
+<div class="flex w-full bg-surface-container-low text-on-surface-variant py-space-2xs px-space-md border-none select-none">
+<span class="w-20 shrink-0 font-mono-sm text-mono-sm text-outline">@@ -28,7 +28,12 @@</span>
+<span class="font-mono-sm text-mono-sm text-outline italic">export function Dialog({ isOpen, onClose, children }: DialogProps) {</span>
+</div>
+<!-- Unchanged Context Line 1 -->
+<div class="flex w-full hover:bg-surface-container-low/40 transition-colors">
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm">28</div>
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm">28</div>
+<div class="w-6 shrink-0 text-center text-outline select-none font-mono-sm text-mono-sm"> </div>
+<div class="px-space-md text-on-surface whitespace-pre">  if (!isOpen) return null;</div>
+</div>
+<!-- Unchanged Context Line 2 -->
+<div class="flex w-full hover:bg-surface-container-low/40 transition-colors">
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm">29</div>
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm">29</div>
+<div class="w-6 shrink-0 text-center text-outline select-none font-mono-sm text-mono-sm"> </div>
+<div class="px-space-md text-on-surface whitespace-pre"> </div>
+</div>
+<!-- Added Line 1 -->
+<div class="flex w-full bg-surface-container hover:bg-surface-container-high transition-colors">
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm"></div>
+<div class="w-10 shrink-0 text-right pr-space-sm text-primary select-none font-mono-sm text-mono-sm font-semibold">30</div>
+<div class="w-6 shrink-0 text-center text-primary select-none font-mono-sm text-mono-sm font-semibold">[+]</div>
+<div class="px-space-md text-primary font-medium whitespace-pre">  // Trap focus within modal boundary during active presentation</div>
+</div>
+<!-- Added Line 2 -->
+<div class="flex w-full bg-surface-container hover:bg-surface-container-high transition-colors">
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm"></div>
+<div class="w-10 shrink-0 text-right pr-space-sm text-primary select-none font-mono-sm text-mono-sm font-semibold">31</div>
+<div class="w-6 shrink-0 text-center text-primary select-none font-mono-sm text-mono-sm font-semibold">[+]</div>
+<div class="px-space-md text-primary font-medium whitespace-pre">  const modalRef = useFocusTrap({ active: isOpen, onEscape: onClose });</div>
+</div>
+<!-- Added Line 3 -->
+<div class="flex w-full bg-surface-container hover:bg-surface-container-high transition-colors">
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm"></div>
+<div class="w-10 shrink-0 text-right pr-space-sm text-primary select-none font-mono-sm text-mono-sm font-semibold">32</div>
+<div class="w-6 shrink-0 text-center text-primary select-none font-mono-sm text-mono-sm font-semibold">[+]</div>
+<div class="px-space-md text-primary font-medium whitespace-pre"> </div>
+</div>
+<!-- Unchanged Context Line 3 -->
+<div class="flex w-full hover:bg-surface-container-low/40 transition-colors">
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm">30</div>
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm">33</div>
+<div class="w-6 shrink-0 text-center text-outline select-none font-mono-sm text-mono-sm"> </div>
+<div class="px-space-md text-on-surface whitespace-pre">  return (</div>
+</div>
+<!-- Unchanged Context Line 4 -->
+<div class="flex w-full hover:bg-surface-container-low/40 transition-colors">
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm">31</div>
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm">34</div>
+<div class="w-6 shrink-0 text-center text-outline select-none font-mono-sm text-mono-sm"> </div>
+<div class="px-space-md text-on-surface whitespace-pre">    &lt;div className="modal-backdrop" onClick={onClose}&gt;</div>
+</div>
+<!-- Removed Line (Monochrome with [-] and strikethrough styling) -->
+<div class="flex w-full bg-surface-container-lowest/60 hover:bg-surface-container-low/30 transition-colors opacity-75">
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm line-through">32</div>
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm"></div>
+<div class="w-6 shrink-0 text-center text-outline select-none font-mono-sm text-mono-sm">[-]</div>
+<div class="px-space-md text-on-surface-variant line-through whitespace-pre">      &lt;div role="dialog" aria-modal="true" aria-labelledby="dialog-title"&gt;</div>
+</div>
+<!-- Replacement Added Line -->
+<div class="flex w-full bg-surface-container hover:bg-surface-container-high transition-colors">
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm"></div>
+<div class="w-10 shrink-0 text-right pr-space-sm text-primary select-none font-mono-sm text-mono-sm font-semibold">35</div>
+<div class="w-6 shrink-0 text-center text-primary select-none font-mono-sm text-mono-sm font-semibold">[+]</div>
+<div class="px-space-md text-primary font-medium whitespace-pre">      &lt;div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="dialog-title"&gt;</div>
+</div>
+<!-- Unchanged Context Line 5 -->
+<div class="flex w-full hover:bg-surface-container-low/40 transition-colors">
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm">33</div>
+<div class="w-10 shrink-0 text-right pr-space-sm text-outline select-none font-mono-sm text-mono-sm">36</div>
+<div class="w-6 shrink-0 text-center text-outline select-none font-mono-sm text-mono-sm"> </div>
+<div class="px-space-md text-on-surface whitespace-pre">        &lt;h2 id="dialog-title"&gt;Settings&lt;/h2&gt;</div>
+</div>
+</div>
+</section>
+<!-- Verification Status Row -->
+<section aria-label="Verification Diagnostics" class="mb-space-xl">
+<div class="bg-surface-container p-space-lg rounded shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center font-label-caps text-label-caps text-primary">
+          [✓]
+        </div>
+<div>
+<div class="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs">
+<span>[✓] Verified</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-normal">(Replay passed, 0 regressions)</span>
+</div>
+<p class="font-body-sm text-body-sm text-outline mt-0.5">
+            Synthetic screen reader replay confirmed active modal keyboard trap boundary across Tab and Shift+Tab traversals.
+          </p>
+</div>
+</div>
+<div class="flex items-center gap-space-lg shrink-0 font-mono-sm text-mono-sm text-on-surface-variant">
+<div class="flex flex-col text-right">
+<span class="text-outline uppercase text-[10px]">Assertions</span>
+<span class="text-primary font-medium">18 / 18</span>
+</div>
+<div class="flex flex-col text-right">
+<span class="text-outline uppercase text-[10px]">Regression Checks</span>
+<span class="text-primary font-medium">42 / 42</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Patch Technical Evidence & Metadata Bento Grid -->
+<section aria-label="Repair Metadata" class="grid grid-cols-1 md:grid-cols-3 gap-space-lg mb-space-2xl">
+<div class="bg-surface-container-low p-space-lg rounded shadow-sm flex flex-col justify-between">
+<div>
+<div class="font-label-caps text-label-caps text-outline uppercase tracking-wider mb-space-2xs">Focus Trapping</div>
+<div class="font-headline-sm text-headline-sm text-primary mb-space-xs">Tab Constrainment</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Focus cycle locked between active close trigger and deepest navigable child node.</p>
+</div>
+<div class="mt-space-md pt-space-md font-mono-sm text-mono-sm text-outline">
+        Hook: <span class="text-primary">useFocusTrap()</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-space-lg rounded shadow-sm flex flex-col justify-between">
+<div>
+<div class="font-label-caps text-label-caps text-outline uppercase tracking-wider mb-space-2xs">Escape Mechanism</div>
+<div class="font-headline-sm text-headline-sm text-primary mb-space-xs">Dismiss Keycode 27</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Graceful escape bubble handling returns parent context cursor to invoker element.</p>
+</div>
+<div class="mt-space-md pt-space-md font-mono-sm text-mono-sm text-outline">
+        Behavior: <span class="text-primary">DOM Focus Restored</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-space-lg rounded shadow-sm flex flex-col justify-between">
+<div>
+<div class="font-label-caps text-label-caps text-outline uppercase tracking-wider mb-space-2xs">Compliance Impact</div>
+<div class="font-headline-sm text-headline-sm text-primary mb-space-xs">WCAG AAA Delta</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Removes modal leak diagnostic flag in automated continuous integration matrix.</p>
+</div>
+<div class="mt-space-md pt-space-md font-mono-sm text-mono-sm text-outline">
+        Gate Status: <span class="text-primary font-semibold">[PASS] READY_FOR_MERGE</span>
+</div>
+</div>
+</section>
+<!-- Sticky Actions Bar -->
+<footer class="pt-space-md pb-space-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm order-2 sm:order-1">
+<a class="px-space-lg py-space-sm bg-surface-container-high hover:bg-surface-container-highest text-primary font-body-md text-body-md font-medium rounded transition-colors flex items-center justify-center gap-space-xs focus-visible:outline-none" href="#">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+        Back to result
+      </a>
+<a class="px-space-md py-space-sm text-on-surface-variant hover:text-primary font-body-md text-body-md transition-colors flex items-center justify-center gap-space-xs focus-visible:outline-none" href="#">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+        Inspect replay trace
+      </a>
+</div>
+<div class="flex items-center gap-space-md order-1 sm:order-2">
+<button class="w-full sm:w-auto px-space-xl py-space-sm bg-primary text-on-primary font-body-md text-body-md font-semibold rounded hover:opacity-90 active:scale-[0.99] transition-all flex items-center justify-center gap-space-xs shadow-md focus-visible:outline-none" id="download-patch-btn">
+<span class="material-symbols-outlined text-[18px]">download</span>
+        Download patch
+      </button>
+</div>
+</footer>
+</div>
+<script>
+  (function() {
+    const rawDiffText = `--- a/src/components/Dialog.tsx
++++ b/src/components/Dialog.tsx
+@@ -28,7 +28,12 @@ export function Dialog({ isOpen, onClose, children }: DialogProps) {
+   if (!isOpen) return null;
+ 
++  // Trap focus within modal boundary during active presentation
++  const modalRef = useFocusTrap({ active: isOpen, onEscape: onClose });
++
+   return (
+     <div className="modal-backdrop" onClick={onClose}>
+-      <div role="dialog" aria-modal="true" aria-labelledby="dialog-title">
++      <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+         <h2 id="dialog-title">Settings</h2>`;
+
+    const copyBtn = document.getElementById('btn-copy-raw');
+    const copyLabel = document.getElementById('copy-label');
+    const downloadBtn = document.getElementById('download-patch-btn');
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(rawDiffText).then(function() {
+          if (copyLabel) copyLabel.textContent = 'Copied!';
+          setTimeout(function() {
+            if (copyLabel) copyLabel.textContent = 'Copy Patch';
+          }, 2000);
+        }).catch(function() {
+          if (copyLabel) copyLabel.textContent = 'Failed';
+        });
+      });
+    }
+
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', function() {
+        const blob = new Blob([rawDiffText], { type: 'text/x-diff;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'a11yforge-focus-trap-repair.patch');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
+    }
+  })();
+</script></main><footer class="w-full bg-surface-container-lowest mt-space-3xl"><div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop py-space-xl flex flex-col sm:flex-row items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><span class="font-mono-sm text-mono-sm text-outline">a11yforge.engine // wcag aaa strict</span></div><div class="flex items-center gap-space-lg"><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" data-path="technical-evidence" href="#">Evidence Log</a><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" href="https://github.com" rel="noopener noreferrer" target="_blank">GitHub</a></div></div></footer></body></html>

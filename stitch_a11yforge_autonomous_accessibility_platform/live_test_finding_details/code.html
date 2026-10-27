@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><title>A11yForge — Autonomous Accessibility Engineering</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;background:#131313;color:#e2e2e2;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #ffffff!important;outline-offset:2px!important;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "inverse-surface": "#e2e2e2", "on-tertiary-fixed": "#1a1c1c", "tertiary-container": "#e2e2e2", "secondary": "#c7c6c6", "on-tertiary": "#2f3131", "on-secondary": "#303031", "surface-container": "#1f1f1f", "on-primary": "#2f3131", "on-error": "#690005", "surface-container-highest": "#353535", "outline-variant": "#444748", "primary-fixed": "#e2e2e2", "surface-container-high": "#2a2a2a", "error-container": "#93000a", "secondary-container": "#464747", "surface-tint": "#c6c6c7", "primary-fixed-dim": "#c6c6c7", "surface-bright": "#393939", "surface-container-low": "#1b1b1b", "secondary-fixed-dim": "#c7c6c6", "tertiary-fixed": "#e2e2e2", "on-primary-container": "#636565", "primary": "#ffffff", "secondary-fixed": "#e3e2e2", "on-primary-fixed-variant": "#454747", "on-background": "#e2e2e2", "surface": "#131313", "on-surface-variant": "#c4c7c8", "on-secondary-container": "#b5b5b5", "surface-variant": "#353535", "inverse-primary": "#5d5f5f", "on-primary-fixed": "#1a1c1c", "on-tertiary-fixed-variant": "#454747", "outline": "#8e9192", "surface-container-lowest": "#0e0e0e", "on-error-container": "#ffdad6", "surface-dim": "#131313", "error": "#ffb4ab", "on-secondary-fixed": "#1b1c1c", "on-surface": "#e2e2e2", "background": "#131313", "primary-container": "#e2e2e2", "inverse-on-surface": "#303030", "tertiary": "#ffffff", "on-tertiary-container": "#636565", "on-secondary-fixed-variant": "#464747", "tertiary-fixed-dim": "#c6c6c7" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xl": "1.5rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-md": "0.75rem", "gutter": "1rem", "space-2xs": "0.125rem", "margin": "1rem", "gutter-desktop": "1.5rem", "space-3xl": "3rem", "space-lg": "1rem", "space-2xl": "2rem", "margin-desktop": "2rem" }, "fontFamily": { "body-lg": ["Inter"], "body-sm": ["Inter"], "display-lg": ["Inter"], "label-caps": ["JetBrains Mono"], "mono-sm": ["JetBrains Mono"], "headline-lg": ["Inter"], "headline-md": ["Inter"], "display-lg-mobile": ["Inter"], "mono-md": ["JetBrains Mono"], "mono-lg": ["JetBrains Mono"], "body-md": ["Inter"], "headline-sm": ["Inter"] }, "fontSize": { "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }], "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }], "mono-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "400" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "mono-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }], "mono-lg": ["15px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-primary selection:text-surface"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-margin lg:px-margin-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><a class="flex items-center gap-space-sm text-primary group focus-visible:outline-none" data-path="test-a-site" href="#"><span class="font-headline-sm text-headline-sm uppercase tracking-tight text-primary font-semibold">A11yForge</span></a><span class="font-label-caps text-label-caps uppercase px-space-xs py-space-2xs bg-surface-container-high text-on-surface-variant rounded">v1.0 // AUTONOMOUS</span></div><nav class="hidden md:flex items-center gap-space-sm" data-active-classes="bg-primary text-surface font-headline-sm"><a aria-current="page" class="px-space-md py-space-xs rounded transition-colors bg-primary text-surface font-headline-sm" data-path="test-a-site" href="#">Test a site</a><a class="px-space-md py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="demo" href="#">Demo</a><a class="px-space-md py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="technical-evidence" href="#">Technical evidence</a><a class="px-space-md py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" href="https://github.com" rel="noopener noreferrer" target="_blank">GitHub</a></nav><div class="flex items-center gap-space-md"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-4rem)] max-w-7xl mx-auto px-margin lg:px-margin-desktop"><div class="flex flex-col w-full pb-space-3xl">
+<!-- Top Session Bar / Telemetry Strip -->
+<section class="w-full bg-surface-container-lowest py-space-md px-margin lg:px-margin-desktop mb-space-lg">
+<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-space-md">
+<!-- Target URL & Status Badges -->
+<div class="flex flex-col sm:flex-row sm:items-center gap-space-md">
+<div class="flex items-center gap-space-xs bg-surface-container px-space-md py-space-xs rounded">
+<span class="material-symbols-outlined text-outline text-[18px]">travel_explore</span>
+<span class="font-mono-md text-mono-md text-primary font-medium tracking-tight select-all">https://app.supamarket.io/checkout</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="inline-flex items-center gap-space-xs px-space-sm py-space-2xs bg-surface-container-high rounded font-mono-sm text-mono-sm text-primary">
+<span class="font-semibold text-primary">[✕]</span> 1 ISSUE FOUND
+          </span>
+<span class="font-mono-sm text-mono-sm text-outline">/</span>
+<span class="inline-flex items-center gap-space-xs px-space-sm py-space-2xs bg-surface-container rounded font-mono-sm text-mono-sm text-secondary">
+<span class="font-semibold text-primary">[✓]</span> 14 CHECKS PASSED
+          </span>
+<span class="hidden md:inline-flex items-center gap-space-2xs font-mono-sm text-mono-sm text-outline">
+<span class="w-2 h-2 rounded-full bg-primary inline-block"></span> 1,280ms
+          </span>
+</div>
+</div>
+<!-- Action Cluster -->
+<div class="flex items-center gap-space-sm flex-wrap">
+<button aria-disabled="true" class="opacity-40 cursor-not-allowed px-space-md py-space-xs rounded bg-surface-container text-on-surface-variant font-body-md text-body-md inline-flex items-center gap-space-xs" disabled="" type="button">
+<span class="material-symbols-outlined text-[16px]">stop_circle</span>
+          Cancel test
+        </button>
+<a class="px-space-md py-space-xs rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors font-body-md text-body-md inline-flex items-center gap-space-xs" data-path="test-a-site" href="#">
+<span class="material-symbols-outlined text-[16px]">restart_alt</span>
+          Try another site
+        </a>
+<button class="px-space-lg py-space-xs rounded bg-primary text-surface hover:bg-inverse-surface transition-colors font-body-md text-body-md font-medium inline-flex items-center gap-space-xs" id="btn-connect-repair" type="button">
+<span class="material-symbols-outlined text-surface text-[18px]">build</span>
+          Connect source to repair
+        </button>
+</div>
+</div>
+</section>
+<!-- Main Split Execution Stage -->
+<section class="w-full grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT PANE: Headless Real Browser Replay & Sequence Log (60% ~ cols 7 on 12-col) -->
+<div class="lg:col-span-7 flex flex-col gap-space-md">
+<!-- Viewport Device Chrome Frame -->
+<div class="w-full bg-surface-container-lowest rounded-xl overflow-hidden shadow-xl">
+<!-- Viewport Toolbar / Address Header -->
+<div class="bg-surface-container-high px-space-md py-space-xs flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="inline-block w-3 h-3 rounded-full bg-surface-variant"></span>
+<span class="inline-block w-3 h-3 rounded-full bg-surface-variant"></span>
+<span class="inline-block w-3 h-3 rounded-full bg-surface-variant"></span>
+<span class="font-mono-sm text-mono-sm text-on-surface-variant ml-space-sm">HEADLESS_CHROMIUM // 1440x900 @2x</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="font-label-caps text-label-caps uppercase text-outline">STEP 4/4 [KEY_EVENT: TAB]</span>
+<button aria-label="Toggle viewport magnification" class="text-on-surface-variant hover:text-primary transition-colors p-space-2xs" id="toggle-zoom" type="button">
+<span class="material-symbols-outlined text-[18px]">fit_screen</span>
+</button>
+</div>
+</div>
+<!-- Rendered Webpage Canvas -->
+<div class="relative w-full aspect-[16/10] bg-surface-container-low p-space-lg overflow-hidden flex flex-col justify-between select-none">
+<!-- Background Application Mockup (Dimmed Underlying Page) -->
+<div class="w-full opacity-30 pointer-events-none flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-sm">
+<span class="font-headline-sm text-headline-sm uppercase tracking-wider text-outline font-semibold">SUPAMARKET</span>
+<div class="flex gap-space-md">
+<span class="w-16 h-3 bg-surface-variant rounded"></span>
+<span class="w-20 h-3 bg-surface-variant rounded"></span>
+<span class="w-12 h-3 bg-surface-variant rounded"></span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-space-md mt-space-md">
+<div class="h-28 bg-surface-container rounded p-space-sm flex flex-col justify-between">
+<div class="w-2/3 h-3 bg-surface-variant rounded"></div>
+<div class="w-1/3 h-4 bg-surface-bright rounded"></div>
+</div>
+<div class="h-28 bg-surface-container rounded p-space-sm flex flex-col justify-between">
+<div class="w-2/3 h-3 bg-surface-variant rounded"></div>
+<div class="w-1/3 h-4 bg-surface-bright rounded"></div>
+</div>
+<div class="h-28 bg-surface-container rounded p-space-sm flex flex-col justify-between">
+<div class="w-2/3 h-3 bg-surface-variant rounded"></div>
+<div class="w-1/3 h-4 bg-surface-bright rounded"></div>
+</div>
+</div>
+</div>
+<!-- Active Modal Dialog in Foreground with Focus Escaped Marker -->
+<div class="absolute inset-0 flex items-center justify-center p-space-lg bg-surface/75 backdrop-blur-[2px]">
+<div class="w-full max-w-md bg-surface-container-high rounded p-space-lg shadow-2xl relative">
+<!-- Diagnostic High-Contrast Annotation Badge -->
+<div class="absolute -top-7 left-0 right-0 flex items-center justify-between px-space-xs">
+<span class="bg-primary text-surface font-label-caps text-label-caps px-space-xs py-space-2xs uppercase tracking-wider font-semibold">
+                  ACTIVE MODAL BOUNDARY
+                </span>
+<span class="font-mono-sm text-mono-sm text-primary tracking-wide">
+                  role="dialog" [aria-modal="true"]
+                </span>
+</div>
+<!-- Dialog Header -->
+<div class="flex items-center justify-between pb-space-sm mb-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-primary">shopping_bag</span>
+<span class="font-headline-sm text-headline-sm text-primary">Confirm &amp; Pay</span>
+</div>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">close</span>
+</div>
+<!-- Modal Form Content Mockup -->
+<div class="flex flex-col gap-space-sm mb-space-md">
+<div class="flex justify-between items-center py-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Standard Delivery (2-3 business days)</span>
+<span class="font-mono-sm text-mono-sm text-primary">$4.99</span>
+</div>
+<div class="flex justify-between items-center py-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Order Total (incl. tax)</span>
+<span class="font-mono-md text-mono-md text-primary font-semibold">$89.40</span>
+</div>
+</div>
+<!-- Place Order Button (Last Traversed Interactive Item inside dialog) -->
+<div class="pt-space-xs flex flex-col gap-space-xs relative">
+<button class="w-full py-space-sm bg-surface-variant text-on-surface font-body-md text-body-md rounded text-center font-medium relative" tabindex="0" type="button">
+                  Place Order • $89.40
+                  <span class="absolute -right-3 -top-3 px-space-xs py-space-2xs bg-surface-container-lowest font-mono-sm text-mono-sm text-secondary">
+                    #place-order-btn
+                  </span>
+</button>
+</div>
+<!-- Escaped Path Vector Line Annotation -->
+<div class="absolute -bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center">
+<div class="w-0.5 h-8 bg-primary"></div>
+<span class="bg-primary text-surface font-label-caps text-label-caps px-space-sm py-space-2xs uppercase">
+                  [!] FOCUS ESCAPED TRAP
+                </span>
+</div>
+</div>
+</div>
+<!-- Bottom Target Element Out-Of-Bounds Focus Indicator -->
+<div class="w-full pt-space-md flex items-center justify-between relative z-10">
+<span class="font-mono-sm text-mono-sm text-outline">© 2025 Supamarket Ltd.</span>
+<!-- Focused Anchor outside dialog -->
+<div class="relative bg-surface-container-highest px-space-md py-space-xs rounded shadow-lg">
+<div class="flex items-center gap-space-xs">
+<span class="font-mono-sm text-mono-sm text-primary font-bold">[CURRENT FOCUS]</span>
+<span class="font-mono-sm text-mono-sm text-primary underline underline-offset-4 decoration-primary font-semibold">&lt;a href="/privacy"&gt;Privacy Policy&lt;/a&gt;</span>
+</div>
+<div class="absolute -top-6 right-0 bg-primary text-surface font-mono-sm text-mono-sm px-space-xs uppercase font-medium">
+                LEAKED FOCUS NODE
+              </div>
+</div>
+</div>
+</div>
+<!-- Annotation Callout Strip -->
+<div class="bg-surface-container p-space-md flex items-start gap-space-sm">
+<span class="font-mono-md text-mono-md font-bold text-primary shrink-0">[✕]</span>
+<div class="flex flex-col gap-space-2xs">
+<p class="font-body-md text-body-md text-primary font-medium">
+              Focus escaped to background body element when <code class="font-mono-sm text-mono-sm bg-surface-container-highest px-space-2xs py-0.5 text-primary">Tab</code> was pressed from <code class="font-mono-sm text-mono-sm bg-surface-container-highest px-space-2xs py-0.5 text-primary">'Place Order'</code> button.
+            </p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              The dialog failed to constrain keyboard navigation within its subtree. Next tab index leaked into document footer.
+            </p>
+</div>
+</div>
+</div>
+<!-- Execution Sequence Telemetry Log -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-space-md shadow-md flex flex-col gap-space-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">terminal</span>
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">SYNTHETIC RUNNER SEQUENCE LOG</span>
+</div>
+<span class="font-mono-sm text-mono-sm text-outline">TARGET: CHROMIUM_DEVTOOLS_PROTOCOL</span>
+</div>
+<!-- Step List -->
+<ol aria-label="Automated test step breakdown" class="flex flex-col gap-space-xs font-mono-sm text-mono-sm">
+<li class="flex items-center justify-between py-space-xs px-space-sm bg-surface-container rounded">
+<div class="flex items-center gap-space-sm">
+<span class="text-outline">[0.12s]</span>
+<span class="text-on-surface">Load DOM complete &amp; hydrate root</span>
+</div>
+<span class="text-primary font-medium">[✓] Passed</span>
+</li>
+<li class="flex items-center justify-between py-space-xs px-space-sm bg-surface-container rounded">
+<div class="flex items-center gap-space-sm">
+<span class="text-outline">[0.45s]</span>
+<span class="text-on-surface">Open dialog: <code class="text-primary font-mono-sm">modal[role="dialog"]</code></span>
+</div>
+<span class="text-primary font-medium">[✓] Passed</span>
+</li>
+<li class="flex items-center justify-between py-space-xs px-space-sm bg-surface-container rounded">
+<div class="flex items-center gap-space-sm">
+<span class="text-outline">[0.78s]</span>
+<span class="text-on-surface">Keydown [Tab] x 4 times inside dialog hierarchy</span>
+</div>
+<span class="text-primary font-medium">[✓] Passed</span>
+</li>
+<li class="flex items-center justify-between py-space-xs px-space-sm bg-surface-container-high rounded">
+<div class="flex items-center gap-space-sm">
+<span class="text-primary font-semibold">[1.02s]</span>
+<span class="text-primary font-medium">Focus left this dialog -&gt; <code class="text-primary bg-surface px-space-xs font-mono-sm">body &gt; footer &gt; a[href="/privacy"]</code></span>
+</div>
+<span class="text-primary font-bold underline decoration-primary underline-offset-2">[✕] Failed</span>
+</li>
+</ol>
+</div>
+</div>
+<!-- RIGHT PANE: Finding Details Drawer / Panel (40% ~ cols 5 on 12-col) -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<!-- Finding Card Container -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-space-lg shadow-xl flex flex-col gap-space-lg">
+<!-- Header & Status Indicator -->
+<div class="flex flex-col gap-space-xs pb-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-outline">ISSUE ID: WCAG-KEYBOARD-TRAP-01</span>
+<span class="font-mono-sm text-mono-sm bg-surface text-primary px-space-sm py-space-2xs rounded font-semibold tracking-wide">
+              [✕] FAILED
+            </span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-primary tracking-tight">Focus left this dialog</h2>
+<span class="font-mono-md text-mono-md text-on-surface-variant font-medium">
+            WCAG 2.1.2 No Keyboard Trap &amp; 2.4.3 Focus Order
+          </span>
+</div>
+<!-- Impact Severity Metric -->
+<div class="bg-surface-container p-space-md rounded flex items-start gap-space-md">
+<div class="p-space-xs bg-surface-container-highest rounded text-primary shrink-0">
+<span class="material-symbols-outlined text-[20px]">report_problem</span>
+</div>
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-caps text-label-caps uppercase text-primary font-semibold">SEVERITY: CRITICAL</span>
+<span class="font-mono-sm text-mono-sm text-outline">• Level A / AA Mandatory</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              High disorientation barrier for keyboard-only and screen reader navigation. Users cannot cycle back through dialog elements or trigger the payment action without navigating the entire background webpage hierarchy.
+            </p>
+</div>
+</div>
+<!-- Evidence Breakdown Hierarchy -->
+<div class="flex flex-col gap-space-sm">
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant">TECHNICAL EVIDENCE BREAKDOWN</span>
+<!-- Trigger Element Box -->
+<div class="bg-surface-container p-space-md rounded flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-mono-sm text-mono-sm text-outline">1. TRIGGER ELEMENT (ORIGIN)</span>
+<span class="font-label-caps text-label-caps text-primary">DOM_NODE</span>
+</div>
+<code class="font-mono-md text-mono-md text-primary bg-surface-container-lowest px-space-sm py-space-xs rounded select-all overflow-x-auto">
+              &lt;button id="place-order-btn" type="submit" class="checkout-cta"&gt;
+            </code>
+<p class="font-body-sm text-body-sm text-secondary">
+              Final focusable control detected inside modal overlay container before trap release.
+            </p>
+</div>
+<!-- Escaped Target Box -->
+<div class="bg-surface-container p-space-md rounded flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-mono-sm text-mono-sm text-outline">2. ESCAPED TARGET (LEAKED)</span>
+<span class="font-label-caps text-label-caps text-primary">ACTIVE_FOCUS</span>
+</div>
+<code class="font-mono-md text-mono-md text-primary bg-surface-container-lowest px-space-sm py-space-xs rounded select-all overflow-x-auto">
+              &lt;a href="/privacy" class="footer-link"&gt;Privacy Policy&lt;/a&gt;
+            </code>
+<p class="font-body-sm text-body-sm text-secondary">
+              Active document focus shifted outside modal boundary to a background ancestor child.
+            </p>
+</div>
+<!-- Interaction Trace Data -->
+<div class="bg-surface-container p-space-md rounded flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-mono-sm text-mono-sm text-outline">3. SYNTHETIC INTERACTION TRACE</span>
+<span class="font-label-caps text-label-caps text-primary">DISPATCH_LOG</span>
+</div>
+<code class="font-mono-sm text-mono-sm text-primary bg-surface-container-lowest px-space-sm py-space-xs rounded select-all overflow-x-auto">
+              KeyEvent.Tab(Shift: false, Code: 9) -&gt; NO_TRAP_BOUNDARY_DETECTED
+            </code>
+<p class="font-body-sm text-body-sm text-secondary">
+              Lack of keydown listener trapping tab sequence or inert/hidden attribute on background sibling containers.
+            </p>
+</div>
+</div>
+<!-- Code Patch Remediation Preview (Monochrome Diff) -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant">AUTONOMOUS REPAIR CANDIDATE</span>
+<span class="font-mono-sm text-mono-sm text-primary">FOCUS-TRAP v3.1</span>
+</div>
+<div class="bg-surface-container-lowest rounded p-space-md font-mono-sm text-mono-sm flex flex-col gap-1 overflow-x-auto">
+<div class="text-outline">// Suggested patch on modal lifecycle hook:</div>
+<div class="text-secondary line-through opacity-70">[-] dialog.addEventListener('keydown', handleEscape);</div>
+<div class="text-primary font-semibold">[+] useFocusTrap(dialogRef, { initialFocus: '#first-field', fallbackFocus: '#dialog' });</div>
+<div class="text-primary font-semibold">[+] document.getElementById('main-root').setAttribute('inert', '');</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col sm:flex-row items-center gap-space-sm pt-space-xs">
+<button class="w-full sm:flex-1 py-space-sm px-space-md bg-primary text-surface hover:bg-inverse-surface rounded font-body-md text-body-md font-semibold transition-colors flex items-center justify-center gap-space-xs" id="btn-repair-drawer" type="button">
+<span class="material-symbols-outlined text-surface text-[18px]">auto_fix_high</span>
+            Connect source to repair
+          </button>
+<a class="w-full sm:w-auto py-space-sm px-space-md bg-surface-container hover:bg-surface-container-high text-primary rounded font-body-md text-body-md font-medium transition-colors flex items-center justify-center gap-space-xs" data-path="technical-evidence" href="#">
+<span class="material-symbols-outlined text-[18px]">query_stats</span>
+            See evidence
+          </a>
+</div>
+</div>
+<!-- Quick Context Reference Metadata -->
+<div class="w-full bg-surface-container rounded-xl p-space-md flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-outline">ENGINE RUNNER TELEMETRY</span>
+<span class="font-mono-sm text-mono-sm text-on-surface">V8 12.8 / CHROMIUM 129</span>
+</div>
+<div class="grid grid-cols-2 gap-space-sm pt-space-xs">
+<div>
+<span class="font-mono-sm text-mono-sm text-outline block">Accessibility API</span>
+<span class="font-mono-sm text-mono-sm text-primary">AXTree &amp; CDP Node Tracker</span>
+</div>
+<div>
+<span class="font-mono-sm text-mono-sm text-outline block">Tab Key Cycle</span>
+<span class="font-mono-sm text-mono-sm text-primary">Unconstrained / Escaped</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<script>
+  (function () {
+    const connectButtons = [
+      document.getElementById('btn-connect-repair'),
+      document.getElementById('btn-repair-drawer')
+    ];
+
+    connectButtons.forEach(btn => {
+      if (btn) {
+        btn.addEventListener('click', function () {
+          const originalContent = this.innerHTML;
+          this.setAttribute('aria-busy', 'true');
+          this.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">sync</span> Initializing repo handshake...';
+          
+          setTimeout(() => {
+            alert('A11yForge Handshake: Ready to connect your GitHub/GitLab repository to submit pull request with focus-trap remediation patch.');
+            this.innerHTML = originalContent;
+            this.removeAttribute('aria-busy');
+          }, 600);
+        });
+      }
+    });
+
+    const toggleZoom = document.getElementById('toggle-zoom');
+    if (toggleZoom) {
+      let expanded = false;
+      toggleZoom.addEventListener('click', () => {
+        expanded = !expanded;
+        toggleZoom.setAttribute('aria-pressed', expanded ? 'true' : 'false');
+      });
+    }
+  })();
+</script></main><footer class="w-full bg-surface-container-lowest mt-space-3xl"><div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop py-space-2xl flex flex-col md:flex-row items-center justify-between gap-space-lg"><div class="flex flex-col gap-space-2xs"><span class="font-mono-sm text-mono-sm text-on-surface-variant">[✓] WCAG AAA STRICT MONOCHROME COMPLIANCE</span><span class="font-mono-sm text-mono-sm text-outline">Press ? or Tab to navigate • Zero-Hue Diagnostic Architecture</span></div><div class="flex items-center gap-space-xl"><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" data-path="ruleset" href="#">Ruleset Spec</a><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" data-path="technical-evidence" href="#">Audit Traces</a><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" data-path="documentation" href="#">CLI Documentation</a><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" href="https://github.com" rel="noopener noreferrer" target="_blank">Repository</a></div></div></footer></body></html>

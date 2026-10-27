@@ -22,6 +22,15 @@ interface FocusBox {
   height: number;
   viewportWidth: number;
   viewportHeight: number;
+  /** Vertical scroll offset when measured: steps at another scroll position do not align to the failure shot. */
+  scrollY: number;
+}
+
+/** One recorded focus landing, in traversal order. */
+export interface RecordedFocusStep {
+  label: string;
+  selector: string;
+  box: FocusBox | null;
 }
 
 interface FocusSnapshot {
@@ -107,6 +116,7 @@ export function describeActiveElement(): FocusSnapshot {
           height: rect.height,
           viewportWidth: window.innerWidth,
           viewportHeight: window.innerHeight,
+          scrollY: window.scrollY,
         }
       : null,
   };
@@ -132,6 +142,7 @@ export const keyboardProbe: AccessibilityProbe = {
     trace.record("traversal-started", `Keyboard focus started on ${labelFocus(start)}.`);
 
     const seen: string[] = [];
+    const focusSteps: RecordedFocusStep[] = [];
     let failure: {
       title: string;
       summary: string;
@@ -163,6 +174,7 @@ export const keyboardProbe: AccessibilityProbe = {
       const key = `${snapshot.role}::${snapshot.name}::${snapshot.selector}`;
       const revisits = seen.filter((entry) => entry === key).length;
       seen.push(key);
+      focusSteps.push({ label: labelFocus(snapshot), selector: snapshot.selector, box: snapshot.box });
       trace.record("tab-step", `Focus moved to ${labelFocus(snapshot)}.`);
 
       if (!snapshot.exposed || !snapshot.rendered) {
@@ -245,6 +257,7 @@ export const keyboardProbe: AccessibilityProbe = {
               box: end.box,
               startLabel: failure.startLabel,
               steps: failure.steps,
+              focusSteps,
             },
           },
         ],

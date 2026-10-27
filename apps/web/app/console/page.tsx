@@ -27,7 +27,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -46,54 +45,16 @@ import {
   EvidenceShots,
   FocusTraceList,
   MetaGrid,
-  PipelineStages,
   RunStatusBadge,
   VerdictMark,
 } from "@/components/domain";
 import { foldLiveEvidence, formatTokens } from "../../lib/live-evidence";
+import { BeforeAfter, DemoReplay } from "../../components/demo-replay";
 
 type LoadState =
   | { kind: "loading" }
   | { kind: "ready"; view: RunViewModel }
   | { kind: "error"; message: string };
-
-function stageMark(status: string): string {
-  if (status === "success") return "✓";
-  if (status === "failed") return "✕";
-  if (status === "current") return "●";
-  return "○";
-}
-
-function stageWord(status: string): string {
-  if (status === "success") return "DONE";
-  if (status === "failed") return "FAILED";
-  if (status === "current") return "IN PROGRESS";
-  return "PENDING";
-}
-
-/** Live pipeline states reuse the recorded-console marks (text + glyph). */
-function liveMark(state: string): string {
-  if (state === "passed") return "✓";
-  if (state === "failed") return "✕";
-  if (state === "running") return "●";
-  if (state === "skipped") return "–";
-  return "○";
-}
-
-function liveMarkStatus(state: string): string {
-  if (state === "passed") return "success";
-  if (state === "failed") return "failed";
-  if (state === "running") return "current";
-  return "pending";
-}
-
-function liveWord(state: string): string {
-  if (state === "passed") return "DONE";
-  if (state === "failed") return "FAILED";
-  if (state === "running") return "IN PROGRESS";
-  if (state === "skipped") return "SKIPPED";
-  return "PENDING";
-}
 
 type LivePhase = "idle" | "starting" | "running" | "done" | "failed";
 
@@ -283,34 +244,41 @@ export default function Home() {
         : null;
 
   return (
-    <div className="console">
+    <div className="xp">
       <main id="main">
       <a className="skip-link" href="#main">
         Skip to run evidence
       </a>
-      <div className="topbar">
-        <div className="brand">
-          <Badge variant="faint" style={{ margin: "0 0 4px" }}>
-            Observable repair console
-          </Badge>
-          <h1>A11yForge</h1>
-          <p>Autonomous accessibility engineering — every claim backed by artifacts</p>
-        </div>
-        {state.kind === "ready" && <RunStatusBadge status={state.view.finalStatus} />}
-        {state.kind === "ready" && isLiveSelection && (
-          <Badge variant="solid" aria-label="This is the live run you just started">
-            ● LIVE RUN
-          </Badge>
-        )}
+      <div className="xp-verdict">
+        <span className="mono-label">
+          <span className="dot-live" aria-hidden="true">● </span>
+          Recorded real repair — demo theatre
+        </span>
+        <h1 className="display-2">
+          One repair, <span className="display-accent">replayed.</span>
+        </h1>
+        <p className="lede-xl">
+          A real historical A11yForge repair run, steppable start to finish.
+          Every claim below is backed by recorded artifacts — nothing executes
+          here, nothing is faked.
+        </p>
+        <p style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", margin: 0 }}>
+          {state.kind === "ready" && <RunStatusBadge status={state.view.finalStatus} />}
+          {state.kind === "ready" && isLiveSelection && (
+            <Badge variant="solid" aria-label="This is the live run you just started">
+              ● LIVE RUN
+            </Badge>
+          )}
+        </p>
       </div>
 
       <Card className="live-panel" aria-labelledby="h-live">
         <CardHeader className="p-0">
-          <Badge variant="faint" style={{ margin: "0 0 4px" }}>
+          <span className="mono-label" style={{ margin: "0 0 4px" }}>
             Live pipeline · scan → verify → critic
-          </Badge>
+          </span>
           <CardTitle asChild>
-            <h2 id="h-live">
+            <h2 id="h-live" className="display-3">
               Live autonomous repair{" "}
               <Badge variant="solid" aria-hidden="true">
                 ● LIVE
@@ -365,29 +333,40 @@ export default function Home() {
                 )}
                 {liveStatus.state === "FAILED" && "Run failed — see error below."}
               </p>
-              <Progress
-                value={
-                  liveStatus.stages.length > 0
-                    ? (liveStatus.stages.filter(
-                        (stage) => stage.state === "passed" || stage.state === "failed" || stage.state === "skipped",
-                      ).length /
-                        liveStatus.stages.length) *
-                      100
-                    : 0
-                }
-                aria-label="Live pipeline progress"
-              />
-              <PipelineStages
-                stages={liveStatus.stages.map((stage) => ({
-                  id: stage.id,
-                  label: stage.label,
-                  detail: stage.detail,
-                  mark: liveMark(stage.state),
-                  word: liveWord(stage.state),
-                  tone: liveMarkStatus(stage.state) as "success" | "failed" | "current" | "pending",
-                }))}
-                ariaLabel="Live pipeline stages"
-              />
+              <div className="repair-line" aria-label="Live pipeline stages">
+                <div className="repair-track">
+                  <div
+                    className="repair-progress"
+                    style={{
+                      width: liveStatus.stages.length > 0
+                        ? `${(liveStatus.stages.filter(
+                            (stage) => stage.state === "passed" || stage.state === "failed" || stage.state === "skipped",
+                          ).length / liveStatus.stages.length) * 100}%`
+                        : "0%",
+                      transition: "width 0.9s ease",
+                    }}
+                  />
+                </div>
+                <ol className="repair-stops">
+                  {liveStatus.stages.map((stage) => (
+                    <li
+                      key={stage.id}
+                      data-state={
+                        stage.state === "passed" || stage.state === "skipped"
+                          ? "done"
+                          : stage.state === "failed"
+                            ? "bad"
+                            : stage.state === "running"
+                              ? "now"
+                              : undefined
+                      }
+                      title={stage.detail}
+                    >
+                      {stage.label}
+                    </li>
+                  ))}
+                </ol>
+              </div>
               <div className="live-evidence" aria-label="Progressive run evidence">
                 {liveEvidence.findings !== null && (
                   <p>
@@ -504,25 +483,20 @@ export default function Home() {
 
       <Separator className="my-7" />
 
-      <section aria-labelledby="h-recorded">
-      <Badge variant="faint" style={{ margin: "0 0 4px" }}>
-        Historical audit · patch-loop verification
-      </Badge>
-      <h2 className="section-heading" id="h-recorded" style={{ marginTop: 0 }}>
-        Completed demo run <Badge variant="outline">◉ RECORDED — REAL RUN</Badge>
+      <section aria-labelledby="h-recorded" style={{ marginTop: 40 }}>
+      <span className="mono-label" id="h-recorded">
+        Historical audit · patch-loop verification · ◉ recorded — real run
+      </span>
+      <h2 className="display-3" style={{ margin: "14px 0 8px" }}>
+        Completed demo run
       </h2>
-      <Alert className="mt-3">
-        <AlertDescription>
-          This is a real historical A11yForge repair run bundled with the project. It is not
-          executing now — every section below renders recorded artifacts only.
-          {health?.demoMode === "bundled-recorded" && (
-            <>
-              <br />
-              No API key needed; this is a recording, not a live run.
-            </>
-          )}
-        </AlertDescription>
-      </Alert>
+      <p className="help" style={{ maxWidth: "72ch" }}>
+        This is a real historical A11yForge repair run bundled with the project. It is not
+        executing now — every section below renders recorded artifacts only.
+        {health?.demoMode === "bundled-recorded" && (
+          <> No API key needed; this is a recording, not a live run.</>
+        )}
+      </p>
 
       <div className="controls" role="group" aria-label="Run controls">
         <Label htmlFor="run-select">Run</Label>
@@ -542,6 +516,84 @@ export default function Home() {
           Refresh artifacts
         </Button>
       </div>
+
+      {state.kind === "ready" && (
+        <div style={{ marginTop: 20 }}>
+          <DemoReplay
+            beats={[
+              {
+                label: "Failure",
+                headline: "Keyboard focus escapes the modal.",
+                detail: state.view.diagnosis.observedFailure,
+                targetId: "h-evidence",
+                targetLabel: "See the evidence",
+              },
+              {
+                label: "Source trace",
+                headline: "We found the code behind this problem.",
+                detail: `Top candidate: ${state.view.sourceTrace.topFile} — matched deterministically, no model asked where to look.`,
+                targetId: "h-trace",
+                targetLabel: "See the trace",
+              },
+              {
+                label: "Repair",
+                headline: "Attempt 1 proposes a repair.",
+                detail: state.view.attempts[0]?.outcomeNote ?? "The engine proposes a source change.",
+                targetId: "h-diff",
+                targetLabel: "See the patch",
+              },
+              ...(state.view.attempts.length > 1
+                ? [
+                    {
+                      label: "Rejected",
+                      headline: "That fix wasn't good enough.",
+                      detail:
+                        state.view.attempts[0]?.outcomeNote ??
+                        "The browser behavior improved, but the project's checks failed.",
+                      targetId: "h-pipeline",
+                      targetLabel: "Why it failed",
+                    },
+                    {
+                      label: "Revision",
+                      headline: "Trying one verified revision.",
+                      detail:
+                        state.view.attempts[1]?.outcomeNote ??
+                        "One bounded revision addresses the verifier feedback.",
+                      targetId: "h-diff",
+                      targetLabel: "See the revision",
+                    },
+                  ]
+                : []),
+              {
+                label: "Verified",
+                headline: state.view.finalStatus === "ACCEPTED" ? "Fixed. Verified." : "Awaiting verdict.",
+                detail:
+                  state.view.finalStatus === "ACCEPTED"
+                    ? "A11yForge replayed the original problem and confirmed it no longer occurs."
+                    : state.view.verification.decisionBasis,
+                targetId: "h-verify",
+                targetLabel: "See the proof",
+              },
+            ]}
+          />
+          <nav aria-label="Developer details" className="doc-panel-nav" style={{ marginTop: 16 }}>
+            <span className="mono-label" style={{ alignSelf: "center", marginRight: 8 }}>
+              Developer details
+            </span>
+            {[
+              ["h-evidence", "Browser evidence"],
+              ["h-trace", "Source"],
+              ["h-diff", "Repair"],
+              ["h-verify", "Verification"],
+              ["h-critic", "Model usage"],
+            ].map(([id, label]) => (
+              <a key={id} href={`#${id}`}>
+                {label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      )}
 
       {state.kind === "loading" && (
         <div role="status" aria-label="Loading run artifacts">
@@ -603,21 +655,48 @@ export default function Home() {
                   <h2 id="h-pipeline">Autonomous pipeline</h2>
                 </CardTitle>
               </CardHeader>
-              <PipelineStages
-                stages={state.view.pipeline.map((stage) => ({
-                  id: stage.id,
-                  label: stage.label,
-                  detail: stage.detail,
-                  mark: stageMark(stage.status),
-                  word: stageWord(stage.status),
-                  tone: stage.status as "success" | "failed" | "current" | "pending",
-                }))}
-                ariaLabel="Autonomous pipeline stages"
-              />
-              <p>
-                Attempt 1 was <strong>deterministically rejected</strong> and is preserved
-                above — the engine does not hide its own failed repair.
-              </p>
+              <div className="repair-line" aria-label="Recorded pipeline stages">
+                <div className="repair-track">
+                  <div
+                    className="repair-progress"
+                    style={{
+                      width: state.view.pipeline.length > 0
+                        ? `${(state.view.pipeline.filter((stage) => stage.status === "success" || stage.status === "failed").length / state.view.pipeline.length) * 100}%`
+                        : "0%",
+                    }}
+                  />
+                </div>
+                <ol className="repair-stops">
+                  {state.view.pipeline.map((stage) => (
+                    <li
+                      key={stage.id}
+                      data-state={
+                        stage.status === "success"
+                          ? "done"
+                          : stage.status === "failed"
+                            ? "bad"
+                            : stage.status === "current"
+                              ? "now"
+                              : undefined
+                      }
+                      title={stage.detail}
+                    >
+                      {stage.label}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="repair-fork">
+                <p style={{ margin: 0 }}>
+                  <strong>That fix wasn&apos;t good enough.</strong> Attempt 1 was{" "}
+                  <strong>deterministically rejected</strong> and is preserved here — the
+                  engine does not hide its own failed repair.
+                </p>
+                <p className="help" style={{ margin: 0 }}>
+                  The repair path reached verification, was refused, and the line
+                  reversed into one verified revision.
+                </p>
+              </div>
             </Card>
 
             <Card aria-labelledby="h-evidence">
@@ -654,6 +733,30 @@ export default function Home() {
               <CardTitle asChild>
                 <h2 id="h-beforeafter">Before / after</h2>
               </CardTitle>
+              <div style={{ margin: "12px 0 20px" }}>
+                <BeforeAfter
+                  before={
+                    state.view.artifacts.focusEscapedUrl !== null
+                      ? {
+                          src: artifactSrc(state.view.artifacts.focusEscapedUrl),
+                          alt: "Before repair: checkout modal open while keyboard focus has escaped to the background control",
+                          caption: "BEFORE — focus escaped ✕",
+                        }
+                      : null
+                  }
+                  after={
+                    state.view.artifacts.afterUrl !== null
+                      ? {
+                          src: artifactSrc(state.view.artifacts.afterUrl),
+                          alt: "After repair: focus remains inside the checkout modal",
+                          caption: "AFTER — focus contained ✓",
+                        }
+                      : null
+                  }
+                  beforeNote={`Focus moved to ${state.view.finding.actualFocusBefore} — outside the dialog.`}
+                  afterNote={`Focus stays inside ${state.view.finding.expectedRegion} while the modal is open.`}
+                />
+              </div>
               <Table>
                 <TableCaption>Deterministic assertion outcomes</TableCaption>
                 <TableBody>
@@ -699,30 +802,6 @@ export default function Home() {
                   </TableRow>
                 </TableBody>
               </Table>
-              <div style={{ marginTop: 12 }}>
-                <EvidenceShots
-                  shots={[
-                    ...(state.view.artifacts.focusEscapedUrl !== null
-                      ? [
-                          {
-                            src: artifactSrc(state.view.artifacts.focusEscapedUrl),
-                            alt: "Before repair: checkout modal open while keyboard focus has escaped to the background control",
-                            caption: "BEFORE — focus escaped ✕",
-                          },
-                        ]
-                      : []),
-                    ...(state.view.artifacts.afterUrl !== null
-                      ? [
-                          {
-                            src: artifactSrc(state.view.artifacts.afterUrl),
-                            alt: "After repair: focus remains inside the checkout modal",
-                            caption: "AFTER — focus contained ✓",
-                          },
-                        ]
-                      : []),
-                  ]}
-                />
-              </div>
               {(state.view.artifacts.focusEscapedUrl === null ||
                 state.view.artifacts.afterUrl === null) && (
                 <p>Screenshots unavailable for this run — assertion data above still holds.</p>
@@ -849,14 +928,53 @@ export default function Home() {
 
           <div className="grid two">
             <Card aria-labelledby="h-verify">
-              <CardHeader className="p-0">
-                <Badge variant="faint" style={{ margin: "0 0 4px" }}>
-                  Verification proof · all measured, none inferred
-                </Badge>
-                <CardTitle asChild>
-                  <h2 id="h-verify">Verification (deterministic gates)</h2>
-                </CardTitle>
-              </CardHeader>
+              {state.view.finalStatus === "ACCEPTED" ? (
+                <div className="verify-hero" style={{ paddingTop: 8 }}>
+                  <span className="verify-mark" aria-hidden="true">✓</span>
+                  <h2 id="h-verify" className="display-3">
+                    Fixed. Verified.
+                  </h2>
+                  <p className="lede-xl">
+                    A11yForge replayed the original problem and confirmed it no
+                    longer occurs.
+                  </p>
+                  <p style={{ display: "flex", flexWrap: "wrap", gap: 12, margin: 0 }}>
+                    <Button asChild>
+                      <a href="#h-diff">View change</a>
+                    </Button>
+                    {(() => {
+                      const accepted = state.view.attempts[state.view.attempts.length - 1];
+                      return accepted?.diffUrl != null ? (
+                        <DownloadPatchButton
+                          url={accepted.diffUrl}
+                          filename={`a11yforge-${state.view.runId}-accepted.patch`}
+                          label="Download patch"
+                        />
+                      ) : null;
+                    })()}
+                    <Button variant="secondary" asChild>
+                      <a href="#h-critic">Developer details</a>
+                    </Button>
+                  </p>
+                </div>
+              ) : (
+                <CardHeader className="p-0">
+                  <Badge variant="faint" style={{ margin: "0 0 4px" }}>
+                    Verification proof · all measured, none inferred
+                  </Badge>
+                  <CardTitle asChild>
+                    <h2 id="h-verify">Verification (deterministic gates)</h2>
+                  </CardTitle>
+                </CardHeader>
+              )}
+              {state.view.finalStatus !== "ACCEPTED" && (
+                <div className="repair-fork">
+                  <p style={{ margin: 0 }}>
+                    <strong>Repair rejected.</strong> The deterministic gates did
+                    not all pass, so this change was refused.
+                  </p>
+                </div>
+              )}
               <Table>
                 <TableCaption>Attempt 2 gate outcomes — all measured, none inferred</TableCaption>
                 <TableBody>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><title>A11yForge — Autonomous Accessibility Engineering</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;background:#131313;color:#e2e2e2;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #ffffff!important;outline-offset:2px!important;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "inverse-surface": "#e2e2e2", "on-tertiary-fixed": "#1a1c1c", "tertiary-container": "#e2e2e2", "secondary": "#c7c6c6", "on-tertiary": "#2f3131", "on-secondary": "#303031", "surface-container": "#1f1f1f", "on-primary": "#2f3131", "on-error": "#690005", "surface-container-highest": "#353535", "outline-variant": "#444748", "primary-fixed": "#e2e2e2", "surface-container-high": "#2a2a2a", "error-container": "#93000a", "secondary-container": "#464747", "surface-tint": "#c6c6c7", "primary-fixed-dim": "#c6c6c7", "surface-bright": "#393939", "surface-container-low": "#1b1b1b", "secondary-fixed-dim": "#c7c6c6", "tertiary-fixed": "#e2e2e2", "on-primary-container": "#636565", "primary": "#ffffff", "secondary-fixed": "#e3e2e2", "on-primary-fixed-variant": "#454747", "on-background": "#e2e2e2", "surface": "#131313", "on-surface-variant": "#c4c7c8", "on-secondary-container": "#b5b5b5", "surface-variant": "#353535", "inverse-primary": "#5d5f5f", "on-primary-fixed": "#1a1c1c", "on-tertiary-fixed-variant": "#454747", "outline": "#8e9192", "surface-container-lowest": "#0e0e0e", "on-error-container": "#ffdad6", "surface-dim": "#131313", "error": "#ffb4ab", "on-secondary-fixed": "#1b1c1c", "on-surface": "#e2e2e2", "background": "#131313", "primary-container": "#e2e2e2", "inverse-on-surface": "#303030", "tertiary": "#ffffff", "on-tertiary-container": "#636565", "on-secondary-fixed-variant": "#464747", "tertiary-fixed-dim": "#c6c6c7" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xl": "1.5rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-md": "0.75rem", "gutter": "1rem", "space-2xs": "0.125rem", "margin": "1rem", "gutter-desktop": "1.5rem", "space-3xl": "3rem", "space-lg": "1rem", "space-2xl": "2rem", "margin-desktop": "2rem" }, "fontFamily": { "body-lg": ["Inter"], "body-sm": ["Inter"], "display-lg": ["Inter"], "label-caps": ["JetBrains Mono"], "mono-sm": ["JetBrains Mono"], "headline-lg": ["Inter"], "headline-md": ["Inter"], "display-lg-mobile": ["Inter"], "mono-md": ["JetBrains Mono"], "mono-lg": ["JetBrains Mono"], "body-md": ["Inter"], "headline-sm": ["Inter"] }, "fontSize": { "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }], "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }], "mono-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "400" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "mono-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }], "mono-lg": ["15px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-primary selection:text-surface"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-margin lg:px-margin-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><a class="flex items-center gap-space-sm text-primary group focus-visible:outline-none" data-path="test-a-site" href="#"><span class="font-headline-sm text-headline-sm uppercase tracking-tight text-primary font-semibold">A11yForge</span></a><span class="font-label-caps text-label-caps uppercase px-space-xs py-space-2xs bg-surface-container-high text-on-surface-variant rounded">v1.0 // AUTONOMOUS</span></div><nav class="hidden md:flex items-center gap-space-sm" data-active-classes="bg-primary text-surface font-headline-sm"><a aria-current="page" class="px-space-md py-space-xs rounded transition-colors bg-primary text-surface font-headline-sm" data-path="test-a-site" href="#">Test a site</a><a class="px-space-md py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="demo" href="#">Demo</a><a class="px-space-md py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" data-path="technical-evidence" href="#">Technical evidence</a><a class="px-space-md py-space-xs rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-md text-body-md" href="https://github.com" rel="noopener noreferrer" target="_blank">GitHub</a></nav><div class="flex items-center gap-space-md"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-4rem)] max-w-7xl mx-auto px-margin lg:px-margin-desktop"><div class="flex flex-col w-full">
+<section class="py-space-2xl md:py-space-3xl flex flex-col gap-space-2xl max-w-5xl mx-auto w-full">
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center gap-space-sm font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
+<span class="inline-block w-2 h-2 bg-primary rounded-full"></span>
+<span>HEADLESS ENGINE V4.8.1 ACTIVE</span>
+<span class="text-outline">/</span>
+<span>ZERO FALSE-POSITIVE HARNESS</span>
+</div>
+<h1 class="font-display-lg text-display-lg md:text-[44px] md:leading-[52px] text-primary tracking-tight font-semibold max-w-4xl">
+        Autonomous Accessibility Engineering &amp; Verification
+      </h1>
+<p class="font-body-lg text-body-lg text-secondary max-w-3xl leading-relaxed">
+        Paste a website. A11yForge tests it with a real browser. Connect the source code, and it can fix a confirmed accessibility issue and prove whether the fix worked.
+      </p>
+</div>
+<!-- Target Injection Console -->
+<div class="bg-surface-container-low rounded-lg p-space-lg md:p-space-xl shadow-xl flex flex-col gap-space-lg">
+<form class="flex flex-col gap-space-lg" id="auditForm" onsubmit="event.preventDefault(); triggerAuditRun();">
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between items-center">
+<label class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wide" for="targetUrl">
+              Target Website URL
+            </label>
+<span class="font-mono-sm text-mono-sm text-outline">HTTP / HTTPS VALIDATED PROTOCOL</span>
+</div>
+<div class="relative flex items-center">
+<span class="absolute left-space-md font-mono-md text-mono-md text-outline select-none pointer-events-none">&gt;</span>
+<input class="w-full bg-surface-container-lowest text-primary font-mono-md text-mono-md pl-8 pr-space-md py-space-md rounded focus-visible:outline-none transition-colors" id="targetUrl" placeholder="https://acme-store.com/checkout" required="" type="url" value="https://acme-store.com/checkout"/>
+</div>
+</div>
+<!-- Diagnostic Flags -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md pt-space-xs">
+<label class="flex items-start gap-space-sm cursor-pointer select-none group">
+<input checked="" class="mt-1 w-4 h-4 rounded-none accent-primary cursor-pointer bg-surface-container-highest" id="flag-screenreader" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-primary font-medium group-hover:text-primary transition-colors">
+                Simulate screen reader &amp; keyboard trap detection
+              </span>
+<span class="font-mono-sm text-mono-sm text-outline">
+                Dispatches full Tab/Shift+Tab sequences &amp; checks aria-hidden ancestor occlusion
+              </span>
+</div>
+</label>
+<label class="flex items-start gap-space-sm cursor-pointer select-none group">
+<input checked="" class="mt-1 w-4 h-4 rounded-none accent-primary cursor-pointer bg-surface-container-highest" id="flag-modals" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-primary font-medium group-hover:text-primary transition-colors">
+                Test dynamic modal &amp; focus lifecycles
+              </span>
+<span class="font-mono-sm text-mono-sm text-outline">
+                Forces dialog mounting, escape handling, and restores initial activeElement
+              </span>
+</div>
+</label>
+</div>
+<!-- Action Matrix -->
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md pt-space-sm">
+<div class="flex items-center gap-space-md">
+<button class="bg-primary text-surface px-space-xl py-space-md rounded font-headline-sm text-headline-sm hover:opacity-90 active:opacity-80 transition-all flex items-center justify-center gap-space-sm shadow-md" id="submitBtn" type="submit">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+<span>Test accessibility</span>
+</button>
+<button class="bg-surface-container-high text-primary px-space-lg py-space-md rounded font-headline-sm text-headline-sm hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-space-xs" onclick="loadPreset('https://demo.a11yforge.dev/broken-combobox')" type="button">
+<span>Try the demo</span>
+<span class="font-mono-sm text-mono-sm text-outline">[⌘D]</span>
+</button>
+</div>
+<div class="flex items-center gap-space-xs text-outline font-mono-sm text-mono-sm">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+<span>Headless Chromium 124.0.0</span>
+</div>
+</div>
+</form>
+</div>
+<!-- Active Audit Execution Tray (Simulated Telemetry View) -->
+<div class="bg-surface-container-lowest rounded-lg p-space-lg flex flex-col gap-space-md transition-all" id="telemetryPanel">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="font-mono-sm text-mono-sm text-outline uppercase">EXECUTION PIPELINE:</span>
+<span class="font-mono-sm text-mono-sm text-primary uppercase" id="pipelineStatus">[IDLE — STANDBY FOR DISPATCH]</span>
+</div>
+<span class="font-mono-sm text-mono-sm text-outline">CHROMIUM_HEADLESS_RUNNER</span>
+</div>
+<!-- Real-time SVG Terminal Telemetry Visualizer -->
+<div class="w-full bg-surface-container-low rounded p-space-md flex flex-col gap-space-xs">
+<div class="flex items-center justify-between text-on-surface-variant font-mono-sm text-mono-sm mb-1">
+<span>TREE_SWEEP_COVERAGE</span>
+<span class="text-primary font-mono-sm" id="coverageMetric">99.4% AX_NODES EVALUATED</span>
+</div>
+<svg class="w-full h-8 text-surface-container-highest" fill="none" preserveaspectratio="none" viewbox="0 0 800 32">
+<rect fill="currentColor" height="32" rx="2" width="800" x="0" y="0"></rect>
+<rect class="fill-primary" height="32" id="sweepProgress" rx="2" width="560" x="0" y="0"></rect>
+<!-- Monochrome ticks -->
+<line stroke="#131313" stroke-width="2" x1="200" x2="200" y1="0" y2="32"></line>
+<line stroke="#131313" stroke-width="2" x1="400" x2="400" y1="0" y2="32"></line>
+<line stroke="#131313" stroke-width="2" x1="600" x2="600" y1="0" y2="32"></line>
+</svg>
+<div class="flex justify-between items-center text-outline font-mono-sm text-mono-sm mt-1">
+<span>0ms INJECT</span>
+<span>120ms TAB_CYCLE</span>
+<span>240ms MUTATION_OBSERVE</span>
+<span>360ms TREE_SNAPSHOT</span>
+</div>
+</div>
+<!-- Console Log Output -->
+<div class="font-mono-sm text-mono-sm flex flex-col gap-1 text-on-surface-variant leading-5 select-all" id="consoleLog">
+<div>[00:00.00] READY: Standby for execution target.</div>
+<div>[00:00.01] SYSTEM: Awaiting test trigger for standard DOM serialization and AST correlation.</div>
+</div>
+</div>
+<!-- Quick Presets -->
+<div class="flex flex-col gap-space-md pt-space-lg">
+<div class="flex items-center justify-between">
+<h2 class="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">
+          Quick Presets &amp; Recent Test Targets
+        </h2>
+<span class="font-mono-sm text-mono-sm text-outline">CLICK TO LOAD PRESET</span>
+</div>
+<div class="grid grid-cols-1 gap-space-xs">
+<!-- Preset 1: Dialog -->
+<button class="w-full text-left bg-surface-container-low hover:bg-surface-container-high p-space-md rounded transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm group focus-visible:outline-none" onclick="loadPreset('https://demo.a11yforge.dev/accessible-dialog')" type="button">
+<div class="flex items-center gap-space-md">
+<span class="font-mono-md text-mono-md text-primary font-medium">[✓] Passed</span>
+<span class="font-mono-md text-mono-md text-primary group-hover:underline">https://demo.a11yforge.dev/accessible-dialog</span>
+</div>
+<div class="flex items-center gap-space-lg text-outline font-mono-sm text-mono-sm">
+<span>WCAG 2.2 · 2.1.2 Compliant</span>
+<span>Focus contained, Esc wired</span>
+</div>
+</button>
+<!-- Preset 2: Broken Combobox -->
+<button class="w-full text-left bg-surface-container-low hover:bg-surface-container-high p-space-md rounded transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm group focus-visible:outline-none" onclick="loadPreset('https://demo.a11yforge.dev/broken-combobox')" type="button">
+<div class="flex items-center gap-space-md">
+<span class="font-mono-md text-mono-md text-primary font-semibold">[✕] Failed</span>
+<span class="font-mono-md text-mono-md text-primary group-hover:underline">https://demo.a11yforge.dev/broken-combobox</span>
+</div>
+<div class="flex items-center gap-space-lg text-outline font-mono-sm text-mono-sm">
+<span>WCAG 2.2 · 4.1.2 Name/Role/Value</span>
+<span class="text-primary font-semibold">Missing aria-expanded &amp; controls</span>
+</div>
+</button>
+<!-- Preset 3: Unlabeled Modal Focus Trap -->
+<button class="w-full text-left bg-surface-container-low hover:bg-surface-container-high p-space-md rounded transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm group focus-visible:outline-none" onclick="loadPreset('https://demo.a11yforge.dev/unlabeled-modal')" type="button">
+<div class="flex items-center gap-space-md">
+<span class="font-mono-md text-mono-md text-primary font-semibold">[✕] Failed</span>
+<span class="font-mono-md text-mono-md text-primary group-hover:underline">https://demo.a11yforge.dev/unlabeled-modal</span>
+</div>
+<div class="flex items-center gap-space-lg text-outline font-mono-sm text-mono-sm">
+<span>WCAG 2.2 · 2.1.2 No Keyboard Trap</span>
+<span class="text-primary font-semibold">1 Critical focus trap (Escape blocked)</span>
+</div>
+</button>
+</div>
+</div>
+<!-- Technical Architecture: How It Works (Strictly Monochromatic Developer Clarity) -->
+<div class="flex flex-col gap-space-lg pt-space-2xl">
+<div class="flex flex-col gap-space-2xs">
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">MECHANICAL PIPELINE</span>
+<h2 class="font-headline-lg text-headline-lg text-primary tracking-tight">
+          How A11yForge Operates
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+          Unlike static AST parsers or synthetic linters, A11yForge acts as a verification loop: reproducing user barrier dynamics, isolating corresponding repository code, and validating patched builds in isolated sandbox sessions.
+        </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Step 1 -->
+<div class="bg-surface-container-low p-space-lg rounded-lg flex flex-col justify-between gap-space-lg">
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-outline">STEP 01</span>
+<span class="font-mono-sm text-mono-sm bg-surface-container-high text-primary px-space-xs py-space-2xs rounded">HEADLESS EXEC</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<h3 class="font-headline-sm text-headline-sm text-primary">
+                Real Headless Browser Interaction
+              </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                Dispatches actual keyboard strokes (<code class="text-primary font-mono-sm bg-surface-container-high px-1 py-0.5 rounded">Tab</code>, <code class="text-primary font-mono-sm bg-surface-container-high px-1 py-0.5 rounded">Shift+Tab</code>, <code class="text-primary font-mono-sm bg-surface-container-high px-1 py-0.5 rounded">Enter</code>, <code class="text-primary font-mono-sm bg-surface-container-high px-1 py-0.5 rounded">Escape</code>, and Arrow keys) while executing live accessibility tree sweeps to evaluate dynamic states and focus rings.
+              </p>
+</div>
+</div>
+<!-- Micro-Diagnostic Spec Visual -->
+<div class="bg-surface-container-lowest p-space-sm rounded font-mono-sm text-mono-sm text-outline flex flex-col gap-1">
+<div class="text-primary">&gt; dispatchKeyEvent("Tab")</div>
+<div>[✓] activeElement: &lt;button id="cta"&gt;</div>
+<div>[✓] focusedRect.contrast: 14.2:1 (AAA)</div>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="bg-surface-container-low p-space-lg rounded-lg flex flex-col justify-between gap-space-lg">
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-outline">STEP 02</span>
+<span class="font-mono-sm text-mono-sm bg-surface-container-high text-primary px-space-xs py-space-2xs rounded">AST MAPPING</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<h3 class="font-headline-sm text-headline-sm text-primary">
+                Source Code Connection
+              </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                Map confirmed runtime DOM failures directly back to your connected Git repository. Works natively across React, Vue, Svelte, Angular, and server-rendered HTML components with source-map parity.
+              </p>
+</div>
+</div>
+<!-- Component Map Spec Visual -->
+<div class="bg-surface-container-lowest p-space-sm rounded font-mono-sm text-mono-sm text-outline flex flex-col gap-1">
+<div class="text-primary">&gt; git-resolver --resolve-ast</div>
+<div>[MAP] /src/components/Modal.tsx:42</div>
+<div>[TARGET] &lt;dialog aria-modal="true"&gt;</div>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="bg-surface-container-low p-space-lg rounded-lg flex flex-col justify-between gap-space-lg">
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-outline">STEP 03</span>
+<span class="font-mono-sm text-mono-sm bg-surface-container-high text-primary px-space-xs py-space-2xs rounded">VERIFIED DIFF</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<h3 class="font-headline-sm text-headline-sm text-primary">
+                Autonomous Verified Patch
+              </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                Inspect the generated source patch, run automated regression verification in an isolated headless container, and download or push the mathematically validated diff with zero regressions.
+              </p>
+</div>
+</div>
+<!-- Verified Patch Spec Visual -->
+<div class="bg-surface-container-lowest p-space-sm rounded font-mono-sm text-mono-sm text-outline flex flex-col gap-1">
+<div class="text-primary">[+] onKeyDown={(e) =&gt; e.key === 'Esc' &amp;&amp; close()}</div>
+<div class="line-through">[-] &lt;div role="presentation"&gt;</div>
+<div class="text-primary font-semibold">[✓] RE-TEST: PASS (0 barriers)</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Live Evidence Proof Section -->
+<div class="bg-surface-container-low rounded-lg p-space-lg md:p-space-xl flex flex-col gap-space-lg mt-space-md">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<div>
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">DIAGNOSTIC EVIDENCE AUDIT LOG</span>
+<h3 class="font-headline-md text-headline-md text-primary">Sample Execution Diff Output</h3>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="font-mono-sm text-mono-sm text-outline">SPECIFICATION:</span>
+<span class="font-mono-sm text-mono-sm bg-surface-container-highest px-space-sm py-1 rounded text-primary font-medium">WCAG 2.2 AAA VERIFIED</span>
+</div>
+</div>
+<!-- Diff Container -->
+<div class="bg-surface-container-lowest rounded p-space-md flex flex-col gap-space-xs font-mono-sm text-mono-sm overflow-x-auto">
+<div class="text-outline pb-space-xs">--- a/components/checkout/AddressDialog.tsx</div>
+<div class="text-outline pb-space-xs">+++ b/components/checkout/AddressDialog.tsx</div>
+<div class="text-on-surface-variant">@@ -28,7 +28,8 @@ export function AddressDialog({ isOpen, onClose }: DialogProps) {</div>
+<div class="text-on-surface-variant">   return (</div>
+<div class="text-outline">[-]    &lt;div className="modal-container" tabIndex={0}&gt;</div>
+<div class="text-primary font-semibold">[+]    &lt;div role="dialog" aria-modal="true" aria-labelledby="dialog-title"&gt;</div>
+<div class="text-on-surface-variant">       &lt;h2 id="dialog-title"&gt;Billing Address&lt;/h2&gt;</div>
+<div class="text-outline">[-]      &lt;span onClick={onClose}&gt;×&lt;/span&gt;</div>
+<div class="text-primary font-semibold">[+]      &lt;button type="button" aria-label="Close billing dialog" onClick={onClose}&gt;×&lt;/button&gt;</div>
+<div class="text-on-surface-variant">     &lt;/div&gt;</div>
+<div class="text-on-surface-variant">   );</div>
+</div>
+<div class="flex flex-col sm:flex-row items-center justify-between text-outline font-mono-sm text-mono-sm pt-space-2xs">
+<div class="flex items-center gap-space-md">
+<span>[✓] Regression Test: 14/14 Scenarios Passed</span>
+<span>[✓] Focus Cycle Rebound: Zero Traps</span>
+</div>
+<span class="text-primary font-mono-sm font-semibold">[CONFIRMED RESOLUTION]</span>
+</div>
+</div>
+</section>
+<script>
+    function loadPreset(url) {
+      const input = document.getElementById('targetUrl');
+      if (input) {
+        input.value = url;
+        input.focus();
+      }
+      triggerAuditRun();
+    }
+
+    function triggerAuditRun() {
+      const status = document.getElementById('pipelineStatus');
+      const consoleLog = document.getElementById('consoleLog');
+      const progress = document.getElementById('sweepProgress');
+      const input = document.getElementById('targetUrl');
+      const submitBtn = document.getElementById('submitBtn');
+      const url = input ? input.value : 'Target';
+
+      if (!status || !consoleLog || !progress) return;
+
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-50');
+      status.innerText = '[EXECUTING CHROMIUM HEADLESS RUNNER...]';
+      progress.setAttribute('width', '160');
+
+      consoleLog.innerHTML = `
+        <div>[00:00.02] DISPATCH: Initializing headless session for \${url}</div>
+        <div>[00:00.08] CHROMIUM: Headless browser mounted. User-Agent: A11yForge-Inspector/4.8</div>
+      `;
+
+      setTimeout(() => {
+        progress.setAttribute('width', '420');
+        consoleLog.innerHTML += `
+          <div>[00:00.22] RUNNER: Dispatching 34 sequential Tab / Shift+Tab keyboard events</div>
+          <div>[00:00.35] AX_TREE: Serialized 1,248 Accessibility Nodes</div>
+        `;
+      }, 350);
+
+      setTimeout(() => {
+        progress.setAttribute('width', '800');
+        if (url.includes('accessible-dialog')) {
+          status.innerText = '[✓ EXECUTION COMPLETED: 0 BARRIERS IDENTIFIED]';
+          consoleLog.innerHTML += `
+            <div>[00:00.58] [✓] Passed: Dialog correctly traps focus and yields to Escape.</div>
+            <div>[00:00.62] VERDICT: 100% WCAG 2.2 AAA Strict Monochrome Compliance.</div>
+          `;
+        } else if (url.includes('broken-combobox')) {
+          status.innerText = '[✕ BARRIERS CONFIRMED: 1 ARIA DEFECT FOUND]';
+          consoleLog.innerHTML += `
+            <div>[00:00.58] [✕] Failed: &lt;div class="custom-select"&gt; missing role="combobox" and aria-expanded state.</div>
+            <div>[00:00.64] SOURCE: Match found in React AST at /components/Combobox.tsx:18</div>
+            <div>[00:00.70] READY: Connect repository to generate verified patch.</div>
+          `;
+        } else {
+          status.innerText = '[✕ BARRIERS CONFIRMED: FOCUS TRAP ISOLATED]';
+          consoleLog.innerHTML += `
+            <div>[00:00.58] [✕] Failed: Focus unable to exit active dialog. Escape event unhandled.</div>
+            <div>[00:00.65] AUDIT: WCAG 2.1.2 violation isolated on modal container.</div>
+            <div>[00:00.72] READY: Patch synthesized. Standby for validation review.</div>
+          `;
+        }
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50');
+      }, 750);
+    }
+  </script>
+</div></main><footer class="w-full bg-surface-container-lowest mt-space-3xl"><div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop py-space-2xl flex flex-col md:flex-row items-center justify-between gap-space-lg"><div class="flex flex-col gap-space-2xs"><span class="font-mono-sm text-mono-sm text-on-surface-variant">[✓] WCAG AAA STRICT MONOCHROME COMPLIANCE</span><span class="font-mono-sm text-mono-sm text-outline">Press ? or Tab to navigate • Zero-Hue Diagnostic Architecture</span></div><div class="flex items-center gap-space-xl"><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" data-path="ruleset" href="#">Ruleset Spec</a><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" data-path="technical-evidence" href="#">Audit Traces</a><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" data-path="documentation" href="#">CLI Documentation</a><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" href="https://github.com" rel="noopener noreferrer" target="_blank">Repository</a></div></div></footer></body></html>

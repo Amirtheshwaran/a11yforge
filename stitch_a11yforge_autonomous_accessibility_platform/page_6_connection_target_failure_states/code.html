@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><title>A11yForge — Autonomous Accessibility Engineering</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;background:#131313;color:#e2e2e2;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #ffffff!important;outline-offset:2px!important;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "inverse-surface": "#e2e2e2", "on-tertiary-fixed": "#1a1c1c", "tertiary-container": "#e2e2e2", "secondary": "#c7c6c6", "on-tertiary": "#2f3131", "on-secondary": "#303031", "surface-container": "#1f1f1f", "on-primary": "#2f3131", "on-error": "#690005", "surface-container-highest": "#353535", "outline-variant": "#444748", "primary-fixed": "#e2e2e2", "surface-container-high": "#2a2a2a", "error-container": "#93000a", "secondary-container": "#464747", "surface-tint": "#c6c6c7", "primary-fixed-dim": "#c6c6c7", "surface-bright": "#393939", "surface-container-low": "#1b1b1b", "secondary-fixed-dim": "#c7c6c6", "tertiary-fixed": "#e2e2e2", "on-primary-container": "#636565", "primary": "#ffffff", "secondary-fixed": "#e3e2e2", "on-primary-fixed-variant": "#454747", "on-background": "#e2e2e2", "surface": "#131313", "on-surface-variant": "#c4c7c8", "on-secondary-container": "#b5b5b5", "surface-variant": "#353535", "inverse-primary": "#5d5f5f", "on-primary-fixed": "#1a1c1c", "on-tertiary-fixed-variant": "#454747", "outline": "#8e9192", "surface-container-lowest": "#0e0e0e", "on-error-container": "#ffdad6", "surface-dim": "#131313", "error": "#ffb4ab", "on-secondary-fixed": "#1b1c1c", "on-surface": "#e2e2e2", "background": "#131313", "primary-container": "#e2e2e2", "inverse-on-surface": "#303030", "tertiary": "#ffffff", "on-tertiary-container": "#636565", "on-secondary-fixed-variant": "#464747", "tertiary-fixed-dim": "#c6c6c7" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xl": "1.5rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-md": "0.75rem", "gutter": "1rem", "space-2xs": "0.125rem", "margin": "1rem", "gutter-desktop": "1.5rem", "space-3xl": "3rem", "space-lg": "1rem", "space-2xl": "2rem", "margin-desktop": "2rem" }, "fontFamily": { "body-lg": ["Inter"], "body-sm": ["Inter"], "display-lg": ["Inter"], "label-caps": ["JetBrains Mono"], "mono-sm": ["JetBrains Mono"], "headline-lg": ["Inter"], "headline-md": ["Inter"], "display-lg-mobile": ["Inter"], "mono-md": ["JetBrains Mono"], "mono-lg": ["JetBrains Mono"], "body-md": ["Inter"], "headline-sm": ["Inter"] }, "fontSize": { "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }], "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }], "mono-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "400" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "mono-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }], "mono-lg": ["15px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-primary selection:text-surface"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-7xl mx-auto px-margin lg:px-margin-desktop flex items-center justify-between"><div class="flex items-center"><a class="font-headline-sm text-headline-sm text-primary font-semibold tracking-tight hover:text-on-surface transition-colors focus-visible:outline-none" data-path="test-a-site" href="#">A11yForge</a></div><nav class="flex items-center gap-space-xl" data-active-classes="text-primary font-semibold"><a aria-current="page" class="transition-colors text-primary font-semibold" data-path="test-a-site" href="#">Test a site</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="demo" href="#">Demo</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" data-path="technical-evidence" href="#">Technical evidence</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="https://github.com" rel="noopener noreferrer" target="_blank">GitHub</a></nav></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-4rem)] max-w-7xl mx-auto px-margin lg:px-margin-desktop"><div class="flex flex-col w-full">
+<div class="w-full pb-space-3xl pt-space-md">
+<!-- Top System Context Metadata Bar -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-lg gap-space-sm">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="font-label-caps text-label-caps bg-surface-container-high text-on-surface px-space-xs py-space-2xs rounded">DIAGNOSTIC FAULT RUNNER</span>
+<span class="font-mono-sm text-mono-sm text-outline">HOST_RUNNER // EDGE_CLUSTER_US_EAST</span>
+<span class="font-mono-sm text-mono-sm text-outline">SESSION: #8092-AX-TRACE</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="font-mono-sm text-mono-sm text-secondary flex items-center gap-space-2xs">
+<span class="inline-block w-2 h-2 rounded-full bg-outline"></span>
+          WCAG 2.2 AAA VERIFIER IDLE
+        </span>
+</div>
+</div>
+<!-- State Switcher Toolbar (Utilitarian Segment Control) -->
+<div class="bg-surface-container-lowest p-space-xs rounded-lg mb-space-2xl shadow-sm">
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-xs">
+<div aria-label="Error state switcher" class="flex items-center gap-space-2xs overflow-x-auto" id="state-tab-nav" role="tablist">
+<button aria-controls="panel-content" aria-selected="true" class="state-tab-btn flex items-center gap-space-xs px-space-md py-space-sm rounded font-mono-md text-mono-md bg-surface text-primary transition-colors focus-visible:outline-none" id="tab-A" onclick="selectState('A')" role="tab">
+<span class="font-label-caps text-label-caps bg-surface-container-highest px-space-2xs text-primary rounded">[✕] 01</span>
+<span>Target Unreachable</span>
+</button>
+<button aria-controls="panel-content" aria-selected="false" class="state-tab-btn flex items-center gap-space-xs px-space-md py-space-sm rounded font-mono-md text-mono-md text-on-surface-variant hover:text-primary transition-colors focus-visible:outline-none" id="tab-B" onclick="selectState('B')" role="tab">
+<span class="font-label-caps text-label-caps bg-surface-container px-space-2xs text-outline rounded">[!] 02</span>
+<span>Auth Required</span>
+</button>
+<button aria-controls="panel-content" aria-selected="false" class="state-tab-btn flex items-center gap-space-xs px-space-md py-space-sm rounded font-mono-md text-mono-md text-on-surface-variant hover:text-primary transition-colors focus-visible:outline-none" id="tab-C" onclick="selectState('C')" role="tab">
+<span class="font-label-caps text-label-caps bg-surface-container px-space-2xs text-outline rounded">[!] 03</span>
+<span>Automation Blocked</span>
+</button>
+<button aria-controls="panel-content" aria-selected="false" class="state-tab-btn flex items-center gap-space-xs px-space-md py-space-sm rounded font-mono-md text-mono-md text-on-surface-variant hover:text-primary transition-colors focus-visible:outline-none" id="tab-D" onclick="selectState('D')" role="tab">
+<span class="font-label-caps text-label-caps bg-surface-container px-space-2xs text-outline rounded">[—] 04</span>
+<span>Private Target</span>
+</button>
+</div>
+<div class="px-space-sm py-space-xs flex items-center justify-end">
+<span class="font-mono-sm text-mono-sm text-outline">SWITCHER MODE: EMULATED REPLAY</span>
+</div>
+</div>
+</div>
+<!-- Active State Canvas & Diagnostic Stage -->
+<div aria-labelledby="tab-A" class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl" id="panel-content" role="tabpanel">
+<!-- Primary Resolution Terminal Panel (Left 7 Cols) -->
+<section class="lg:col-span-7 flex flex-col justify-between bg-surface-container-low rounded-lg p-space-xl lg:p-space-2xl shadow-md min-h-[460px]">
+<div>
+<!-- System Breadcrumb / Fault ID -->
+<div class="flex items-center gap-space-sm pb-space-xl">
+<span class="font-label-caps text-label-caps bg-surface-container text-on-surface-variant px-space-sm py-space-2xs rounded" id="fault-badge">
+              FAULT_CODE: ERR_CONNECTION_TIMED_OUT
+            </span>
+<span class="font-mono-sm text-mono-sm text-outline">HTTP_STATUS: 000</span>
+</div>
+<!-- Semantic Diagnostic Status Block -->
+<div class="space-y-space-md max-w-2xl">
+<div class="flex items-center gap-space-sm font-mono-md text-mono-md text-secondary" id="fault-status-tag">
+<span>[✕]</span>
+<span class="font-semibold uppercase tracking-wider text-primary">FAILURE STATUS: UNREACHABLE</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight font-semibold" id="state-headline">
+              We couldn't open this website
+            </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed pt-space-xs" id="state-copy">
+              The website could not be reached from the A11yForge browser.
+            </p>
+</div>
+<!-- Structured Context Callout -->
+<div class="mt-space-2xl p-space-lg bg-surface-container rounded" id="state-context-box">
+<div class="flex items-start gap-space-md">
+<span class="font-mono-md text-mono-md text-primary font-bold pt-space-2xs">»</span>
+<div class="space-y-space-2xs">
+<span class="font-label-caps text-label-caps text-secondary block" id="state-context-label">
+                  NETWORK DIAGNOSTIC LOG
+                </span>
+<p class="font-mono-sm text-mono-sm text-on-surface-variant" id="state-context-detail">
+                  DNS lookup completed in 14ms (IP: 198.51.100.24). TCP handshake to port 443 timed out after 30000ms. No SYN-ACK received.
+                </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="pt-space-2xl flex flex-wrap items-center gap-space-md" id="actions-container">
+<button class="px-space-lg py-space-sm bg-primary text-on-primary font-body-md text-body-md font-medium rounded hover:opacity-90 transition-opacity focus-visible:outline-none" id="primary-action-btn" type="button">
+            Try again
+          </button>
+<button class="px-space-lg py-space-sm bg-surface-container-high text-primary font-body-md text-body-md font-medium rounded hover:bg-surface-variant transition-colors focus-visible:outline-none" type="button">
+            Test another site
+          </button>
+<span class="font-mono-sm text-mono-sm text-outline ml-auto self-center">KEY: [ESC] CANCEL · [R] RETRY</span>
+</div>
+</section>
+<!-- Right Column: Inspector Stream & Technical Instrumentation (Right 5 Cols) -->
+<section class="lg:col-span-5 flex flex-col gap-space-lg">
+<!-- Target Payload Inspection Box -->
+<div class="bg-surface-container-low rounded-lg p-space-lg shadow-sm">
+<div class="flex items-center justify-between pb-space-md">
+<span class="font-label-caps text-label-caps text-secondary">TARGET SPECIFICATION</span>
+<span class="font-mono-sm text-mono-sm text-outline">ENGINE v4.19</span>
+</div>
+<div class="space-y-space-sm font-mono-sm text-mono-sm">
+<div class="flex justify-between py-space-2xs bg-surface-container px-space-sm rounded">
+<span class="text-outline">REQUEST_URI</span>
+<span class="text-primary truncate max-w-[220px]" id="uri-display">https://staging.internal-edge.test</span>
+</div>
+<div class="flex justify-between py-space-2xs bg-surface-container px-space-sm rounded">
+<span class="text-outline">USER_AGENT</span>
+<span class="text-secondary truncate max-w-[220px]">A11yForge-Headless/1.8 (+wcag-bot)</span>
+</div>
+<div class="flex justify-between py-space-2xs bg-surface-container px-space-sm rounded">
+<span class="text-outline">PROXY_MODE</span>
+<span class="text-secondary">DIRECT_EGRESS</span>
+</div>
+<div class="flex justify-between py-space-2xs bg-surface-container px-space-sm rounded">
+<span class="text-outline">ISOLATION</span>
+<span class="text-secondary">EPHEMERAL_CONTAINER</span>
+</div>
+</div>
+</div>
+<!-- Telemetry Flow / Trace Visualizer -->
+<div class="bg-surface-container-low rounded-lg p-space-lg shadow-sm flex-1 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-space-md">
+<span class="font-label-caps text-label-caps text-secondary">REQUEST LIFECYCLE BREAKDOWN</span>
+<span class="font-mono-sm text-mono-sm text-outline">TERMINATION PHASE</span>
+</div>
+<!-- Inline SVG Protocol Timing Waveform -->
+<div class="py-space-sm">
+<svg aria-hidden="true" class="w-full h-16 text-outline-variant" fill="none" viewbox="0 0 380 64" xmlns="http://www.w3.org/2000/svg">
+<rect fill="currentColor" height="20" opacity="0.3" rx="1" width="50" x="0" y="8"></rect>
+<text class="font-mono-sm text-mono-sm" fill="#e2e2e2" font-size="8" x="6" y="22">DNS (14ms)</text>
+<rect fill="currentColor" height="20" opacity="0.5" rx="1" width="110" x="54" y="8"></rect>
+<text class="font-mono-sm text-mono-sm" fill="#e2e2e2" font-size="8" x="60" y="22">CONNECT (30s timeout)</text>
+<rect fill="#353535" height="20" rx="1" stroke="#444748" stroke-dasharray="2 2" width="212" x="168" y="8"></rect>
+<text class="font-mono-sm text-mono-sm" fill="#8e9192" font-size="8" x="210" y="22">ABORTED BEFORE TLS</text>
+<!-- Bottom Axis markers -->
+<line opacity="0.4" stroke="currentColor" x1="0" x2="380" y1="40" y2="40"></line>
+<circle cx="50" cy="40" fill="#ffffff" r="2"></circle>
+<circle cx="164" cy="40" fill="#ffffff" r="2"></circle>
+<line stroke="#ffffff" stroke-width="2" x1="164" x2="164" y1="36" y2="48"></line>
+<text class="font-mono-sm text-mono-sm" fill="#8e9192" font-size="9" x="0" y="56">0ms</text>
+<text class="font-mono-sm text-mono-sm" fill="#ffffff" font-size="9" x="146" y="56">30000ms FAULT</text>
+</svg>
+</div>
+<!-- Terminal Output Stream -->
+<div class="mt-space-md p-space-sm bg-surface-container-lowest rounded font-mono-sm text-mono-sm space-y-space-2xs text-secondary overflow-hidden">
+<div class="text-outline">$ a11yforge check --target="https://..."</div>
+<div id="terminal-line-1">&gt; resolving host headers... OK</div>
+<div class="text-primary" id="terminal-line-2">&gt; socket hangup on port 443</div>
+<div class="text-outline" id="terminal-line-3">&gt; error category: TARGET_UNREACHABLE</div>
+</div>
+</div>
+<div class="pt-space-md flex items-center justify-between text-outline font-mono-sm text-mono-sm">
+<span>WCAG CHECKLIST: NOT RUN</span>
+<span>EXIT_STATUS: 1</span>
+</div>
+</div>
+</section>
+</div>
+<!-- State Manifest Matrix (Documentation & QA Reference) -->
+<div class="mt-space-3xl pt-space-2xl">
+<div class="flex items-center justify-between pb-space-lg">
+<div>
+<span class="font-label-caps text-label-caps text-outline block mb-space-2xs">SYSTEM SPECIFICATION 04-A</span>
+<h2 class="font-headline-md text-headline-md text-primary font-semibold">Error State Registry</h2>
+</div>
+<span class="font-mono-sm text-mono-sm text-outline hidden sm:inline-block">STANDARDS: WCAG 2.2 · AAA CONTRAST LEVEL</span>
+</div>
+<!-- 4-Card Comparison Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg">
+<!-- State A Card -->
+<div class="cursor-pointer bg-surface-container p-space-lg rounded-lg hover:bg-surface-container-high transition-all flex flex-col justify-between group" onclick="selectState('A')">
+<div>
+<div class="flex items-center justify-between pb-space-md">
+<span class="font-mono-sm text-mono-sm text-primary font-semibold">[✕] STATE A</span>
+<span class="font-label-caps text-label-caps bg-surface-container-highest px-space-2xs py-space-2xs text-primary rounded">DEFAULT</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary font-semibold mb-space-xs group-hover:underline">
+              We couldn't open this website
+            </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              The website could not be reached from the A11yForge browser.
+            </p>
+</div>
+<div class="pt-space-xl flex items-center justify-between font-mono-sm text-mono-sm text-outline">
+<span>Try again · Test another</span>
+<span class="text-primary">ACTIVE</span>
+</div>
+</div>
+<!-- State B Card -->
+<div class="cursor-pointer bg-surface-container-low p-space-lg rounded-lg hover:bg-surface-container-high transition-all flex flex-col justify-between group" onclick="selectState('B')">
+<div>
+<div class="flex items-center justify-between pb-space-md">
+<span class="font-mono-sm text-mono-sm text-secondary font-semibold">[!] STATE B</span>
+<span class="font-label-caps text-label-caps bg-surface-container px-space-2xs py-space-2xs text-outline rounded">AUTH_WALL</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary font-semibold mb-space-xs group-hover:underline">
+              Authentication required
+            </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              The requested page redirected to a login screen. A11yForge does not attempt to create accounts or guess credentials.
+            </p>
+</div>
+<div class="pt-space-xl flex items-center justify-between font-mono-sm text-mono-sm text-outline">
+<span>Test another site</span>
+<span class="group-hover:text-primary transition-colors">SWITCH →</span>
+</div>
+</div>
+<!-- State C Card -->
+<div class="cursor-pointer bg-surface-container-low p-space-lg rounded-lg hover:bg-surface-container-high transition-all flex flex-col justify-between group" onclick="selectState('C')">
+<div>
+<div class="flex items-center justify-between pb-space-md">
+<span class="font-mono-sm text-mono-sm text-secondary font-semibold">[!] STATE C</span>
+<span class="font-label-caps text-label-caps bg-surface-container px-space-2xs py-space-2xs text-outline rounded">BOT_GUARD</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary font-semibold mb-space-xs group-hover:underline">
+              Automated browser access was blocked
+            </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              The website appears to block automated browsers.
+            </p>
+</div>
+<div class="pt-space-xl flex items-center justify-between font-mono-sm text-mono-sm text-outline">
+<span>Test another site</span>
+<span class="group-hover:text-primary transition-colors">SWITCH →</span>
+</div>
+</div>
+<!-- State D Card -->
+<div class="cursor-pointer bg-surface-container-low p-space-lg rounded-lg hover:bg-surface-container-high transition-all flex flex-col justify-between group" onclick="selectState('D')">
+<div>
+<div class="flex items-center justify-between pb-space-md">
+<span class="font-mono-sm text-mono-sm text-secondary font-semibold">[—] STATE D</span>
+<span class="font-label-caps text-label-caps bg-surface-container px-space-2xs py-space-2xs text-outline rounded">POLICY_SCOPE</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary font-semibold mb-space-xs group-hover:underline">
+              This target isn't available from the hosted explorer
+            </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Used for unsafe/private URLs. Local/private targets can be tested using the local A11yForge development mode.
+            </p>
+</div>
+<div class="pt-space-xl flex items-center justify-between font-mono-sm text-mono-sm text-outline">
+<span>Test another site</span>
+<span class="group-hover:text-primary transition-colors">SWITCH →</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+    const stateData = {
+      'A': {
+        headline: "We couldn't open this website",
+        copy: "The website could not be reached from the A11yForge browser.",
+        code: "ERR_CONNECTION_TIMED_OUT",
+        status: "[✕] FAILURE STATUS: UNREACHABLE",
+        contextLabel: "NETWORK DIAGNOSTIC LOG",
+        contextDetail: "DNS lookup completed in 14ms (IP: 198.51.100.24). TCP handshake to port 443 timed out after 30000ms. No SYN-ACK received.",
+        uri: "https://staging.internal-edge.test",
+        t1: "> resolving host headers... OK",
+        t2: "> socket hangup on port 443",
+        t3: "> error category: TARGET_UNREACHABLE",
+        hasRetry: true
+      },
+      'B': {
+        headline: "Authentication required",
+        copy: "The requested page redirected to a login screen. A11yForge does not attempt to create accounts or guess credentials.",
+        code: "HTTP_401_UNAUTHORIZED_REDIRECT",
+        status: "[!] INTERCEPTION: LOGIN_WALL_DETECTED",
+        contextLabel: "REDIRECT CHAIN CAPTURE",
+        contextDetail: "HTTP 302 Found -> Location: /login?redirect_uri=%2Fdashboard. Cookie challenge 'auth_token' is absent. Scanning stopped per strict safety guidelines.",
+        uri: "https://app.service-provider.io/dashboard",
+        t1: "> GET /dashboard HTTP/2 -> 302 Found",
+        t2: "> intercepted redirect to /login",
+        t3: "> credential bypass suppressed by safety policy",
+        hasRetry: false
+      },
+      'C': {
+        headline: "Automated browser access was blocked",
+        copy: "The website appears to block automated browsers.",
+        code: "HTTP_403_BOT_CHALLENGE",
+        status: "[!] ACCESS REJECTED: WAF / BOT SHIELD",
+        contextLabel: "RESPONSE HEADERS INSPECTION",
+        contextDetail: "Server returned 403 Forbidden with CF-Ray challenge / CAPTCHA token requirement. Headless browser fingerprint was flagged by destination origin rules.",
+        uri: "https://storefront.retail-secure.com/browse",
+        t1: "> connection established (TLS 1.3)",
+        t2: "> anti-automation heuristic triggered",
+        t3: "> challenge page returned (WCAG audit aborted)",
+        hasRetry: false
+      },
+      'D': {
+        headline: "This target isn't available from the hosted explorer",
+        copy: "Used for unsafe/private URLs. Local/private targets can be tested using the local A11yForge development mode.",
+        code: "SECURITY_POLICY_RESTRICTED_RANGE",
+        status: "[—] INELIGIBLE: PRIVATE_RFC1918_TARGET",
+        contextLabel: "HOSTED RUNNER SECURITY BOUNDARY",
+        contextDetail: "Target resolves to 127.0.0.1 (Localhost / Loopback) or private enterprise CIDR. Hosted cloud runner restricts SSRF egress. Please use the CLI runner for internal hosts.",
+        uri: "http://localhost:3000/internal-audit",
+        t1: "> validating security boundaries...",
+        t2: "> rejected target: 127.0.0.1 in non-public IP range",
+        t3: "> remediation: use `npx @a11yforge/cli test` locally",
+        hasRetry: false
+      }
+    };
+
+    function selectState(key) {
+      const data = stateData[key];
+      if (!data) return;
+
+      // Update text
+      document.getElementById('state-headline').textContent = data.headline;
+      document.getElementById('state-copy').textContent = data.copy;
+      document.getElementById('fault-badge').textContent = `FAULT_CODE: ${data.code}`;
+      document.getElementById('fault-status-tag').innerHTML = `<span>${data.status.substring(0, 3)}</span><span class="font-semibold uppercase tracking-wider text-primary">${data.status.substring(4)}</span>`;
+      document.getElementById('state-context-label').textContent = data.contextLabel;
+      document.getElementById('state-context-detail').textContent = data.contextDetail;
+      document.getElementById('uri-display').textContent = data.uri;
+      
+      document.getElementById('terminal-line-1').textContent = data.t1;
+      document.getElementById('terminal-line-2').textContent = data.t2;
+      document.getElementById('terminal-line-3').textContent = data.t3;
+
+      // Update buttons
+      const actions = document.getElementById('actions-container');
+      if (data.hasRetry) {
+        actions.innerHTML = `
+          <button id="primary-action-btn" type="button" class="px-space-lg py-space-sm bg-primary text-on-primary font-body-md text-body-md font-medium rounded hover:opacity-90 transition-opacity focus-visible:outline-none">
+            Try again
+          </button>
+          <button type="button" class="px-space-lg py-space-sm bg-surface-container-high text-primary font-body-md text-body-md font-medium rounded hover:bg-surface-variant transition-colors focus-visible:outline-none">
+            Test another site
+          </button>
+          <span class="font-mono-sm text-mono-sm text-outline ml-auto self-center">KEY: [ESC] CANCEL · [R] RETRY</span>
+        `;
+      } else {
+        actions.innerHTML = `
+          <button type="button" class="px-space-lg py-space-sm bg-primary text-on-primary font-body-md text-body-md font-medium rounded hover:opacity-90 transition-opacity focus-visible:outline-none">
+            Test another site
+          </button>
+          <span class="font-mono-sm text-mono-sm text-outline ml-auto self-center">KEY: [ESC] CANCEL</span>
+        `;
+      }
+
+      // Update nav styling
+      ['A', 'B', 'C', 'D'].forEach(tabKey => {
+        const btn = document.getElementById(`tab-${tabKey}`);
+        if (!btn) return;
+        const isSelected = tabKey === key;
+        btn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        if (isSelected) {
+          btn.className = "state-tab-btn flex items-center gap-space-xs px-space-md py-space-sm rounded font-mono-md text-mono-md bg-surface text-primary transition-colors focus-visible:outline-none";
+          btn.querySelector('span:first-child').className = "font-label-caps text-label-caps bg-surface-container-highest px-space-2xs text-primary rounded";
+        } else {
+          btn.className = "state-tab-btn flex items-center gap-space-xs px-space-md py-space-sm rounded font-mono-md text-mono-md text-on-surface-variant hover:text-primary transition-colors focus-visible:outline-none";
+          btn.querySelector('span:first-child').className = "font-label-caps text-label-caps bg-surface-container px-space-2xs text-outline rounded";
+        }
+      });
+    }
+  </script>
+</div></main><footer class="w-full bg-surface-container-lowest mt-space-3xl"><div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop py-space-xl flex flex-col sm:flex-row items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><span class="font-mono-sm text-mono-sm text-outline">a11yforge.engine // wcag aaa strict</span></div><div class="flex items-center gap-space-lg"><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" data-path="technical-evidence" href="#">Evidence Log</a><a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary transition-colors" href="https://github.com" rel="noopener noreferrer" target="_blank">GitHub</a></div></div></footer></body></html>

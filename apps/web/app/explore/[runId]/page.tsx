@@ -1,7 +1,8 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useParams, useSearchParams } from "next/navigation";
 import type {
   ExplorationEvent,
@@ -18,9 +19,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -30,23 +29,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { StageSteps } from "@/components/domain";
 import { EvidenceViewer } from "@/components/evidence-viewer";
+import { IssueWalkthrough } from "@/components/issue-walkthrough";
+import {
+  EvidenceFallback,
+  FindingListFallback,
+} from "@/components/finding-list-fallback";
 import { STAGE_ORDER, stageState } from "../../../lib/exploration-stages";
 import {
-  affectedCountOf,
-  fixGuidanceOf,
   GROUP_ORDER,
   groupOf,
   humanFindingOf,
   humanLimitationOf,
   humanProgressOf,
   LIMITATION_SUPPORTING,
-  pluralize,
   PROBLEM_GROUPS,
-  ruleSlugOf,
-  severityWordOf,
   shortPageOf,
   storyboardOf,
   tierOfSeverity,
@@ -56,34 +53,41 @@ import {
 } from "../../../lib/human-copy";
 import { drawableHighlights } from "../../../lib/overlay";
 import {
+  buildSceneNodes,
+  fitDistanceFor,
+  focusPathOf,
+  highlightToPlane,
+  markerCategoryCounts,
+  planeSizeFor,
+  repairStateFromStages,
+  type CameraRequest,
+  type FindingSceneNode,
+  type RepairState,
+} from "../../../lib/scene-model";
+import {
   cancelExploration,
   explorationShotSrc,
   fetchExploration,
+  fetchSourceTrace,
   subscribeExplorationEvents,
+  subscribeRunEvents,
 } from "../../../lib/api";
+import { prefersReducedMotion, revealIn } from "../../../lib/motion";
 
-function categoryLabel(category: ExplorationFinding["category"]): string {
-  if (category === "confirmed-failure") return "Confirmed failure";
-  if (category === "automated-finding") return "Automated finding";
-  if (category === "observation") return "Observation";
-  return "Not tested";
-}
-
-function categoryGlyph(category: ExplorationFinding["category"]): string {
-  if (category === "confirmed-failure") return "[✕]";
-  if (category === "automated-finding") return "[!]";
-  if (category === "observation") return "[i]";
-  return "[—]";
-}
-
-function categoryHelp(category: ExplorationFinding["category"]): string {
-  if (category === "confirmed-failure")
-    return "Reproduced live in the browser: the failure was observed, not inferred.";
-  if (category === "automated-finding")
-    return "Flagged by an automated WCAG rule check during the crawl.";
-  if (category === "observation") return "Noted during exploration; not a confirmed failure.";
-  return "Skipped: the interaction could not be tested safely.";
-}
+const SpatialScene = dynamic(
+  () =>
+    import("../../../components/scene/AccessibilityScene").then((m) => ({
+      default: m.AccessibilityScene,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="scene-loading" role="status">
+        <p className="help">Loading 3D map…</p>
+      </div>
+    ),
+  },
+);
 
 function probeStatusGlyph(status: string): string {
   if (status === "failed") return "[✕]";
@@ -92,59 +96,28 @@ function probeStatusGlyph(status: string): string {
   return "[!]";
 }
 
-function FindingTechnicalDetails({ finding }: { finding: ExplorationFinding }) {
-  const slug = ruleSlugOf(finding);
+export default function ExploreRunPage(): React.JSX.Element {
   return (
-    <div className="finding-evidence">
-      {slug !== null && (
-        <p className="badge-mono" style={{ margin: "0 0 8px" }}>
-          Check: {slug}
-        </p>
-      )}
-      <h4>How it was checked</h4>
-      <ol>
-        {finding.howReproduced.map((step, index) => (
-          <li key={index}>{step}</li>
-        ))}
-      </ol>
-      {finding.standardReferences.length > 0 && (
-        <p className="std-refs">
-          Standards:{" "}
-          {finding.standardReferences.map((ref, index) => (
-            <span key={index}>
-              {index > 0 && ", "}
-              <a href={ref} target="_blank" rel="noreferrer">
-                {ref}
-              </a>
-            </span>
-          ))}
-        </p>
-      )}
-      <p className="std-refs">
-        Probe: {finding.probeId} · Finding: {finding.findingId}
-      </p>
-    </div>
+    <Suspense fallback={<main className="landing"><p className="loading">Loading test…</p></main>}>
+      <ExploreRunContent />
+    </Suspense>
   );
 }
 
-function ConnectCta({ runId, findingId }: { runId: string; findingId: string }) {
-  return (
-    <div>
-      <div className="finding-actions">
-        <Button size="sm" asChild>
-          <Link
-            href={`/connect?run=${encodeURIComponent(runId)}&finding=${encodeURIComponent(findingId)}`}
-          >
-            Connect source
-          </Link>
-        </Button>
-      </div>
-      <p className="help mt-2" style={{ color: "var(--ink-dim)" }}>
-        Connect source to check repair support. A11yForge can try to locate
-        and repair supported issues once your code is connected.
-      </p>
-    </div>
+/** Plane-space center of one affected element (camera + outline target). */
+function elementCenterOf(
+  finding: ExplorationFinding,
+  elementIndex: number,
+  screenshot: string,
+): { x: number; y: number; w: number; h: number } | null {
+  const drawable = drawableHighlights(finding.highlights).filter(
+    (highlight) => highlight.screenshot === screenshot,
   );
+  const box = drawable[Math.min(Math.max(elementIndex, 0), Math.max(drawable.length - 1, 0))] ?? null;
+  if (box === null || box.viewportWidth <= 0 || box.viewportHeight <= 0) return null;
+  const plane = planeSizeFor(box.viewportWidth, box.viewportHeight);
+  const { center, rect } = highlightToPlane(box, plane);
+  return { x: center.x, y: center.y, w: rect.width, h: rect.height };
 }
 
 /** Compact card for observations (not confirmed problems). */
@@ -164,21 +137,6 @@ function ObservationCard({
     <article aria-labelledby={`finding-title-${finding.findingId}`}>
       <Card className="p-5">
         <CardHeader className="p-0">
-          {developer && (
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline">
-                {finding.severity.toUpperCase()}
-              </Badge>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge>
-                    {categoryGlyph(finding.category)} {categoryLabel(finding.category)}
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>{categoryHelp(finding.category)}</TooltipContent>
-              </Tooltip>
-            </div>
-          )}
           <CardTitle asChild className="text-lg">
             <h3 id={`finding-title-${finding.findingId}`}>{human.title}</h3>
           </CardTitle>
@@ -188,7 +146,15 @@ function ObservationCard({
           </p>
         </CardHeader>
         <CardContent className="p-0">
-          <ConnectCta runId={runId} findingId={finding.findingId} />
+          <div className="finding-actions">
+            <Button size="sm" asChild>
+              <Link
+                href={`/connect?run=${encodeURIComponent(runId)}&finding=${encodeURIComponent(finding.findingId)}`}
+              >
+                Connect source
+              </Link>
+            </Button>
+          </div>
           <Accordion type="single" collapsible className="mt-2">
             <AccordionItem value={`show-me-${finding.findingId}`}>
               <AccordionTrigger>Show me</AccordionTrigger>
@@ -207,14 +173,6 @@ function ObservationCard({
                     the captured screenshot.
                   </p>
                 )}
-                <Accordion type="single" collapsible className="mt-2">
-                  <AccordionItem value={`technical-${finding.findingId}`}>
-                    <AccordionTrigger>Developer details</AccordionTrigger>
-                    <AccordionContent>
-                      <FindingTechnicalDetails finding={finding} />
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -224,153 +182,13 @@ function ObservationCard({
   );
 }
 
-/**
- * Guided walkthrough detail for one problem: visual evidence, plain
- * explanation, fix guidance, and navigation. Evidence-first, jargon-last.
- */
-function WalkthroughItem({
-  finding,
-  runId,
-  position,
-  total,
-  developer,
-  elementIndex,
-  onElementSelect,
-  viewerRef,
-  headingRef,
-}: {
-  finding: ExplorationFinding;
-  runId: string;
-  position: number;
-  total: number;
-  developer: boolean;
-  elementIndex: number;
-  onElementSelect: (index: number) => void;
-  viewerRef: React.RefObject<HTMLDivElement | null>;
-  headingRef: React.RefObject<HTMLHeadingElement | null>;
-}) {
-  const human = humanFindingOf(finding);
-  const count = affectedCountOf(finding);
-  const drawable = drawableHighlights(finding.highlights);
-  const shot = finding.screenshots[0] ?? null;
-  const selected = drawable.length === 0 ? 0 : Math.min(elementIndex, drawable.length - 1);
-  const isKeyboard = finding.probeId === "keyboard-traversal";
-  return (
-    <div>
-      <p className="badge-mono" aria-live="polite">
-        Issue {position} of {total}
-      </p>
-      <h3 ref={headingRef} tabIndex={-1} className="outline-none" style={{ fontSize: 24, lineHeight: "32px", margin: "8px 0 4px" }}>
-        {human.title}
-      </h3>
-      <p className="help" style={{ color: "var(--ink-dim)" }}>
-        {severityWordOf(finding.severity)}
-      </p>
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:gap-6">
-        <div className="lg:col-start-2 lg:row-start-2">
-          <h4>What&apos;s wrong?</h4>
-          <p>{human.title}.</p>
-          <h4>Why it matters</h4>
-          <p style={{ color: "var(--ink-dim)" }}>{human.why}</p>
-          <h4>Where it happens</h4>
-          <p className="font-mono text-[11px] text-inkdim">
-            <code>{developer ? finding.pageUrl : shortPageOf(finding.pageUrl)}</code>
-          </p>
-          {count !== null && (
-            <p className="font-mono text-[11px] text-inkdim">
-              Affected: {pluralize(count, human.noun)}
-            </p>
-          )}
-          {isKeyboard && (
-            <>
-              <h4>What happened</h4>
-              <ol className="finding-steps">
-                {storyboardOf(finding).map((step, index) => (
-                  <li key={index}>
-                    {step.marker !== "start" && <span aria-hidden="true">↓ Tab </span>}
-                    {step.text}
-                    {step.marker === "problem" && " ✕"}
-                  </li>
-                ))}
-              </ol>
-            </>
-          )}
-        </div>
-        <div ref={viewerRef} className="lg:col-start-1 lg:row-start-2 lg:row-span-3 scroll-mt-4">
-          {shot !== null && drawable.length > 0 ? (
-            <EvidenceViewer
-              src={explorationShotSrc(runId, shot)}
-              alt={`Screenshot from the test showing where: ${human.title}`}
-              highlights={drawable}
-              selectedIndex={selected}
-              onSelect={onElementSelect}
-              caption="This is the exact element to look at."
-            />
-          ) : (
-            <Card>
-              <p className="help" style={{ color: "var(--ink-dim)" }}>
-                We found this problem but could not visually locate it in the
-                captured screenshot.
-              </p>
-              {shot !== null && (
-                <img
-                  src={explorationShotSrc(runId, shot)}
-                  alt="Screenshot from the test showing the checked page"
-                  loading="lazy"
-                  style={{ display: "block", width: "100%", height: "auto", marginTop: 8 }}
-                />
-              )}
-            </Card>
-          )}
-        </div>
-        <div className="lg:col-start-2 lg:row-start-3">
-          <h4>How do I fix this?</h4>
-          <p>{fixGuidanceOf(finding)}</p>
-          <ConnectCta runId={runId} findingId={finding.findingId} />
-          <p style={{ marginTop: 12 }}>
-            <Button size="sm" variant="secondary" asChild>
-              <a href={finding.pageUrl} target="_blank" rel="noreferrer">
-                Open affected page
-              </a>
-            </Button>
-          </p>
-        </div>
-      </div>
-      {developer && (
-        <Card className="mt-4">
-          <p className="badge-mono">
-            {finding.severity.toUpperCase()} · {categoryGlyph(finding.category)} {categoryLabel(finding.category)}
-          </p>
-          <FindingTechnicalDetails finding={finding} />
-        </Card>
-      )}
-      {!developer && (
-        <Accordion type="single" collapsible className="mt-4">
-          <AccordionItem value={`walk-technical-${finding.findingId}`}>
-            <AccordionTrigger>Developer details</AccordionTrigger>
-            <AccordionContent>
-              <FindingTechnicalDetails finding={finding} />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      )}
-    </div>
-  );
-}
-
-export default function ExploreRunPage(): React.JSX.Element {
-  return (
-    <Suspense fallback={<main className="landing"><p className="loading">Loading test…</p></main>}>
-      <ExploreRunContent />
-    </Suspense>
-  );
-}
-
 function ExploreRunContent(): React.JSX.Element {
   const params = useParams<{ runId: string }>();
   const search = useSearchParams();
   const runId = params.runId;
   const entryUrl = search.get("url") ?? "";
+  const sourceIdParam = search.get("source") ?? "";
+  const repairRunParam = search.get("repair") ?? "";
 
   const [events, setEvents] = useState<ExplorationEvent[]>([]);
   const [run, setRun] = useState<ExplorationRun | null>(null);
@@ -378,8 +196,17 @@ function ExploreRunContent(): React.JSX.Element {
   const [cancelling, setCancelling] = useState(false);
   const [developer, setDeveloper] = useState(false);
   const [unreachable, setUnreachable] = useState(false);
+  const [webglFailed, setWebglFailed] = useState(false);
+  const [resetNonce, setResetNonce] = useState(0);
+  const [cameraRequest, setCameraRequest] = useState<CameraRequest | null>(null);
+  const [storyIndex, setStoryIndex] = useState(0);
+  const [storyPlaying, setStoryPlaying] = useState(false);
+  const [repairStages, setRepairStages] = useState<string[]>([]);
+  const [sourceFile, setSourceFile] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const failuresRef = useRef(0);
+  const cameraNonce = useRef(0);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   const poll = useCallback(async () => {
     try {
@@ -390,8 +217,6 @@ function ExploreRunContent(): React.JSX.Element {
         if (pollRef.current !== null) clearInterval(pollRef.current);
       }
     } catch {
-      // The run record is unreachable (unknown id, server restarted).
-      // After several consecutive failures, say so instead of waiting forever.
       failuresRef.current += 1;
       if (failuresRef.current >= 5) {
         if (pollRef.current !== null) clearInterval(pollRef.current);
@@ -419,6 +244,24 @@ function ExploreRunContent(): React.JSX.Element {
     };
   }, [runId, poll]);
 
+  // Linked repair run (explicit ?repair=<runId>): fold its real backend
+  // stages into marker repair states. Absent linkage stays unresolved.
+  useEffect(() => {
+    if (repairRunParam === "") return;
+    const seen = new Set<string>();
+    return subscribeRunEvents(
+      repairRunParam,
+      (event) => {
+        if (seen.has(event.type)) return;
+        seen.add(event.type);
+        setRepairStages((previous) => [...previous, event.type]);
+      },
+      () => {
+        /* status poll on the console still converges */
+      },
+    );
+  }, [repairRunParam]);
+
   async function onCancel(): Promise<void> {
     setCancelling(true);
     try {
@@ -433,7 +276,6 @@ function ExploreRunContent(): React.JSX.Element {
 
   const latest = events.length > 0 ? events[events.length - 1] ?? null : null;
   const previous = events.length > 1 ? events[events.length - 2] ?? null : null;
-  // Live-region restraint: announce only when the stage actually changes.
   const announceLatest = latest !== null && (previous === null || previous.stage !== latest.stage);
   const confirmed = run?.findings.filter((finding) => finding.category === "confirmed-failure") ?? [];
   const automated = run?.findings.filter((finding) => finding.category === "automated-finding") ?? [];
@@ -468,11 +310,9 @@ function ExploreRunContent(): React.JSX.Element {
     list.sort((a, b) => severityRank(a.severity) - severityRank(b.severity));
   }
 
-  // Guided walkthrough: issue-by-issue review over the grouped problems.
+  // Guided walkthrough doubles as the category filter: the scene shows
+  // the scoped findings, so filtering hides/shows real markers only.
   const [walk, setWalk] = useState<{ scope: "all" | GroupId; fi: number; ei: number } | null>(null);
-  const walkHeadingRef = useRef<HTMLHeadingElement | null>(null);
-  const walkViewerRef = useRef<HTMLDivElement | null>(null);
-  const walkSectionRef = useRef<HTMLElement | null>(null);
 
   const walkProblems: ExplorationFinding[] = [];
   for (const id of GROUP_ORDER) {
@@ -482,320 +322,569 @@ function ExploreRunContent(): React.JSX.Element {
 
   function enterWalkthrough(scope: "all" | GroupId, fi = 0): void {
     setWalk({ scope, fi, ei: 0 });
+    setStoryIndex(0);
+    setStoryPlaying(false);
   }
 
   const scopedWalk =
     walk === null
-      ? []
+      ? walkProblems
       : walk.scope === "all"
         ? walkProblems
         : walkProblems.filter((finding) => groupOf(finding) === walk.scope);
   const walkFinding = walk === null ? null : (scopedWalk[Math.min(walk.fi, Math.max(scopedWalk.length - 1, 0))] ?? null);
+  const walkPosition = walk === null ? 0 : Math.min(walk.fi, Math.max(scopedWalk.length - 1, 0)) + 1;
 
+  const isKeyboard = walkFinding?.probeId === "keyboard-traversal";
+  const board = walkFinding !== null ? storyboardOf(walkFinding) : [];
+  const storyShot =
+    walkFinding !== null && isKeyboard && walkFinding.screenshots.length > 1
+      ? (walkFinding.screenshots[Math.min(storyIndex, walkFinding.screenshots.length - 1)] ?? null)
+      : null;
+  const activeShot = storyShot ?? walkFinding?.screenshots[0] ?? newestShot ?? null;
+
+  const plane = useMemo(() => {
+    if (run !== null && activeShot !== null) {
+      for (const finding of run.findings) {
+        for (const highlight of drawableHighlights(finding.highlights)) {
+          if (highlight.screenshot === activeShot && highlight.viewportWidth > 0 && highlight.viewportHeight > 0) {
+            return planeSizeFor(highlight.viewportWidth, highlight.viewportHeight);
+          }
+        }
+      }
+    }
+    return planeSizeFor(1280, 720);
+  }, [run, activeShot]);
+
+  const repairStates = useMemo<Record<string, RepairState>>(() => {
+    if (walkFinding === null || repairRunParam === "") return {};
+    return { [walkFinding.findingId]: repairStateFromStages(repairStages) };
+  }, [walkFinding, repairRunParam, repairStages]);
+
+  const nodes = useMemo<FindingSceneNode[]>(() => {
+    if (run === null || activeShot === null) return [];
+    return buildSceneNodes(scopedWalk, {
+      screenshot: activeShot,
+      plane,
+      selectedFindingId: walkFinding?.findingId ?? null,
+      selectedElementIndex: walk?.ei ?? 0,
+      repairStates,
+      categoryOf: groupOf,
+    });
+  }, [run, activeShot, scopedWalk, plane, walkFinding?.findingId, walk?.ei, repairStates]);
+
+  const selectedNode = nodes.find((node) => node.selected) ?? null;
+
+  const focusPath = useMemo(
+    () => (walkFinding !== null && isKeyboard ? focusPathOf(walkFinding, plane) : null),
+    [walkFinding, isKeyboard, plane],
+  );
+  const showFocusPath = focusPath !== null && focusPath.nodes.length > 0;
+  const focusSeq = focusPath !== null ? Math.min(storyIndex, focusPath.nodes.length - 1) : 0;
+
+  const markerCounts = useMemo(() => markerCategoryCounts(problems, groupOf), [problems]);
+  const selectedIssueLabel =
+    walkFinding !== null && walk !== null
+      ? `Issue ${walkPosition} · ${humanFindingOf(walkFinding).title}`
+      : null;
+
+  // Source trace for the selected issue (explicit ?source=<id> only).
   useEffect(() => {
+    if (sourceIdParam === "" || walkFinding === null) {
+      setSourceFile(null);
+      return;
+    }
+    let cancelled = false;
+    fetchSourceTrace(sourceIdParam).then((trace) => {
+      if (cancelled) return;
+      if (trace === null || trace.findingId !== walkFinding.findingId) {
+        setSourceFile(null);
+        return;
+      }
+      setSourceFile(trace.candidates[0]?.filePath ?? null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [sourceIdParam, walkFinding]);
+
+  // Evidence playback: step through the recorded focus sequence.
+  useEffect(() => {
+    if (!storyPlaying || board.length < 2) return;
+    const id = setInterval(() => {
+      setStoryIndex((index) => (index + 1) % board.length);
+    }, 1600);
+    return () => clearInterval(id);
+  }, [storyPlaying, board.length]);
+
+  // Cinematic sequencing: the first problem selects itself when the scan
+  // completes, and every issue swap restages the panel typography.
+  const walkProblemsCount = walkProblems.length;
+  const runState = run?.state;
+  useEffect(() => {
+    if (runState === "COMPLETED" && walk === null && walkProblemsCount > 0) {
+      enterWalkthrough("all", 0);
+    }
+    // enterWalkthrough is stable intent; walkProblemsCount gates re-entry.
+  }, [runState, walkProblemsCount]);
+  const walkKey = walk === null ? "none" : `${walk.scope}:${walk.fi}`;
+  useEffect(() => {
+    if (panelRef.current !== null && walk !== null) {
+      void revealIn(panelRef.current, "[data-enter]");
+    }
+  }, [walkKey, walk]);
+
+  function moveCamera(point: { x: number; y: number }, distance: number): void {
+    cameraNonce.current += 1;
+    setCameraRequest({ point, distance, nonce: cameraNonce.current });
+  }
+
+  function focusIssue(fi: number, ei: number, list: ExplorationFinding[] = scopedWalk): void {
+    const finding = list[Math.min(Math.max(fi, 0), Math.max(list.length - 1, 0))] ?? null;
+    if (finding === null || activeShot === null) return;
+    const center = elementCenterOf(finding, ei, activeShot);
+    if (center === null) return;
+    moveCamera(center, fitDistanceFor(center.w, center.h));
+  }
+
+  function goToIssue(fi: number): void {
     if (walk === null) return;
-    walkSectionRef.current?.scrollIntoView({ block: "start" });
-    walkHeadingRef.current?.focus({ preventScroll: true });
-  }, [walk?.scope, walk?.fi]);
+    const next = Math.min(Math.max(fi, 0), scopedWalk.length - 1);
+    setWalk({ scope: walk.scope, fi: next, ei: 0 });
+    setStoryIndex(0);
+    setStoryPlaying(false);
+    focusIssue(next, 0);
+  }
+
+  // Previous/next moves through the spatial presentation: current
+  // typography exits with stagger, the camera moves, new text enters.
+  async function goToIssueAnimated(fi: number): Promise<void> {
+    const scope = panelRef.current;
+    if (walk === null || scope === null || prefersReducedMotion()) {
+      goToIssue(fi);
+      return;
+    }
+    const { exitPanel } = await import("../../../lib/motion");
+    await exitPanel(scope);
+    goToIssue(fi);
+  }
+
+  function onSelectNode(findingId: string, highlightIndex: number): void {
+    const inScope = scopedWalk.findIndex((finding) => finding.findingId === findingId);
+    const scope = walk?.scope ?? "all";
+    if (inScope >= 0 && walk !== null) {
+      setWalk({ scope, fi: inScope, ei: highlightIndex });
+    } else {
+      const index = walkProblems.findIndex((finding) => finding.findingId === findingId);
+      if (index < 0) return;
+      setWalk({ scope: "all", fi: index, ei: highlightIndex });
+    }
+    setStoryIndex(0);
+    setStoryPlaying(false);
+    const node = nodes.find((candidate) => candidate.findingId === findingId && candidate.highlightIndex === highlightIndex);
+    if (node !== null && node !== undefined) {
+      moveCamera(node.center, fitDistanceFor(node.rect.width, node.rect.height));
+    }
+  }
+
+  function onSelectFinding(findingId: string): void {
+    const inScope = scopedWalk.findIndex((finding) => finding.findingId === findingId);
+    if (inScope >= 0 && walk !== null) {
+      goToIssue(inScope);
+      return;
+    }
+    const index = walkProblems.findIndex((finding) => finding.findingId === findingId);
+    if (index < 0) return;
+    enterWalkthrough("all", index);
+    focusIssue(index, 0, walkProblems);
+  }
+
+  function onElementSelect(index: number): void {
+    if (walk === null || walkFinding === null) return;
+    setWalk({ scope: walk.scope, fi: walk.fi, ei: index });
+    const center = elementCenterOf(walkFinding, index, activeShot ?? "");
+    if (center !== null) moveCamera(center, fitDistanceFor(center.w, center.h));
+  }
+
+  function onStorySelect(index: number): void {
+    setStoryIndex(index);
+    setStoryPlaying(false);
+    if (focusPath !== null && focusPath.nodes.length > 0) {
+      const node = focusPath.nodes[Math.min(index, focusPath.nodes.length - 1)];
+      if (node !== undefined) moveCamera(node.center, 3.5);
+    } else if (walkFinding !== null) {
+      const center = elementCenterOf(walkFinding, 0, activeShot ?? "");
+      if (center !== null) moveCamera(center, fitDistanceFor(center.w, center.h));
+    }
+  }
+
+  function onResetView(): void {
+    setResetNonce((nonce) => nonce + 1);
+  }
+
+  function startReview(scope: "all" | GroupId, fi = 0): void {
+    const list =
+      scope === "all" ? walkProblems : walkProblems.filter((finding) => groupOf(finding) === scope);
+    if (list.length === 0) return;
+    enterWalkthrough(scope, fi);
+    focusIssue(fi, 0, list);
+  }
+
+  const textureUrl = activeShot !== null ? explorationShotSrc(runId, activeShot) : null;
+  const walkDrawableCount =
+    walkFinding !== null && activeShot !== null
+      ? drawableHighlights(walkFinding.highlights).filter((highlight) => highlight.screenshot === activeShot).length
+      : 0;
+
+  const scanPct = progress.length > 0 ? Math.round((doneSteps / progress.length) * 100) : 0;
 
   return (
-    <main className="landing-wide">
-      <a className="skip-link" href="#result">
-        Skip to result
+    <main className="xp">
+      <a className="skip-link" href="#issue-panel">
+        Skip to issue details
       </a>
 
       {run === null && !unreachable && (
-        <section aria-labelledby="run-title" id="result">
-          <Card className="flex flex-wrap items-center justify-between gap-3">
-            <Badge>
-              Checking: <span className="normal-case text-ink">{shortPageOf(targetUrl)}</span>
-            </Badge>
-            <Button type="button" variant="secondary" onClick={onCancel} disabled={cancelling}>
+        <section aria-labelledby="run-title">
+          <div className="xp-stage-head">
+            <span className="mono-label">
+              <span className="dot-live" aria-hidden="true">● </span>
+              Live scan — {shortPageOf(targetUrl)}
+            </span>
+            <button type="button" className="issue-nav-btn" onClick={onCancel} disabled={cancelling}>
               {cancelling ? "Cancelling…" : "Cancel check"}
-            </Button>
-          </Card>
-
-          <div className="steps-grid" style={{ display: "grid", gap: 16, marginTop: 16 }}>
-            <Card className="overflow-hidden p-0" aria-label="Live browser view">
-              {newestShot !== undefined && newestShot !== null ? (
-                <img
-                  src={explorationShotSrc(runId, newestShot)}
-                  alt="Screenshot from the test browser showing the page being checked"
-                  style={{ display: "block", width: "100%", height: "auto" }}
-                />
-              ) : (
-                <div className="p-8 text-center" role="status" aria-label="Live browser view">
-                  <Skeleton className="mx-auto h-48 w-full" />
-                  <p className="help mt-3">
-                    Waiting for browser evidence…
-                  </p>
-                </div>
-              )}
-              <p className="help px-4 py-2">
-                This is what the test browser sees right now.
-              </p>
-            </Card>
-
-            <div style={{ display: "grid", gap: 16 }}>
-              <Card aria-labelledby="run-title">
-                <CardTitle asChild>
-                  <h1 id="run-title">Checking your website…</h1>
-                </CardTitle>
-                <Progress
-                  value={(doneSteps / progress.length) * 100}
-                  aria-label={`${doneSteps} of ${progress.length} check steps complete`}
-                />
-                <StageSteps steps={progress} ariaLabel="Check steps" />
-                <p className="help mt-3" style={{ color: "var(--ink-dim)" }}>
-                  This usually checks things like text readability, missing
-                  labels, keyboard navigation, and page structure.
-                </p>
-                {announceLatest && latest !== null && (
-                  <p className="latest" role="status" aria-live="polite">
-                    {latest.message}
-                  </p>
-                )}
-                {error !== null && (
-                  <Alert variant="destructive" className="mt-3">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-              </Card>
-
-              <Accordion type="single" collapsible>
-                <AccordionItem value="testing-technical">
-                  <AccordionTrigger>Developer details</AccordionTrigger>
-                  <AccordionContent>
-                    <Badge variant="faint">Steps observed: {events.length} · Run: {runId}</Badge>
-                    {latest !== null && (
-                      <p className="help mt-2" style={{ color: "var(--ink-dim)" }}>
-                        Current action: {latest.message}
-                      </p>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
+            </button>
           </div>
+          <section aria-label="Live website scan" className="scene-wrap">
+            <SpatialScene
+              textureUrl={null}
+              plane={plane}
+              nodes={[]}
+              selectedNode={null}
+              selectedIssueLabel={null}
+              focusPath={null}
+              showFocusPath={false}
+              focusActiveSeq={0}
+              focusPlaying={false}
+              scanning
+              cameraRequest={null}
+              resetNonce={0}
+              onSelectNode={() => undefined}
+              onWebGLFail={() => setWebglFailed(true)}
+            />
+            <div className="xp-float xp-float-tl">
+              <span className="mono-label">Scanning your site</span>
+              <p className="xp-float-strong" role="status">
+                <span className="n">{issueCount}</span> {issueCount === 1 ? "problem" : "problems"} found
+              </p>
+            </div>
+            <div className="xp-float xp-float-tr">
+              <span className="mono-label">Progress</span>
+              <p className="xp-float-strong">
+                <span className="n">{scanPct}</span>%
+              </p>
+            </div>
+            <div className="scan-line" aria-hidden="false">
+              <div className="scan-line-track">
+                <div
+                  className="scan-line-fill"
+                  style={{ width: `${scanPct}%`, transition: "width 0.9s ease" }}
+                />
+              </div>
+              <div className="scan-line-stages">
+                {progress.map((step) => (
+                  <span
+                    key={step.id}
+                    data-on={step.state === "done" || step.state === "running" ? "true" : "false"}
+                  >
+                    {step.state === "done" ? "✓ " : step.state === "running" ? "● " : "○ "}
+                    {step.label}
+                  </span>
+                ))}
+              </div>
+              <p className="help" role="status" aria-live="polite" style={{ margin: "8px 0 0" }}>
+                {announceLatest && latest !== null
+                  ? latest.message
+                  : "Opening the website in the test browser…"}
+              </p>
+            </div>
+            <span id="run-title" className="sr-only">
+              Checking your website
+            </span>
+          </section>
+          {error !== null && (
+            <Alert variant="destructive" className="mt-3">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
         </section>
       )}
 
       {run === null && unreachable && (
-        <section aria-labelledby="missing-title" id="result">
-          <h1 id="missing-title" style={{ fontSize: 36, lineHeight: "44px", letterSpacing: "-0.03em" }}>
-            We couldn&apos;t find this check
+        <section aria-labelledby="missing-title" id="result" className="verify-hero">
+          <span className="mono-label">Verification unavailable</span>
+          <h1 id="missing-title" className="display-2">
+            We couldn&apos;t find this check.
           </h1>
-          <Card style={{ marginTop: 16 }}>
-            <p className="lede mt-2">
-              This check may have run on a server that has since restarted, so
-              its progress is no longer available.
-            </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 12 }}>
-              <Button asChild>
-                <Link href="/">Check a website</Link>
-              </Button>
-              <Button variant="secondary" asChild>
-                <Link href="/console">See the recorded example instead</Link>
-              </Button>
-            </div>
-          </Card>
+          <p className="lede-xl">
+            This check may have run on a server that has since restarted, so
+            its progress is no longer available. Nothing was backfilled — we
+            show this honestly instead of inventing results.
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 12 }}>
+            <Button asChild>
+              <Link href="/">Check a website</Link>
+            </Button>
+            <Button variant="secondary" asChild>
+              <Link href="/console">See the recorded example instead</Link>
+            </Button>
+          </div>
         </section>
       )}
 
       {run !== null && run.state === "COMPLETED" && (
-        <section aria-labelledby="run-title" id="result">
-          <header style={{ padding: "24px 0" }}>
-            <h1 id="run-title" style={{ fontSize: 36, lineHeight: "44px", letterSpacing: "-0.03em", margin: "8px 0" }}>
-              {issueCount > 0 ? `We found ${issueCount} accessibility ${issueCount === 1 ? "problem" : "problems"}` : "We didn’t find any major accessibility problems"}
+        <section aria-labelledby="run-title">
+          <div className="xp-verdict">
+            <span className="mono-label">
+              Scan complete — {shortPageOf(run.target.entryUrl)}
+            </span>
+            <h1 id="run-title" className="display-2">
+              {issueCount > 0 ? (
+                <>
+                  <span className="n">{issueCount}</span> accessibility{" "}
+                  <span className="display-accent">{issueCount === 1 ? "problem" : "problems"}</span> found
+                </>
+              ) : (
+                <>No major barriers found.</>
+              )}
             </h1>
-            <p className="help" style={{ color: "var(--ink-dim)" }}>
-              {issueCount > 0
-                ? `On this page: ${shortPageOf(run.target.entryUrl)}`
-                : "in the parts of the site we tested."}
-            </p>
-          </header>
-          <Separator />
+            {issueCount > 0 && (
+              <p className="xp-tiers">
+                {tier0.length > 0 && (
+                  <span className="t0"><strong>{tier0.length}</strong> need attention first</span>
+                )}
+                {tier1.length > 0 && (
+                  <span className="t1"><strong>{tier1.length}</strong> important</span>
+                )}
+                {tier2.length > 0 && (
+                  <span className="t2"><strong>{tier2.length}</strong> improvements</span>
+                )}
+              </p>
+            )}
+            <div role="group" aria-label="Detail level" className="kat-filter" style={{ borderBottom: 0, paddingTop: 0 }}>
+              <button
+                type="button"
+                aria-pressed={!developer}
+                onClick={() => setDeveloper(false)}
+              >
+                Plain language
+              </button>
+              <button
+                type="button"
+                aria-pressed={developer}
+                onClick={() => setDeveloper(true)}
+              >
+                Developer view
+              </button>
+            </div>
+          </div>
+          {issueCount > 0 && (
+            <div className="kat-filter" role="group" aria-label="Filter problems by category">
+              <button
+                type="button"
+                aria-pressed={walk === null || walk.scope === "all"}
+                onClick={() => startReview("all")}
+              >
+                All<span className="count">{walkProblems.length}</span>
+              </button>
+              {GROUP_ORDER.filter((id) => (markerCounts[id] ?? 0) > 0).map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-pressed={walk !== null && walk.scope === id}
+                  onClick={() => startReview(id)}
+                >
+                  {PROBLEM_GROUPS[id].heading}<span className="count">{markerCounts[id]}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          <Separator style={{ marginTop: 12 }} />
 
           {issueCount > 0 ? (
-            <>
-              <section aria-label="Summary" style={{ padding: "24px 0" }}>
-                <p style={{ fontSize: 24, lineHeight: "32px", fontWeight: 600, margin: "0 0 4px" }}>
-                  {VERDICT_COPY[verdict]}
-                </p>
-                {tier0.length > 0 && (
-                  <p className="lede">
-                    Start here: {tier0.length === 1 ? "1 problem needs attention first." : `${tier0.length} problems need attention first.`}{" "}
-                    <Button
-                      variant="link"
-                      className="h-auto p-0 text-base"
-                      onClick={() =>
-                        enterWalkthrough(
-                          "all",
-                          Math.max(
-                            walkProblems.findIndex((finding) => tierOfSeverity(finding.severity) === 0),
-                            0,
-                          ),
-                        )
-                      }
-                    >
-                      View important problems
-                    </Button>
-                  </p>
+            <div className="spatial-layout">
+              <section aria-label="3D accessibility map" className="scene-wrap">
+                {webglFailed ? (
+                  <div className="scene-fallback">
+                    {walkFinding !== null ? (
+                      <EvidenceFallback
+                        runId={runId}
+                        finding={walkFinding}
+                        elementIndex={walk?.ei ?? 0}
+                        onElementSelect={onElementSelect}
+                      />
+                    ) : (
+                      <p className="help">3D is unavailable — use the issue list to review each problem.</p>
+                    )}
+                  </div>
+                ) : (
+                  <SpatialScene
+                    textureUrl={textureUrl}
+                    plane={plane}
+                    nodes={nodes}
+                    selectedNode={selectedNode}
+                    selectedIssueLabel={selectedIssueLabel}
+                    focusPath={focusPath}
+                    showFocusPath={showFocusPath}
+                    focusActiveSeq={focusSeq}
+                    focusPlaying={storyPlaying}
+                    scanning={false}
+                    cameraRequest={cameraRequest}
+                    resetNonce={resetNonce}
+                    onSelectNode={onSelectNode}
+                    onWebGLFail={() => setWebglFailed(true)}
+                  />
                 )}
-                <p className="help" style={{ color: "var(--ink-dim)" }}>
-                  Also found:{" "}
-                  {[
-                    tier1.length > 0 ? `${tier1.length} may make the site harder to use` : null,
-                    tier2.length > 0 ? `${tier2.length} are smaller improvements` : null,
-                  ]
-                    .filter((part) => part !== null)
-                    .join(" · ") || "nothing else"}
-                  {observations.length > 0 && ` · ${observations.length} ${observations.length === 1 ? "observation" : "observations"}`}
-                </p>
-                <div role="group" aria-label="Detail level" style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                  <Button
-                    size="sm"
-                    variant={developer ? "secondary" : "default"}
-                    aria-pressed={!developer}
-                    onClick={() => setDeveloper(false)}
-                  >
-                    Simple view
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={developer ? "default" : "secondary"}
-                    aria-pressed={developer}
-                    onClick={() => setDeveloper(true)}
-                  >
-                    Developer view
+                {walk !== null && (
+                  <div className="xp-float xp-float-tr">
+                    <span className="mono-label">Issue</span>
+                    <p className="xp-float-strong">
+                      <span className="n">{walkPosition}</span> / {scopedWalk.length}
+                    </p>
+                  </div>
+                )}
+                {walk === null && (
+                  <div className="xp-float xp-float-tl">
+                    <span className="mono-label">Results</span>
+                    <p className="xp-float-strong" role="status">
+                      Organizing findings…
+                    </p>
+                  </div>
+                )}
+                <div className="scene-bar">
+                  <p className="help" style={{ margin: 0 }}>
+                    {activeShot !== null ? "This is the exact page state the test browser captured." : "Waiting for browser evidence…"}
+                    {storyShot !== null && ` State ${Math.min(storyIndex, (walkFinding?.screenshots.length ?? 1) - 1) + 1} of ${walkFinding?.screenshots.length ?? 1}.`}
+                  </p>
+                  <Button size="sm" variant="secondary" onClick={onResetView}>
+                    Reset view
                   </Button>
                 </div>
-                {developer && (
-                  <Card className="mt-4">
-                    <Badge variant="faint">
-                      Run: {run.runId} · {run.pagesVisited.length} pages checked · {run.probeResults.length} interaction checks ·{" "}
-                      {notTestedFindings.length} could not be tested
-                    </Badge>
-                  </Card>
-                )}
-                <p style={{ marginTop: 16 }}>
-                  <Button size="lg" onClick={() => enterWalkthrough("all")}>
-                    Review {issueCount} {issueCount === 1 ? "problem" : "problems"}
-                  </Button>
-                </p>
               </section>
 
-              {walk !== null && walkFinding !== null && (
-                <section ref={walkSectionRef} aria-labelledby="walkthrough-title" className="scroll-mt-4" style={{ padding: "24px 0" }}>
-                  <h2 id="walkthrough-title" style={{ fontSize: 24, lineHeight: "32px", margin: "0 0 4px" }}>
-                    {walk.scope === "all" ? "Review problems" : `Review: ${PROBLEM_GROUPS[walk.scope].heading}`}
-                  </h2>
-                  <ol className="walk-mini-nav" aria-label="All problems in this review">
-                    {scopedWalk.map((item, index) => {
-                      const itemHuman = humanFindingOf(item);
-                      const shortTitle =
-                        itemHuman.title.length > 48 ? `${itemHuman.title.slice(0, 45)}…` : itemHuman.title;
-                      const active = walk !== null && index === Math.min(walk.fi, scopedWalk.length - 1);
-                      return (
-                        <li key={item.findingId}>
-                          <Button
-                            size="sm"
-                            variant={active ? "default" : "secondary"}
-                            aria-current={active ? "true" : undefined}
-                            aria-label={`Issue ${index + 1} of ${scopedWalk.length}: ${itemHuman.title}`}
-                            onClick={() => setWalk({ scope: walk.scope, fi: index, ei: 0 })}
-                          >
-                            {index + 1} · {shortTitle}
-                          </Button>
-                        </li>
-                      );
-                    })}
-                  </ol>
-                  <WalkthroughItem
-                    finding={walkFinding}
-                    runId={runId}
-                    position={Math.min(walk.fi, scopedWalk.length - 1) + 1}
-                    total={scopedWalk.length}
-                    developer={developer}
-                    elementIndex={walk.ei}
-                    onElementSelect={(index) => setWalk({ scope: walk.scope, fi: walk.fi, ei: index })}
-                    viewerRef={walkViewerRef}
-                    headingRef={walkHeadingRef}
-                  />
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
-                    <Button
-                      variant="secondary"
-                      disabled={walk.fi <= 0}
-                      onClick={() => setWalk({ scope: walk.scope, fi: walk.fi - 1, ei: 0 })}
-                      aria-label="Previous issue"
-                    >
-                      ← Previous issue
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      disabled={walk.fi >= scopedWalk.length - 1}
-                      onClick={() => setWalk({ scope: walk.scope, fi: walk.fi + 1, ei: 0 })}
-                      aria-label="Next issue"
-                    >
-                      Next issue →
-                    </Button>
-                    <Button variant="link" onClick={() => setWalk(null)}>
-                      Back to summary
-                    </Button>
-                  </div>
-                </section>
-              )}
-
-              {GROUP_ORDER.filter((id) => (grouped.get(id) ?? []).length > 0).map((id) => {
-                const group = PROBLEM_GROUPS[id];
-                const list = grouped.get(id) ?? [];
-                const urgent = list.filter((finding) => tierOfSeverity(finding.severity) === 0).length;
-                return (
-                  <section key={id} aria-labelledby={`group-title-${id}`} style={{ padding: "24px 0" }}>
-                    <h2 id={`group-title-${id}`} style={{ fontSize: 24, lineHeight: "32px", margin: "0 0 4px" }}>
-                      {group.heading}
-                    </h2>
-                    <p className="help">{group.description}</p>
-                    <p className="help" style={{ color: "var(--ink-dim)" }}>
-                      {list.length} {list.length === 1 ? "problem" : "problems"}
-                      {urgent > 0 && ` · ${urgent} ${urgent === 1 ? "needs" : "need"} attention first`}
+              <aside className="spatial-panel" aria-label="Issue details" id="issue-panel">
+                {walkFinding !== null && walk !== null ? (
+                  <div className="issue-sheet" ref={panelRef}>
+                    <p className="issue-pos" data-enter data-exit aria-live="polite">
+                      <span className="now">{String(walkPosition).padStart(2, "0")}</span>
+                      {" / "}
+                      {String(scopedWalk.length).padStart(2, "0")}
                     </p>
-                    <p style={{ marginTop: 8 }}>
-                      <Button variant="secondary" onClick={() => enterWalkthrough(id)}>
-                        Review {list.length} {list.length === 1 ? "problem" : "problems"}
+                    <div data-enter data-exit>
+                      <IssueWalkthrough
+                        finding={walkFinding}
+                        runId={runId}
+                        position={walkPosition}
+                        total={scopedWalk.length}
+                        developer={developer}
+                        elementCount={walkDrawableCount}
+                        elementIndex={Math.min(walk.ei, Math.max(walkDrawableCount - 1, 0))}
+                        onElementSelect={onElementSelect}
+                        storyIndex={storyIndex}
+                        onStorySelect={onStorySelect}
+                        storyPlaying={storyPlaying}
+                        onTogglePlay={() => setStoryPlaying((playing) => !playing)}
+                        isKeyboard={isKeyboard}
+                        hasDrawableGeometry={drawableHighlights(walkFinding.highlights).length > 0}
+                        repairState={repairStates[walkFinding.findingId] ?? "unresolved"}
+                        sourceFile={sourceFile}
+                        hasPrevious={walk.fi > 0}
+                        hasNext={walk.fi < scopedWalk.length - 1}
+                        onPrevious={() => void goToIssueAnimated(walk.fi - 1)}
+                        onNext={() => void goToIssueAnimated(walk.fi + 1)}
+                        onResetView={onResetView}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <Card>
+                    <p className="lede" style={{ margin: 0 }}>{VERDICT_COPY[verdict]}</p>
+                    <p className="help" style={{ color: "var(--ink-dim)" }}>
+                      {[
+                        tier0.length > 0 ? `${tier0.length} need attention first` : null,
+                        tier1.length > 0 ? `${tier1.length} may make the site harder to use` : null,
+                        tier2.length > 0 ? `${tier2.length} are smaller improvements` : null,
+                      ]
+                        .filter((part) => part !== null)
+                        .join(" · ") || "nothing else"}
+                      {observations.length > 0 && ` · ${observations.length} ${observations.length === 1 ? "observation" : "observations"}`}
+                    </p>
+                    <p style={{ marginTop: 12 }}>
+                      <Button size="lg" onClick={() => startReview("all")}>
+                        Review {issueCount} {issueCount === 1 ? "problem" : "problems"}
                       </Button>
                     </p>
-                  </section>
-                );
-              })}
-
-              {observations.length > 0 && (
-                <section aria-labelledby="observations-title" style={{ padding: "24px 0" }}>
-                  <h2 id="observations-title" style={{ fontSize: 24, lineHeight: "32px", margin: "0 0 4px" }}>
-                    Also noticed
-                  </h2>
-                  <p className="help">Things worth knowing that are not confirmed problems.</p>
-                  <div className="findings">
-                    {observations.map((finding) => (
-                      <ObservationCard key={finding.findingId} finding={finding} runId={runId} developer={developer} />
-                    ))}
-                  </div>
-                </section>
-              )}
-            </>
+                  </Card>
+                )}
+                <h2 className="mono-label" style={{ marginTop: 28 }}>Index — every problem</h2>
+                <FindingListFallback
+                  findings={scopedWalk}
+                  selectedFindingId={walkFinding?.findingId ?? null}
+                  onSelect={onSelectFinding}
+                  compact
+                />
+                <p className="help mt-2" style={{ color: "var(--ink-dim)" }}>
+                  Every problem is listed here. Markers appear on the map for
+                  problems with a measured location.
+                </p>
+              </aside>
+            </div>
           ) : (
-            <Card style={{ margin: "24px 0" }}>
-              <Badge>[✓] Check complete</Badge>
-              <p className="lede mt-2">We didn’t find any major accessibility problems in the parts of the site we tested.</p>
-              <p className="help" style={{ color: "var(--ink-dim)" }}>
-                This does not guarantee the entire website is accessible.
+            <div className="verify-hero">
+              <span className="verify-mark" aria-hidden="true">✓</span>
+              <h2 className="display-2">No major barriers found.</h2>
+              <p className="lede-xl">
+                We didn’t find any major accessibility problems in the parts of
+                the site we tested. This does not guarantee the entire website
+                is accessible.
               </p>
-              <Card className="bg-sunken">
-                <Badge variant="faint">
-                  Pages checked: {run.pagesVisited.length} · Interactions checked: {run.probeResults.length} ·{" "}
-                  Could not be tested safely: {notTestedFindings.length}
-                </Badge>
-              </Card>
+            </div>
+          )}
+
+          {observations.length > 0 && (
+            <section aria-labelledby="observations-title" style={{ padding: "24px 0" }}>
+              <h2 id="observations-title" style={{ fontSize: 24, lineHeight: "32px", margin: "0 0 4px" }}>
+                Also noticed
+              </h2>
+              <p className="help">Things worth knowing that are not confirmed problems.</p>
+              <div className="findings">
+                {observations.map((finding) => (
+                  <ObservationCard key={finding.findingId} finding={finding} runId={runId} developer={developer} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {(notTestedFindings.length > 0 || run.limitations.length > 0) && (
+            <Card style={{ margin: "24px 0" }} aria-labelledby="coverage-title">
+              <Badge>[—] What we couldn&apos;t check</Badge>
+              <CardTitle asChild className="mt-2">
+                <h2 id="coverage-title">What we couldn&apos;t check</h2>
+              </CardTitle>
+              <CardDescription>
+                {(() => {
+                  const unavailable = run.limitations.filter((item) => item.code === "page-unavailable").length;
+                  if (unavailable > 0) {
+                    return (
+                      <>
+                        {humanLimitationOf("page-unavailable", unavailable)}.{" "}
+                        {LIMITATION_SUPPORTING["page-unavailable"]}
+                      </>
+                    );
+                  }
+                  return "Some parts of the site could not be checked safely in this run.";
+                })()}
+              </CardDescription>
               {developer && run.probeResults.length > 0 && (
                 <>
                   <h2 className="mt-4 text-base font-semibold">Verified checks</h2>
@@ -831,96 +920,6 @@ function ExploreRunContent(): React.JSX.Element {
             </Card>
           )}
 
-          {(notTestedFindings.length > 0 || run.limitations.length > 0) && (
-            <Card style={{ margin: "24px 0" }} aria-labelledby="coverage-title">
-              <Badge>[—] What we couldn&apos;t check</Badge>
-              <CardTitle asChild className="mt-2">
-                <h2 id="coverage-title">What we couldn&apos;t check</h2>
-              </CardTitle>
-              <CardDescription>
-                {(() => {
-                  const unavailable = run.limitations.filter((item) => item.code === "page-unavailable").length;
-                  if (unavailable > 0) {
-                    return (
-                      <>
-                        {humanLimitationOf("page-unavailable", unavailable)}.{" "}
-                        {LIMITATION_SUPPORTING["page-unavailable"]}
-                      </>
-                    );
-                  }
-                  return "Some parts of the site could not be checked safely in this run.";
-                })()}
-              </CardDescription>
-              {notTestedFindings.length > 0 && (
-                <p className="help" style={{ color: "var(--ink-dim)" }}>
-                  {notTestedFindings.length} {notTestedFindings.length === 1 ? "interaction was" : "interactions were"} skipped because A11yForge could not establish that trying {notTestedFindings.length === 1 ? "it was" : "them was"} safe.
-                </p>
-              )}
-              <Accordion type="single" collapsible>
-                <AccordionItem value="coverage-technical">
-                  <AccordionTrigger>Developer details</AccordionTrigger>
-                  <AccordionContent>
-                    <ul>
-                      {notTestedFindings.map((finding) => (
-                        <li key={finding.findingId}>
-                          <strong>{humanFindingOf(finding).title}</strong>{" "}
-                          <span className="std-refs">[{finding.category}] {finding.findingId}</span>
-                        </li>
-                      ))}
-                      {run.limitations.map((limitation, index) => (
-                        <li key={`limit-${index}`}>
-                          <span className="std-refs">[{limitation.code}]</span> {limitation.message}
-                          {limitation.pageUrl !== "" && <span className="std-refs"> — {limitation.pageUrl}</span>}
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </Card>
-          )}
-
-          <Accordion type="single" collapsible className="tech-evidence">
-            <AccordionItem value="tech-evidence">
-              <AccordionTrigger>Developer details</AccordionTrigger>
-              <AccordionContent>
-                <p>
-                  Raw check results and page information for advanced users.{" "}
-                  <Link href="/console">Open the full developer console</Link>
-                </p>
-                <p>No model calls were used for this check — findings come from deterministic browser checks only.</p>
-                <pre aria-label="Technical evidence JSON" tabIndex={0}>{JSON.stringify({ pages: run.pagesVisited, probes: run.probeResults.map((probe) => ({ id: probe.probeId, status: probe.status, page: probe.pageUrl })) }, null, 2)}</pre>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-
-          {developer && (
-            <Card className="mt-4">
-              <CardTitle asChild>
-                <h2>Developer information</h2>
-              </CardTitle>
-              <Table>
-                <TableCaption>Severity and category per problem (developer view)</TableCaption>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Problem</TableHead>
-                    <TableHead>Severity</TableHead>
-                    <TableHead>Category</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {problems.map((finding) => (
-                    <TableRow key={finding.findingId}>
-                      <TableCell className="std-refs">{finding.findingId}</TableCell>
-                      <TableCell>{finding.severity}</TableCell>
-                      <TableCell>{finding.category}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          )}
-
           <section aria-label="Next steps" style={{ display: "flex", flexWrap: "wrap", gap: 12, padding: "24px 0" }}>
             <Button asChild>
               <Link href="/">Check another website</Link>
@@ -933,33 +932,31 @@ function ExploreRunContent(): React.JSX.Element {
       )}
 
       {run !== null && run.state !== "COMPLETED" && (
-        <section aria-labelledby="run-title" id="result">
-          <Badge>
-            {run.state === "CANCELLED" ? "Check cancelled" : "We couldn't open this website"}
-          </Badge>
-          <h1 id="run-title" style={{ fontSize: 36, lineHeight: "44px", letterSpacing: "-0.03em" }}>
-            {run.state === "CANCELLED" ? "Check cancelled" : "We couldn't open this website"}
+        <section aria-labelledby="run-title" id="result" className="verify-hero">
+          <span className="mono-label">
+            {run.state === "CANCELLED" ? "Check cancelled" : "Connection failed"}
+          </span>
+          <h1 id="run-title" className="display-2">
+            {run.state === "CANCELLED" ? "Check cancelled." : "We couldn't open this website."}
           </h1>
-          <Card>
-            <p className="lede mt-2">
-              {run.state === "CANCELLED"
-                ? "The check was cancelled. Partial results are shown honestly — nothing was backfilled."
-                : (run.error ?? "The check could not finish.")}
+          <p className="lede-xl">
+            {run.state === "CANCELLED"
+              ? "The check was cancelled. Partial results are shown honestly — nothing was backfilled."
+              : (run.error ?? "The check could not finish.")}
+          </p>
+          {run.limitations.map((limitation, index) => (
+            <p key={index} className="help">
+              {limitation.message}
             </p>
-            {run.limitations.map((limitation, index) => (
-              <p key={index} className="help">
-                {limitation.message}
-              </p>
-            ))}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 12 }}>
-              <Button asChild>
-                <Link href="/">Check another website</Link>
-              </Button>
-              <Button variant="secondary" asChild>
-                <Link href="/console">See the recorded example instead</Link>
-              </Button>
-            </div>
-          </Card>
+          ))}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 12 }}>
+            <Button asChild>
+              <Link href="/">Check another website</Link>
+            </Button>
+            <Button variant="secondary" asChild>
+              <Link href="/console">See the recorded example instead</Link>
+            </Button>
+          </div>
         </section>
       )}
 
@@ -967,7 +964,7 @@ function ExploreRunContent(): React.JSX.Element {
         <p>
           <Link href="/">Check another website</Link>
           {" · "}
-          <Link href="/console">Developer console</Link>
+          <Link href="/console">Recorded demo</Link>
         </p>
       </footer>
     </main>

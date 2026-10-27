@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SiteNav } from "@/components/site-nav";
+import { ForgeNav } from "@/components/forge-nav";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "A11yForge",
-  description: "Autonomous accessibility engineering. Hackathon development build.",
+  title: "A11yForge — See what your users can't",
+  description:
+    "A11yForge tests your website in a real browser, shows exactly where accessibility problems happen, and can repair supported issues.",
 };
 
 export default function RootLayout({
@@ -16,22 +17,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <header className="site-header">
-          <div className="site-header-inner">
-            <Link href="/" className="site-wordmark">
-              A11yForge
-            </Link>
-            <SiteNav />
-          </div>
-        </header>
-        {children}
-        <footer className="site-footer">
-          <div className="site-footer-inner">
+        <a className="skip-link" href="#main-content">
+          Skip to main content
+        </a>
+        <ForgeNav />
+        <div id="main-content">{children}</div>
+        <footer className="forge-foot">
+          <div className="forge-foot-inner">
             <span>Find. Fix. Prove accessibility.</span>
             <span>
-              <Link href="/console#h-evidence">Developer details</Link>
+              <Link href="/console">Recorded demo</Link>
               {" · "}
-              <Link href="/connect">Connect your code</Link>
+              <Link href="/connect">Connect source</Link>
             </span>
           </div>
         </footer>
