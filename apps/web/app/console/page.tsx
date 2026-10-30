@@ -546,7 +546,7 @@ export default function Home() {
                 ? [
                     {
                       label: "Rejected",
-                      headline: "The first fix failed.",
+                      headline: "That fix wasn't good enough.",
                       detail:
                         "The browser behavior improved, but the project did not pass its checks. A11yForge rejected it.",
                       targetId: "h-pipeline",
