@@ -1,5 +1,6 @@
-import { constants } from "node:fs";
+import { constants, existsSync } from "node:fs";
 import { access, mkdir } from "node:fs/promises";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Fastify from "fastify";
 import type { ApiHealth } from "@a11yforge/shared";
@@ -8,6 +9,25 @@ import { registerRunRoutes, resolveDataDir, resolveRunsDirWithSource } from "./r
 import { registerExplorationRoutes } from "./explorations.js";
 import { registerSourceRoutes } from "./sources.js";
 import { registerLiveRunRoutes, type PipelineRunner } from "./live-runs.js";
+
+// Automatically load .env if present and model key is not already in process.env
+if (typeof process.loadEnvFile === "function" && !process.env[MODEL_API_KEY_ENV]) {
+  const candidateEnvPaths = [
+    join(process.cwd(), ".env"),
+    fileURLToPath(new URL("../../../.env", import.meta.url)),
+    fileURLToPath(new URL("../../.env", import.meta.url)),
+  ];
+  for (const envPath of candidateEnvPaths) {
+    if (existsSync(envPath)) {
+      try {
+        process.loadEnvFile(envPath);
+        if (process.env[MODEL_API_KEY_ENV]) break;
+      } catch {
+        /* skip invalid candidate */
+      }
+    }
+  }
+}
 
 const PORT = Number(process.env["PORT"] ?? 3001);
 const HOST = process.env["HOST"] ?? "127.0.0.1";
