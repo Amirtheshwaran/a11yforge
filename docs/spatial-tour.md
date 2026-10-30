@@ -49,6 +49,25 @@ bounded extra viewport and associates each measurement with its exact
 screenshot. Existing screenshot and call budgets remain unchanged. Unmappable
 or unrecorded locations remain text-only; the tour does not invent a zoom target.
 
+## Access boundaries
+
+The explorer captures visible sign-in redirects and HTTP error pages before
+stopping. These captures can appear in the same 3D tour, but their presence
+does not imply that protected content was tested. Runs with no completed probes
+show the access limitation immediately and remain explicitly untested. Navigation
+waits for DOM content rather than every dependent resource; the existing bounded
+stability check still runs before probes.
+
+A run without a capture does not start WebGL or report a graphics failure.
+Actual viewer failures retain the screenshot and provide a retry control.
+Finished scans and their evidence can be read from validated saved run artifacts
+after an API restart; interrupted scans are never resumed or marked complete.
+
+The access-boundary regression tests exercise real Chromium against controlled
+sign-in redirects and HTTP errors, and confirm that the screenshot budget is
+honored. A fresh public Facebook run also captured its visible sign-in page and
+rendered it in the production 3D viewer. No protected content was accessed.
+
 ## Validation
 
 - `pnpm typecheck`: passed across workspaces.

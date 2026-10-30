@@ -35,6 +35,20 @@ describe("shared spatial tour evidence", () => {
     assert.deepEqual(model.chapters.map((chapter) => chapter.kind), ["overview", "summary"]);
     assert.ok(model.chapters.every((chapter) => chapter.markers.length === 0));
   });
+  it("presents a captured sign-in wall without claiming accessibility checks passed", () => {
+    const model = render({ ...live, findings: [], probeResults: [], limitations: [{ code: "authentication-required", message: "Sign-in required." }] });
+    assert.equal(model.chapters[0].imageUrl, "/live/capture.png");
+    assert.equal(model.chapters[0].body, "Sign-in required.");
+    assert.match(model.chapters[0].eyebrow, /ACCESS LIMITED/);
+    assert.match(model.chapters.at(-1).title, /untested/);
+    assert.ok(model.chapters.every((chapter) => chapter.markers.length === 0 && chapter.outcome === "unresolved"));
+  });
+  it("keeps an unreachable website untested without inventing an image", () => {
+    const model = render({ ...live, findings: [], screenshots: [], pagesVisited: [], probeResults: [], limitations: [{ code: "navigation-failed", message: "Could not load the website." }] });
+    assert.equal(model.chapters[0].body, "Could not load the website.");
+    assert.ok(model.chapters.every((chapter) => chapter.imageUrl === null));
+    assert.match(model.chapters.at(-1).title, /untested/);
+  });
   it("agrees with the existing 2D highlight validity rules", () => {
     for (const candidate of [box, { ...box, width: 0 }, { ...box, x: 2000 }, { ...box, y: -15, height: 40 }, { ...box, x: 0, y: 0, width: 1280, height: 720 }]) {
       assert.equal(canFrameHighlight(candidate), isDrawableHighlight(candidate));

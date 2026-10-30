@@ -23,6 +23,8 @@ export function SpatialTour({ model, id = "spatial-tour" }: { model: TourModel; 
   const [active, setActive] = useState(0);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [sceneAttempt, setSceneAttempt] = useState(0);
+  const hasCapture = model.chapters.some((item) => item.imageUrl !== null);
   const lastActive = useRef(0);
   const seek = useRef<((progress: number) => void) | null>(null);
   const onReady = useCallback(() => setReady(true), []);
@@ -98,10 +100,12 @@ export function SpatialTour({ model, id = "spatial-tour" }: { model: TourModel; 
       <div className="tour-topline"><span><i aria-hidden="true" />{model.label}</span><span>{model.target}</span></div>
       <div className="tour-stage" aria-label="Captured website in 3D">
         {(!ready || failed) && <div className="tour-capture-fallback">
-          {chapter.imageUrl !== null ? <img src={chapter.imageUrl} alt="Recorded website capture" /> : <p>No screenshot was captured for this check.</p>}
-          <span role="status">{failed ? "3D unavailable. The same evidence and chapter controls remain available." : "Preparing the website for inspection…"}</span>
+          {chapter.imageUrl !== null ? <img src={chapter.imageUrl} alt="Recorded website capture" /> : <p>No page capture is available for this run.</p>}
+          <span role="status">{!hasCapture ? "The browser could not capture this site. Review the access limitation and try a public page." : failed ? "The 3D viewer could not load. The captured page and evidence remain available." : "Preparing the website for inspection…"}</span>
+          {hasCapture && failed && <button type="button" onClick={() => { setReady(false); setFailed(false); setSceneAttempt((value) => value + 1); }}>Retry 3D viewer</button>}
+          {!hasCapture && <Link href="/#check-site">Check a public page</Link>}
         </div>}
-        {!failed && <div className="tour-webgl" aria-hidden="true"><Scene model={model} motion={motion} onReady={onReady} onFail={onFail} onSelect={selectFinding} /></div>}
+        {hasCapture && !failed && <div className="tour-webgl" aria-hidden="true"><Scene key={sceneAttempt} model={model} motion={motion} onReady={onReady} onFail={onFail} onSelect={selectFinding} /></div>}
       </div>
       <div className="tour-copy-scrim" aria-hidden="true" />
       {model.chapters.map((item, index) => <article key={item.id} ref={(element) => { panels.current[index] = element; }} className={`tour-copy tour-copy-${item.kind}`} data-active={active === index} aria-hidden={active !== index} inert={active !== index}>
@@ -111,7 +115,7 @@ export function SpatialTour({ model, id = "spatial-tour" }: { model: TourModel; 
         {item.facts.length > 0 && <ul data-tour-copy className="tour-facts">{item.facts.map((fact, fi) => <li key={`${fi}:${fact}`}>{fact}</li>)}</ul>}
         {item.focusSteps.length > 0 && <ol data-tour-copy className="tour-focus-order" aria-label="Recorded focus order">{item.focusSteps.map((step, si) => <li key={si} data-failed={step.failed}><span>{si + 1}</span>{step.label}{step.failed && <strong>Escaped</strong>}</li>)}</ol>}
         {item.kind === "categories" && <div data-tour-copy className="tour-category-controls" role="group" aria-label="Finding categories">{categories.map((category) => <button type="button" key={category} onClick={() => goTo(model.chapters.findIndex((candidate) => candidate.finding !== null && groupOf(candidate.finding) === category))}>{PROBLEM_GROUPS[category].heading}</button>)}</div>}
-        {index === 0 && <button data-tour-copy className="tour-scroll-hint" type="button" onClick={() => goTo(1)}><span aria-hidden="true">↓</span>{model.label === "Live website scan" ? "Explore the problems" : "Scroll to explore"}</button>}
+        {index === 0 && <button data-tour-copy className="tour-scroll-hint" type="button" onClick={() => goTo(1)}><span aria-hidden="true">↓</span>{model.label === "Live website scan" ? model.chapters.some((item) => item.finding !== null) ? "Explore the problems" : "Review the check" : "Scroll to explore"}</button>}
         {item.finding !== null && <div data-tour-copy className="tour-finding-actions"><Link href={`/connect?run=${encodeURIComponent(model.id)}&finding=${encodeURIComponent(item.finding.findingId)}`}>How do I fix this? <span aria-hidden="true">↗</span></Link></div>}
         {failed && item.highlight !== null && item.imageUrl !== null && <div data-tour-copy><EvidenceViewer src={item.imageUrl} alt="Measured problem location in the website capture" highlights={[item.highlight]} selectedIndex={0} onSelect={() => undefined} /></div>}
       </article>)}

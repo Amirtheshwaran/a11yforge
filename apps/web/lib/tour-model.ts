@@ -57,6 +57,8 @@ export function liveTourModel(
     .sort((a, b) => rank[a.severity] - rank[b.severity]);
   const overviewShot = run.screenshots[0] ?? null;
   const overviewUrl = overviewShot === null ? null : imageUrl(overviewShot);
+  const untested = run.probeResults?.length === 0;
+  const accessMessage = run.limitations.map((item) => item.message).join(" ");
   const markers: TourMarker[] = problems.flatMap((finding, index) => finding.highlights
     .filter((box) => knownShots.has(box.screenshot) && canFrameHighlight(box))
     .map((box) => ({ finding, box, number: index + 1 })));
@@ -83,14 +85,15 @@ export function liveTourModel(
   return {
     id: run.runId, label: "Live website scan", target: run.target.entryUrl,
     chapters: [
-      chapter({ id: "overview", kind: "overview", title: "Your website. A closer look.", eyebrow: "LIVE WEBSITE SCAN / CAPTURED EVIDENCE",
-        body: `${problems.length} accessibility ${problems.length === 1 ? "issue" : "issues"} recorded across ${run.pagesVisited.length} ${run.pagesVisited.length === 1 ? "page" : "pages"}. Scroll to inspect what the browser found.`,
+      chapter({ id: "overview", kind: "overview", title: untested ? "Here’s where the check stopped." : "Your website. A closer look.", eyebrow: untested ? "LIVE WEBSITE SCAN / ACCESS LIMITED" : "LIVE WEBSITE SCAN / CAPTURED EVIDENCE",
+        body: untested ? accessMessage || "The browser could not complete accessibility checks on this website." : `${problems.length} accessibility ${problems.length === 1 ? "issue" : "issues"} recorded across ${run.pagesVisited.length} ${run.pagesVisited.length === 1 ? "page" : "pages"}. Scroll to inspect what the browser found.`,
+        facts: untested ? [overviewUrl === null ? "No page capture is available for this run." : "This capture shows the visible page only. Content beyond it was not tested."] : [],
         imageUrl: overviewUrl, markers: overviewMarkers }),
       ...(problems.length === 0 ? [] : [chapter({ id: "categories", kind: "categories", title: "The barriers beneath the surface.", eyebrow: "REAL FINDINGS / REAL LOCATIONS",
         body: "Start with the whole page. Then move into each problem, keeping the surrounding interface in view.", imageUrl: overviewUrl, markers: overviewMarkers })]),
       ...issueChapters,
-      chapter({ id: "summary", kind: "summary", title: problems.length > 0 ? "Evidence before a fix." : "The checks are complete.", eyebrow: "SCAN SUMMARY",
-        body: problems.length > 0 ? "These findings are unresolved. Connect source code from the detailed evidence to investigate a supported repair." : "No failures were reported by these checks. This is not a complete accessibility certification.",
+      chapter({ id: "summary", kind: "summary", title: untested ? "This website remains untested." : problems.length > 0 ? "Evidence before a fix." : "The checks are complete.", eyebrow: "SCAN SUMMARY",
+        body: untested ? "Try a publicly accessible page. Pages behind sign-in need an authorized connection before their accessibility can be checked." : problems.length > 0 ? "These findings are unresolved. Connect source code from the detailed evidence to investigate a supported repair." : "No failures were reported by these checks. This is not a complete accessibility certification.",
         facts: run.limitations.map((item) => item.message), imageUrl: overviewUrl, markers: overviewMarkers }),
     ],
   };

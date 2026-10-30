@@ -1,6 +1,7 @@
 import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ExplorationRunSchema, type ExplorationRun } from "@a11yforge/shared";
 import { buildServer } from "./index.js";
@@ -139,5 +140,46 @@ describe("exploration routes", () => {
     const fetched = await app.inject({ method: "GET", url: `/explorations/${runId}` });
     assert.equal(fetched.statusCode, 200);
     assert.equal((fetched.json() as { state: string }).state, "FAILED");
+  });
+
+  it("restores only validated finished evidence after a restart", async () => {
+    const runsDir = await mkdtemp(join(tmpdir(), "a11yforge-saved-scan-"));
+    const previous = process.env["A11YFORGE_RUNS_DIR"];
+    process.env["A11YFORGE_RUNS_DIR"] = runsDir;
+    const app = buildServer();
+    try {
+      const runId = "exp-saved-capture";
+      const run = { ...finishedRun(runId), screenshots: ["screenshot-0.png"] };
+      await mkdir(join(runsDir, runId));
+      await writeFile(join(runsDir, runId, "exploration.json"), JSON.stringify(run));
+      await writeFile(join(runsDir, runId, "screenshot-0.png"), "captured-image-bytes");
+      clearExplorationsForTests();
+      const restored = await app.inject({ method: "GET", url: `/explorations/${runId}` });
+      assert.equal(restored.statusCode, 200);
+      assert.deepEqual(restored.json(), run);
+      const screenshot = await app.inject({ method: "GET", url: `/explorations/${runId}/screenshots/screenshot-0.png` });
+      assert.equal(screenshot.statusCode, 200);
+      assert.equal(screenshot.body, "captured-image-bytes");
+      const events = await app.inject({ method: "GET", url: `/explorations/${runId}/events` });
+      assert.equal(events.body, 'data: {"done":true}\n\n');
+      for (const [id, data] of [
+        ["exp-invalid", {}],
+        ["exp-mismatched", run],
+        ["exp-running", { ...run, runId: "exp-running", state: "RUNNING" }],
+      ] as const) {
+        await mkdir(join(runsDir, id));
+        await writeFile(join(runsDir, id, "exploration.json"), JSON.stringify(data));
+        const rejected = await app.inject({ method: "GET", url: `/explorations/${id}` });
+        assert.equal(rejected.statusCode, 404);
+      }
+      const traversal = await app.inject({ method: "GET", url: "/explorations/..%2Fexp-saved-capture" });
+      assert.equal(traversal.statusCode, 404);
+    } finally {
+      await app.close();
+      clearExplorationsForTests();
+      if (previous === undefined) delete process.env["A11YFORGE_RUNS_DIR"];
+      else process.env["A11YFORGE_RUNS_DIR"] = previous;
+      await rm(runsDir, { recursive: true, force: true });
+    }
   });
 });

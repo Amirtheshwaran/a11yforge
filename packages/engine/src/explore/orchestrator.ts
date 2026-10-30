@@ -253,7 +253,7 @@ export async function runExploration(options: RunExplorationOptions): Promise<Ex
       let responseStatus: number | null = null;
       try {
         const response = await page.goto(pageUrl, {
-          waitUntil: "load",
+          waitUntil: "domcontentloaded",
           timeout: policy.navigationTimeoutMs,
         });
         responseStatus = response?.status() ?? null;
@@ -279,6 +279,8 @@ export async function runExploration(options: RunExplorationOptions): Promise<Ex
         continue;
       }
       if (responseStatus !== null && responseStatus >= 400) {
+        // Preserve what the server actually displayed, without testing its error page.
+        await captureScreenshot("page-unavailable");
         limitations.push({
           code: "page-unavailable",
           message: `The server answered ${responseStatus} for ${finalUrl}, so there was no usable page to test.`,
@@ -299,6 +301,9 @@ export async function runExploration(options: RunExplorationOptions): Promise<Ex
       // not land on directly means a login wall redirected us.
       const passwordFields = await page.evaluate(snapshotPasswordFieldCount).catch(() => 0);
       if (passwordFields > 0 && finalUrl !== pageUrl) {
+        // A visible sign-in page is still valid visual evidence for the tour.
+        // Capture it before stopping; it is never a finding about private content.
+        await captureScreenshot("authentication-required");
         limitations.push({
           code: "authentication-required",
           message: "This site redirected to a sign-in page. A11yForge does not sign in or guess credentials, so testing stopped at the login wall.",

@@ -4,6 +4,7 @@ import { join } from "node:path";
 import type { FastifyInstance } from "fastify";
 import {
   ExplorationEventSchema,
+  ExplorationRunSchema,
   isAllowedExplorationArtifactName,
   type ExplorationEvent,
   type ExplorationRun,
@@ -64,6 +65,26 @@ export function clearExplorationsForTests(): void {
 }
 
 const MAX_CONCURRENT_EXPLORATIONS = 3;
+
+/** Finished evidence remains readable after a service restart. Never resume a lost browser. */
+async function findRecord(runId: string): Promise<ExplorationRecord | undefined> {
+  const active = records.get(runId);
+  if (active !== undefined) return active;
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(runId)) return undefined;
+  const runsDir = resolveLiveRunsDir();
+  try {
+    const parsed = ExplorationRunSchema.safeParse(JSON.parse(await readFile(join(runsDir, runId, "exploration.json"), "utf8")));
+    if (!parsed.success || parsed.data.runId !== runId || parsed.data.state === "RUNNING") return undefined;
+    const run = parsed.data;
+    const record: ExplorationRecord = {
+      runId, entryUrl: run.target.entryUrl, runsDir, state: run.state,
+      run, error: run.error, events: [], listeners: new Set(),
+      controller: new AbortController(), finishedAt: run.finishedAt,
+    };
+    records.set(runId, record);
+    return record;
+  } catch { return undefined; }
+}
 
 function runningCount(): number {
   let count = 0;
@@ -179,7 +200,7 @@ export function registerExplorationRoutes(app: FastifyInstance): void {
   });
 
   app.get<{ Params: { runId: string } }>("/explorations/:runId", async (request, reply) => {
-    const record = records.get(request.params.runId);
+    const record = await findRecord(request.params.runId);
     if (record === undefined) {
       return reply.status(404).send({ error: "Unknown exploration run." });
     }
@@ -187,7 +208,7 @@ export function registerExplorationRoutes(app: FastifyInstance): void {
   });
 
   app.get<{ Params: { runId: string } }>("/explorations/:runId/events", async (request, reply) => {
-    const record = records.get(request.params.runId);
+    const record = await findRecord(request.params.runId);
     if (record === undefined) {
       return reply.status(404).send({ error: "Unknown exploration run." });
     }
@@ -220,7 +241,7 @@ export function registerExplorationRoutes(app: FastifyInstance): void {
   app.get<{ Params: { runId: string; name: string } }>(
     "/explorations/:runId/screenshots/:name",
     async (request, reply) => {
-      const record = records.get(request.params.runId);
+      const record = await findRecord(request.params.runId);
       if (record === undefined) {
         return reply.status(404).send({ error: "Unknown exploration run." });
       }
@@ -241,7 +262,7 @@ export function registerExplorationRoutes(app: FastifyInstance): void {
   );
 
   app.post<{ Params: { runId: string } }>("/explorations/:runId/cancel", async (request, reply) => {
-    const record = records.get(request.params.runId);
+    const record = await findRecord(request.params.runId);
     if (record === undefined) {
       return reply.status(404).send({ error: "Unknown exploration run." });
     }
