@@ -200,7 +200,11 @@ function sha256Hex(data: Buffer | string): string {
 
 async function readRunFile(runDir: string, name: string): Promise<Buffer> {
   try {
-    return await readFile(join(runDir, name));
+    const raw = await readFile(join(runDir, name));
+    if (name.endsWith(".json") || name.endsWith(".patch")) {
+      return Buffer.from(raw.toString("utf8").replace(/\r\n/g, "\n"), "utf8");
+    }
+    return raw;
   } catch {
     throw new DemoBundleError(`missing required artifact: ${name}`);
   }

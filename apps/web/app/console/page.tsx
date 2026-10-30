@@ -485,10 +485,10 @@ export default function Home() {
 
       <section aria-labelledby="h-recorded" style={{ marginTop: 40 }}>
       <span className="mono-label" id="h-recorded">
-        Historical audit · patch-loop verification · ◉ recorded — real run
+        Recorded real repair · deterministic verification
       </span>
       <h2 className="display-3" style={{ margin: "14px 0 8px" }}>
-        Completed demo run
+        Watch A11yForge fix a real accessibility problem.
       </h2>
       <p className="help" style={{ maxWidth: "72ch" }}>
         This is a real historical A11yForge repair run bundled with the project. It is not
@@ -522,43 +522,41 @@ export default function Home() {
           <DemoReplay
             beats={[
               {
-                label: "Failure",
-                headline: "Keyboard focus escapes the modal.",
+                label: "The problem",
+                headline: "Keyboard focus escapes somewhere users cannot understand.",
                 detail: state.view.diagnosis.observedFailure,
                 targetId: "h-evidence",
                 targetLabel: "See the evidence",
               },
               {
-                label: "Source trace",
-                headline: "We found the code behind this problem.",
-                detail: `Top candidate: ${state.view.sourceTrace.topFile} — matched deterministically, no model asked where to look.`,
+                label: "We found the code",
+                headline: "A11yForge traced the problem to the part of the interface that caused it.",
+                detail: `Code location: ${state.view.sourceTrace.topFile} — matched deterministically from real browser evidence.`,
                 targetId: "h-trace",
-                targetLabel: "See the trace",
+                targetLabel: "See the code",
               },
               {
-                label: "Repair",
-                headline: "Attempt 1 proposes a repair.",
-                detail: state.view.attempts[0]?.outcomeNote ?? "The engine proposes a source change.",
+                label: "First fix",
+                headline: "A first fix was created.",
+                detail: state.view.attempts[0]?.outcomeNote ?? "A11yForge proposes a bounded source edit.",
                 targetId: "h-diff",
-                targetLabel: "See the patch",
+                targetLabel: "See the first fix",
               },
               ...(state.view.attempts.length > 1
                 ? [
                     {
                       label: "Rejected",
-                      headline: "That fix wasn't good enough.",
+                      headline: "The first fix failed.",
                       detail:
-                        state.view.attempts[0]?.outcomeNote ??
-                        "The browser behavior improved, but the project's checks failed.",
+                        "The browser behavior improved, but the project did not pass its checks. A11yForge rejected it.",
                       targetId: "h-pipeline",
-                      targetLabel: "Why it failed",
+                      targetLabel: "Why it was rejected",
                     },
                     {
                       label: "Revision",
-                      headline: "Trying one verified revision.",
+                      headline: "The failed check became feedback.",
                       detail:
-                        state.view.attempts[1]?.outcomeNote ??
-                        "One bounded revision addresses the verifier feedback.",
+                        "A11yForge uses the deterministic compiler failure as evidence for one careful revision.",
                       targetId: "h-diff",
                       targetLabel: "See the revision",
                     },
@@ -566,10 +564,10 @@ export default function Home() {
                 : []),
               {
                 label: "Verified",
-                headline: state.view.finalStatus === "ACCEPTED" ? "Fixed. Verified." : "Awaiting verdict.",
+                headline: "Fixed. Checked. Proven.",
                 detail:
                   state.view.finalStatus === "ACCEPTED"
-                    ? "A11yForge replayed the original problem and confirmed it no longer occurs."
+                    ? "A11yForge replayed the original problem and confirmed that it no longer happens."
                     : state.view.verification.decisionBasis,
                 targetId: "h-verify",
                 targetLabel: "See the proof",

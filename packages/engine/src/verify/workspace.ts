@@ -1,6 +1,6 @@
 import { cp, copyFile, mkdir, rm, symlink } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve, relative, isAbsolute } from "node:path";
 import { findWorkspaceRoot } from "../scanner/workspace.js";
 
 /**
@@ -108,10 +108,13 @@ export async function cleanRepairWorkspace(args: {
   workspacesDir: string;
 }): Promise<void> {
   const { workspaceRoot, workspacesDir } = args;
-  const root = workspaceRoot.endsWith("/")
+  const root = workspaceRoot.endsWith("/") || workspaceRoot.endsWith("\\")
     ? workspaceRoot.slice(0, -1)
     : workspaceRoot;
-  if (!root.startsWith(`${workspacesDir}/`) || root === workspacesDir) {
+  const normalizedRoot = resolve(root);
+  const normalizedWs = resolve(workspacesDir);
+  const rel = relative(normalizedWs, normalizedRoot);
+  if (!rel || rel.startsWith("..") || isAbsolute(rel)) {
     throw new Error(
       `Refusing to clean outside the repair workspaces dir: ${workspaceRoot}`,
     );

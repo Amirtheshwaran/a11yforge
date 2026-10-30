@@ -21,11 +21,19 @@ describe("source path containment", () => {
     }
   });
 
-  it("rejects symlink escapes", async () => {
+  it("rejects symlink escapes", async (t) => {
     const root = await tempDir("a11y-paths-");
     const outside = await tempDir("a11y-outside-");
     try {
-      await symlink(outside, join(root, "evil"), "dir");
+      try {
+        await symlink(outside, join(root, "evil"), "dir");
+      } catch (err: unknown) {
+        if (process.platform === "win32" && (err as NodeJS.ErrnoException).code === "EPERM") {
+          t?.skip?.("symlink not permitted on win32 without developer mode");
+          return;
+        }
+        throw err;
+      }
       await assert.rejects(() => assertPathWithin(root, "evil"));
     } finally {
       await rm(root, { recursive: true, force: true });
@@ -60,13 +68,21 @@ describe("local source acquisition", () => {
     }
   });
 
-  it("refuses symlink escapes during copy", async () => {
+  it("refuses symlink escapes during copy", async (t) => {
     const src = await tempDir("a11y-local-");
     const outside = await tempDir("a11y-outside-");
     const dest = await tempDir("a11y-sources-");
     try {
       await writeFile(join(outside, "secret.txt"), "secret", "utf8");
-      await symlink(join(outside, "secret.txt"), join(src, "link.txt"));
+      try {
+        await symlink(join(outside, "secret.txt"), join(src, "link.txt"));
+      } catch (err: unknown) {
+        if (process.platform === "win32" && (err as NodeJS.ErrnoException).code === "EPERM") {
+          t?.skip?.("symlink not permitted on win32 without developer mode");
+          return;
+        }
+        throw err;
+      }
       await assert.rejects(() => copyLocalSource({ sourcePath: src, sourcesDir: dest }));
     } finally {
       await rm(src, { recursive: true, force: true });

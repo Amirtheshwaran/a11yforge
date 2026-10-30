@@ -54,13 +54,21 @@ describe("source inventory", () => {
     }
   });
 
-  it("skips escaping symlinks instead of following them", async () => {
+  it("skips escaping symlinks instead of following them", async (t) => {
     const root = await mkdtemp(join(tmpdir(), "a11y-inv-"));
     const outside = await mkdtemp(join(tmpdir(), "a11y-out-"));
     try {
       await writeFile(join(outside, "secret.txt"), "secret", "utf8");
       await writeFile(join(root, "src.ts"), "const a = 1;", "utf8");
-      await symlink(join(outside, "secret.txt"), join(root, "evil.txt"));
+      try {
+        await symlink(join(outside, "secret.txt"), join(root, "evil.txt"));
+      } catch (err: unknown) {
+        if (process.platform === "win32" && (err as NodeJS.ErrnoException).code === "EPERM") {
+          t?.skip?.("symlink not permitted on win32 without developer mode");
+          return;
+        }
+        throw err;
+      }
       const { inventory } = await buildSourceInventory({
         sourceId: "src-test",
         revision: "abc",

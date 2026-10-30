@@ -1,106 +1,14 @@
 # A11yForge
 
-**Find. Fix. Prove accessibility.**
+> **“Give me a website. I’ll show you exactly where people may have trouble using it, explain why, and help fix it.”**
 
-### Test any website
+A11yForge is an autonomous accessibility engineering platform for the **Meta Global AI Developer Hackathon** (Indie Developer Track — *Push the Frontier*). It gives machines the ability to inspect real web interfaces in a browser, observe accessibility failures, trace problems to responsible source code, propose bounded repairs, deterministically verify them in an isolated workspace, and reject repairs that fail project checks.
 
-Paste a URL.
+---
 
-### Repair with source
+## Demo (No API Key Required)
 
-Connect the repository or run A11yForge locally against your source tree.
-
-Paste a website and A11yForge tests it with a real browser, reproduces accessibility failures, and records exactly what happened.
-
-When source code is connected, A11yForge traces a confirmed failure into the codebase, proposes a repair, and deterministically verifies whether the repair actually worked:
-
-Website
-→ Browser evidence
-→ Source trace
-→ Repair
-→ Same failure replayed
-→ Verified or rejected
-
-**Testing is framework-independent. Repairs are verified when the connected project can be built and run inside A11yForge's isolated environment.**
-
-## Two layers
-
-**Universal website testing** — paste any website. A11yForge opens it in a real browser, discovers its pages and interaction surfaces from live semantics, runs automated checks and safe keyboard probes, and reports human-readable findings with reproduction evidence. No source code needed, no AI calls involved.
-
-**Source-connected autonomous repair** — with the codebase connected, a confirmed failure is diagnosed, traced to source, patched minimally in an isolated workspace, rebuilt, replayed, and accepted only when deterministic evidence proves the fix. When the evidence does not prove it, A11yForge rejects its own repair.
-
-## What it does
-
-```text
-Universal exploration (no source needed, 0 model calls)
-  URL → Browser → semantic surface discovery → accessibility probes
-    → deterministic evidence → human-readable findings
-
-Optional source repair (source connected)
-  Evidence → Diagnose (Meta model, evidence-grounded, 1 call)
-  → Trace Source (deterministic, 0 calls)
-  → Repair (Meta proposal, exact-text anchors, 1 call)
-  → Verify (isolated workspace: typecheck, build, replay, axe regression)
-  → Reject or Accept (bounded revision on verifier feedback, then critic)
-```
-
-## Why the verifier matters
-
-The strongest moment in the recorded demo is a rejection. Attempt 1's AI-generated focus trap fixed the browser behavior — the replayed scenario stayed inside the modal — but it failed strict TypeScript (`TS18048`: possibly-`undefined` indexing under `noUncheckedIndexedAccess`). The deterministic verifier rejected its own AI-generated repair without spending the critic call. Verifier feedback drove exactly one bounded revision: a two-line `undefined` guard. Attempt 2 then passed typecheck, build, the exact keyboard replay, reverse Shift+Tab traversal, and the 4-rule axe baseline — and only then did the critic accept it (confidence 0.86). An engine that hides its failed repair cannot be trusted with its accepted one, so both attempts are preserved in the console.
-
-## Architecture
-
-```mermaid
-flowchart TB
-    broken[Broken App<br/>fixtures/broken-shop] --> evidence[Browser + axe evidence<br/>Playwright + axe-core]
-    evidence --> diag[Muse Diagnosis<br/>evidence-grounded, 1 call]
-    diag --> trace[Deterministic Source Trace<br/>ranked candidates, 0 calls]
-    trace --> proposal[Muse Repair Proposal<br/>exact-text anchors, 1 call]
-    proposal --> workspace[Isolated Repair Workspace<br/>fixture source never mutated]
-    workspace --> verifier{Deterministic Verifier<br/>typecheck + build + replay<br/>+ reverse traversal + axe}
-    verifier -->|PASS| critic[Muse Critic<br/>adjudicates passing repairs only]
-    verifier -->|FAIL| feedback[Verifier feedback]
-    feedback --> revision[Bounded revision<br/>at most one]
-    revision --> workspace
-    critic --> accepted[ACCEPT]
-    critic --> rejected[REJECT]
-    verifier -->|FAIL, no revision left| rejected
-    accepted --> ui[Observable Console<br/>RECORDED vs LIVE]
-    rejected --> ui
-```
-
-- `apps/web` — Next.js console. Renders engine state; runs no repairs.
-- `apps/api` — Fastify service. Validates, serves run views and artifacts, orchestrates live runs, exposes `GET /health`.
-- `packages/engine` — the autonomous repair loop and all deterministic tooling (scanner, keyboard replayer, tracer, isolated applier, verifier, read model, demo exporter).
-- `packages/meta` — the only Meta model caller. Bounded, schema-constrained calls.
-- `packages/shared` — cross-boundary Zod schemas and types.
-- `fixtures/broken-shop` — the controlled broken target.
-- `demo/accepted-run/` — the committed, sanitized, real ACCEPTED run.
-- `docs/` — spec, architecture, roadmap.
-
-## Safety / trust model
-
-- **AI proposes. Deterministic systems verify.** Build outcome, replayed assertions, and the axe comparison decide eligibility; any failure rejects without spending the critic call.
-- **AI cannot override deterministic failure.** The critic is consulted only on an otherwise passing repair, and a REJECT verdict still rejects.
-- **Autonomy is bounded.** At most 4 model calls per live run (diagnosis, proposal, at most one revision, critic if eligible). No open-ended agents, no models with shell access, no unbounded retries.
-- **Minimum safe patches.** Exact-text anchors, at most 2 files / 4 edits, confined paths. The fixture source is never mutated — repairs land in isolated workspaces retained as artifacts.
-- **Recorded is never live.** The bundled demo is labeled `RECORDED` everywhere; nothing replays historical events pretending they are newly executing.
-
-## Meta technology
-
-| Where | Model | Job |
-|---|---|---|
-| Development | Muse Code | Built this repository |
-| Diagnosis | Muse Spark 1.3 | Evidence-grounded structured diagnosis (1 call) |
-| Repair proposal | Muse Spark 1.3 | Exact-anchor patch proposal (1 call) |
-| Bounded revision | Muse Spark 1.3 | Verifier-feedback-grounded fix-forward (at most 1) |
-| Critic | Muse Spark 1.3 | Accept/reject verdict on passing repairs only |
-
-No other Meta functionality is used or claimed.
-
-## Demo
-
-**No API key needed.** Clone, install, build, start — the console lands on a real previously completed ACCEPTED run bundled with the checkout:
+Judges can explore the full product immediately without configuring keys or incurring API spend:
 
 ```sh
 pnpm install
@@ -108,85 +16,141 @@ pnpm build
 pnpm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000): paste any website to test it with a real browser. The **Try the demo** link opens the recorded repair run — pipeline, focus evidence, before/after screenshots, diagnosis, source trace, both diffs, deterministic gates, and the critic verdict under a `RECORDED` badge.
+1. Open **[http://localhost:3000](http://localhost:3000)** to test any website in a live browser.
+2. Click **Try the demo** (or visit `http://localhost:3000/console`) to watch a recorded, verified repair from end to end.
 
-Developers can run the same universal engine from the terminal:
+### The Key Demo Moment: Self-Rejection
+In the recorded demo, A11yForge **rejects its own first fix**. 
+- Attempt 1 resolved the browser focus escape, but failed strict TypeScript compilation (`TS18048`).
+- The deterministic compiler gate immediately rejected the repair.
+- A11yForge used the compiler failure as feedback for **one careful revision**.
+- Attempt 2 passed typecheck, build, browser replay, reverse Shift+Tab traversal, and axe regression checks before being accepted.
 
-```sh
-pnpm explore -- --url https://example.com [--max-pages 3]
+---
+
+## How It Works
+
+```text
+1. START        Enter any website URL.
+   ↓
+2. SCAN         A11yForge opens the site in a real browser, maps interaction surfaces,
+                and runs deterministic accessibility probes (0 AI model calls).
+   ↓
+3. UNDERSTAND   See exactly where people have trouble using the site, clustered by category
+                (Keyboard, Forms, Images, Readability), with "Show me" element focus.
+   ↓
+4. FIX          Connect source code (or run locally) to pinpoint the exact file and line.
+                Meta model synthesizes an anchored patch in an isolated workspace.
+   ↓
+5. PROVE        Project builds, replays the original interaction in Playwright, and checks
+                axe-core regressions. If any check fails, the fix is rejected.
 ```
 
-Developers can connect source and trace a finding from the terminal:
+---
 
-```sh
-pnpm --filter @a11yforge/engine repair -- --run <run-id> --finding <finding-id> --source .
-pnpm --filter @a11yforge/engine repair -- --run <run-id> --finding <finding-id> --git https://github.com/owner/repo
+## Why It Is Different
+
+| Traditional A11y Scanners | Prompt Wrappers / Copilots | A11yForge |
+| :--- | :--- | :--- |
+| Produces a 50-page PDF checklist of violations. | Guesses code changes without checking whether they compile. | Traces defects directly from browser measurements to source code. |
+| Cannot verify whether any recommendation works. | Asks the LLM if its own fix worked (hallucinated certification). | **Deterministic verifier gates**: Build + Playwright replay + axe regression. |
+| Leaves implementation entirely to developers. | Overwrites files directly with zero safety boundary. | Isolated repair workspace; AI is **never** permitted to certify its own work. |
+| Silent on regressions. | Unaware of project build systems. | **Self-rejecting**: Rejects bad fixes and uses failures for bounded revisions. |
+
+---
+
+## Meta Technology
+
+A11yForge integrates Meta models via an OpenAI-compatible Chat Completions API with strict JSON schema constrained decoding:
+
+| Role | Model | Endpoint | Responsibility |
+| :--- | :--- | :--- | :--- |
+| **Diagnosis** | `muse-spark-1.3-contributor` | `https://api.meta.ai/v1` | Evidence-grounded structured diagnosis (1 call) |
+| **Repair Proposal** | `muse-spark-1.3-contributor` | `https://api.meta.ai/v1` | Exact-anchor minimal patch proposal (1 call) |
+| **Bounded Revision** | `muse-spark-1.3-contributor` | `https://api.meta.ai/v1` | Verifier-feedback-grounded revision (at most 1 call) |
+| **Adversarial Critic** | `muse-spark-1.3-contributor` | `https://api.meta.ai/v1` | Independent evaluation of passing repairs (1 call) |
+
+> **Baseten Integration Status**: Baseten is configured in the project environment and documentation as an alternative open-weights inference host. However, the active production runtime path routes directly to the Meta Chat Completions API. We do not claim active Baseten runtime execution or inject unused calls.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TB
+    site[Target Website] --> browser[Playwright Browser Engine]
+    browser --> probes[Accessibility Probes<br/>axe-core + keyboard + forms]
+    probes --> findings[Deterministic Findings<br/>0 AI calls]
+    
+    findings --> trace[Deterministic Source Tracer<br/>0 AI calls]
+    trace --> diag[Meta Diagnosis<br/>evidence-grounded, 1 call]
+    diag --> proposal[Meta Repair Proposal<br/>exact-text anchors, 1 call]
+    
+    proposal --> workspace[Isolated Workspace<br/>source repo never directly mutated]
+    workspace --> verifier{Deterministic Verifier<br/>typecheck + build + browser replay}
+    
+    verifier -->|FAIL| feedback[Compiler Feedback]
+    feedback --> revision[Bounded Revision<br/>at most 1 call]
+    revision --> workspace
+    
+    verifier -->|PASS| critic[Meta Critic Review<br/>independent audit]
+    critic -->|ACCEPT| accepted[Verified Patch]
+    critic -->|REJECT| rejected[Rejected Fix]
+    verifier -->|FAIL twice| rejected
 ```
 
-Untrusted repository code builds and runs only in isolation (Docker when available; hosted deployments can require it with `A11YFORGE_REQUIRE_DOCKER=true`). `MODEL_API_KEY` and credentials never enter the sandbox.
+### Package Structure
+- `apps/web` — Next.js 15 continuous spatial console (Stitch design, Three.js inspection showroom, 2D fallback, zero CDN reliance).
+- `apps/api` — Fastify service for live exploration, SSE event streaming, and artifact retrieval.
+- `packages/engine` — Core engine: Playwright crawler, accessibility probes, source tracer, isolated workspace applier, and deterministic verifier.
+- `packages/meta` — Meta model client with token budgeting, Zod wire schemas, and operation tracking.
+- `packages/shared` — Shared schemas and type contracts across API, engine, and web.
+- `fixtures/broken-shop` — Deliberately defective accessibility fixture for test automation.
+- `demo/accepted-run` — Committed, sanitized real run artifacts powering the zero-config demo theatre.
 
-Local targets need an explicit opt-in (`A11YFORGE_ALLOW_PRIVATE_TARGETS=true`); see [.env.example](.env.example). Never enable it on an untrusted public deployment.
+---
 
-**Live run (optional).** With `MODEL_API_KEY` exported on the API server, **Start Autonomous Repair** executes the real pipeline against Broken Shop and streams its events (at most 4 Meta calls; usage shown afterwards, no cost computed). Without the key, the console says so explicitly — `Live Meta execution unavailable — MODEL_API_KEY not configured` — and the recorded run stays fully inspectable.
+## Run Locally
 
-```sh
-pnpm demo:validate   # verify the committed bundle (schemas, evidence, sanitization)
-pnpm demo:export -- --run <run-id>   # re-export one explicitly named ACCEPTED run
-```
+### Requirements
+- Node.js ≥ 20
+- pnpm 10
 
-## Local setup
-
-Requires Node.js ≥ 20 and pnpm 10.
-
+### Quickstart
 ```sh
 pnpm install
 pnpm build
-pnpm dev        # web on :3000, API on :3001 (development)
-pnpm start      # web + API in production mode (after build)
+pnpm start
 ```
+- Web console: `http://localhost:3000`
+- API server: `http://localhost:3001`
 
-Configuration (see [.env.example](.env.example); never commit real values):
-
-| Variable | Purpose | Default |
-|---|---|---|
-| `MODEL_API_KEY` | Live Meta model calls (server-side only) | unset → recorded mode only |
-| `PORT` / `HOST` | API listen address | `3001` / `127.0.0.1` |
-| `NEXT_PUBLIC_API_URL` | API base the browser calls (build-time) | `http://127.0.0.1:3001` |
-| `A11YFORGE_DATA_DIR` | Writable runtime root (production) | working tree |
-| `A11YFORGE_RUNS_DIR` | Live-run artifact dir override | `<data-dir>/.a11yforge/runs` |
-| `A11YFORGE_CORS_ORIGIN` | API CORS origin | `*` |
-| `A11YFORGE_VERSION` | Release label in `/health` | `0.7.0` |
-
-`GET /health` reports `status`, `service`, `version`, `modelConfigured`, `demoMode`, and `dataDirWritable` — booleans and labels only, never keys, paths, or environment values.
-
-## Container
-
+### CLI Exploration
+Run a scan directly from your terminal:
 ```sh
-docker build -t a11yforge .
-docker run --rm -p 3000:3000 -p 3001:3001 a11yforge
+pnpm explore -- --url https://example.com
 ```
 
-The image pins Node 20, installs the workspace, builds it, provisions Playwright Chromium, and runs web + API as a non-root user with a writable `/data/a11yforge` volume. No `MODEL_API_KEY` is baked in — pass it at runtime only when live runs are wanted:
-
+### Local Repair
+Trace and repair a finding against a local repository:
 ```sh
-docker run --rm -p 3000:3000 -p 3001:3001 -e MODEL_API_KEY="$MODEL_API_KEY" a11yforge
+pnpm --filter @a11yforge/engine repair -- --run <run-id> --finding <finding-id> --source .
 ```
 
-## Tests
+---
 
-Suites run with zero live model calls (deterministic fixtures and synthesized artifacts only):
+## Safety & Trust Model
 
-- Engine: scanner normalization, keyboard runner and assertions, diagnosis/trace/proposal validation, isolated workspace safety, verifier gates, revision safety, read-model projection, demo-bundle sanitizer/validator, plus universal exploration (URL safety, surface discovery, probe applicability, findings projection, and an anti-fixture-coupling source scan).
-- API: run routes and artifact allow-listing, live-run orchestration with a mock pipeline, exploration routes with a stubbed engine (validation, cancel, SSE ordering, artifact allow-listing, honest failures), and deployment behavior (data-dir resolution, recorded fallback, safe health, missing-key refusal, traversal rejection).
-- Fixture and console: strict typecheck, lint, and an axe-clean UI. The controlled broken target (`fixtures/broken-shop`) is test infrastructure for the repair loop — production explorer code carries zero knowledge of it, enforced by an automated source scan.
+1. **AI Proposes, Deterministic Systems Decide**: TypeScript compiler errors, Playwright interaction assertions, and axe-core regressions decide whether a fix passes. The LLM cannot override build or test failures.
+2. **Strict Call Budgets**: Hard-capped at 4 model calls per run (diagnosis, proposal, at most one revision, critic). No runaway loops or uncontrolled credit consumption.
+3. **Isolated Workspaces**: Repository code is copied into isolated temporary workspaces. Source repositories are never modified directly until a patch is approved.
+4. **SSRF & Network Guards**: Explorer validates target URLs, blocks loopback/private IP addresses (RFC 1918), checks DNS rebinding, and denies credentials in URLs.
+5. **Secret Isolation**: `MODEL_API_KEY` never enters the build environment or client artifacts. All exported bundles are run through `sanitizeJsonArtifact` and `sanitizeTextArtifact`.
 
-```sh
-pnpm typecheck
-pnpm lint
-pnpm test:engine
-pnpm --filter @a11yforge/api test
-```
+---
 
-## Hackathon scope
+## Limitations
 
-This repository was built during the Meta Global AI Developer Hackathon. The autonomous repair loop (scan → evidence → diagnose → trace → repair → verify → revise → critic) is complete and feature-frozen; this phase hardened it for demo and deployment: a committed recorded ACCEPTED run, production startup, container packaging, and judge-ready documentation. No new AI capabilities were added.
+- **Online Hosted Repair**: Arbitrary online code modification from the hosted web UI is intentionally disabled to protect production repositories. Users connect code to locate the problem, then run verified repairs locally via the CLI.
+- **Dynamic Authentication**: Universal exploration tests public and pre-authenticated routes; multi-step CAPTCHA or external SSO flows must be scanned using local Playwright profiles.
+- **Single Bounded Revision**: To prevent looping hallucination, A11yForge allows exactly one compiler-grounded revision attempt. If attempt 2 does not compile or pass tests, the issue is marked as requiring manual developer attention.

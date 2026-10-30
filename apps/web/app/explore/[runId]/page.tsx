@@ -417,16 +417,7 @@ function ExploreRunContent(): React.JSX.Element {
     return () => clearInterval(id);
   }, [storyPlaying, board.length]);
 
-  // Cinematic sequencing: the first problem selects itself when the scan
-  // completes, and every issue swap restages the panel typography.
-  const walkProblemsCount = walkProblems.length;
-  const runState = run?.state;
-  useEffect(() => {
-    if (runState === "COMPLETED" && walk === null && walkProblemsCount > 0) {
-      enterWalkthrough("all", 0);
-    }
-    // enterWalkthrough is stable intent; walkProblemsCount gates re-entry.
-  }, [runState, walkProblemsCount]);
+  // Overview is shown first; user clicks "Review problems" or category to enter walkthrough.
   const walkKey = walk === null ? "none" : `${walk.scope}:${walk.fi}`;
   useEffect(() => {
     if (panelRef.current !== null && walk !== null) {
@@ -548,8 +539,7 @@ function ExploreRunContent(): React.JSX.Element {
         <section aria-labelledby="run-title">
           <div className="xp-stage-head">
             <span className="mono-label">
-              <span className="dot-live" aria-hidden="true">● </span>
-              Live scan — {shortPageOf(targetUrl)}
+              <span className="dot-live" aria-hidden="true">● </span>Checking your website — {shortPageOf(targetUrl)}
             </span>
             <button type="button" className="issue-nav-btn" onClick={onCancel} disabled={cancelling}>
               {cancelling ? "Cancelling…" : "Cancel check"}
@@ -651,13 +641,30 @@ function ExploreRunContent(): React.JSX.Element {
             <h1 id="run-title" className="display-2">
               {issueCount > 0 ? (
                 <>
-                  <span className="n">{issueCount}</span> accessibility{" "}
-                  <span className="display-accent">{issueCount === 1 ? "problem" : "problems"}</span> found
+                  We found <span className="n">{issueCount}</span> {issueCount === 1 ? "problem" : "problems"}.
                 </>
               ) : (
                 <>No major barriers found.</>
               )}
             </h1>
+            {issueCount > 0 && (
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-sm text-[#e6e5e0]">
+                <span className="px-2.5 py-0.5 rounded bg-[#222226] text-[#f26a5b] font-medium">
+                  <strong>{tier0.length > 0 ? tier0.length : tier1.length > 0 ? tier1.length : 1} should be fixed first</strong>
+                </span>
+                <span className="text-[#7e7d7a]">to make sure everyone can actually use your site.</span>
+              </div>
+            )}
+            {issueCount > 0 && walk === null && (
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
+                <Button size="lg" onClick={() => startReview("all")}>
+                  Review problems →
+                </Button>
+                <Button size="lg" variant="secondary" asChild>
+                  <Link href="/">Check another site</Link>
+                </Button>
+              </div>
+            )}
             {issueCount > 0 && (
               <p className="xp-tiers">
                 {tier0.length > 0 && (

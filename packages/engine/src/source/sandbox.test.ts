@@ -1,4 +1,5 @@
 import { describe, it } from "node:test";
+import { tmpdir } from "node:os";
 import assert from "node:assert/strict";
 import { buildSandboxEnv, runIsolated } from "./sandbox.js";
 import { splitCommand } from "./repair-run.js";
@@ -39,7 +40,7 @@ describe("sandbox isolation", () => {
   it("runs a trivial command with bounded output", async () => {
     const result = await runIsolated({
       argv: ["node", "-e", "console.log('sandbox-ok')"],
-      cwd: "/tmp",
+      cwd: tmpdir(),
       timeoutMs: 30_000,
       requireDocker: false,
     });
@@ -57,7 +58,7 @@ describe("sandbox isolation", () => {
     if (await isDockerAvailable(3000)) return; // Covered by the docker path instead.
     const result = await runIsolated({
       argv: ["node", "-e", "1"],
-      cwd: "/tmp",
+      cwd: tmpdir(),
       timeoutMs: 30_000,
       requireDocker: true,
     });
@@ -68,7 +69,7 @@ describe("sandbox isolation", () => {
   it("times out long commands and cleans up the process", async () => {
     const result = await runIsolated({
       argv: ["node", "-e", "setInterval(() => {}, 1000)"],
-      cwd: "/tmp",
+      cwd: tmpdir(),
       timeoutMs: 1500,
       requireDocker: false,
     });

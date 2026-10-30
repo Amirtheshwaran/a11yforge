@@ -6,16 +6,19 @@ import Link from "next/link";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { OrbitalHero } from "@/components/orbital-hero";
+import { WebsiteHeroChassis } from "@/components/website-hero-chassis";
 import { Reveal, SplitWords } from "@/components/motion-text";
 import { fetchHealth, startExploration, type ApiHealth } from "../lib/api";
 import { observeScenes, parallax, prefersReducedMotion, revealIn } from "../lib/motion";
 
 /**
- * Cinematic landing: giant editorial type left, one dominant orbital
- * accessibility object right, URL form embedded in the composition.
- * Scroll tells the product story; the scan button carries the hero
- * straight into the live scanning theatre (no hard cut in feel).
+ * Editorial Landing Experience (Stitch Remix).
+ *
+ * Core rule: "Give me your website. I will show you exactly where people may have
+ * trouble using it, explain why, and help fix it."
+ *
+ * The user's website is the physical product on display in a dark luxury showroom.
+ * No random spinning, no unmotivated orbiting, and no fake telemetry metrics.
  */
 export default function Home(): React.JSX.Element {
   const router = useRouter();
@@ -38,13 +41,13 @@ export default function Home(): React.JSX.Element {
     };
   }, []);
 
-  // Hero entrance + pointer parallax + scroll-scene reveals.
+  // Hero entrance + subtle pointer parallax + scroll-scene reveals.
   useEffect(() => {
     const hero = heroRef.current;
     const cleanups: Array<() => void> = [];
     if (hero !== null) {
       void revealIn(hero);
-      cleanups.push(parallax(hero, 12));
+      cleanups.push(parallax(hero, 8));
     }
     const story = storyRef.current;
     if (story !== null) {
@@ -75,8 +78,6 @@ export default function Home(): React.JSX.Element {
         router.push(destination);
         return;
       }
-      // The hero transitions into the live scan: push toward the site
-      // instead of hard-cutting to the next screen.
       setLeaving(true);
       window.setTimeout(() => router.push(destination), 320);
     } catch (err) {
@@ -88,9 +89,9 @@ export default function Home(): React.JSX.Element {
   const urlForm = (id: string): React.JSX.Element => (
     <form className="forge-url" onSubmit={onSubmit}>
       <Label htmlFor={id} className="mono-label">
-        Website address
+        Target website
       </Label>
-      <div className="forge-url-row url-row" style={{ marginTop: 6 }}>
+      <div className="forge-url-row url-row" style={{ marginTop: 8 }}>
         <span className="input-wrap">
           <span className="input-prompt" aria-hidden="true">
             &gt;
@@ -101,7 +102,7 @@ export default function Home(): React.JSX.Element {
             type="url"
             inputMode="url"
             autoComplete="url"
-            placeholder="yourwebsite.com"
+            placeholder="https://yourwebsite.com"
             value={url}
             onChange={(event) => setUrl(event.target.value)}
             onFocus={() => setFocused(true)}
@@ -111,16 +112,23 @@ export default function Home(): React.JSX.Element {
           />
         </span>
         <button type="submit" className="forge-scan-btn" disabled={starting}>
-          {starting ? "Scanning…" : "Scan site"}
+          {starting ? "Starting check…" : "Check my website"}
           <span className="arrow" aria-hidden="true">
             →
           </span>
         </button>
       </div>
-      <p id={`${id}-help`} className="help forge-url-hint">
-        A real browser opens your site and finds problems people can actually
-        experience. No account needed.
-      </p>
+      <div className="flex items-center gap-4 pt-3 text-xs text-[#7e7d7a]" id={`${id}-help`}>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[#27ae60]" aria-hidden="true">✓</span>
+          <span>Real browser testing</span>
+        </div>
+        <span>•</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[#7e7d7a]" aria-hidden="true">🔓</span>
+          <span>No account required</span>
+        </div>
+      </div>
     </form>
   );
 
@@ -139,15 +147,15 @@ export default function Home(): React.JSX.Element {
           <span className="mono-label" data-reveal>
             Real-browser accessibility testing
           </span>
-          <Reveal as="h1" className="display-1" >
+          <Reveal as="h1" className="display-1">
             <span id="hero-title">
-              <SplitWords text="See what your users can't." />
+              <SplitWords text="See where your website is hard to use." />
             </span>
           </Reveal>
           <Reveal className="lede-xl">
             <span data-reveal>
-              A11yForge opens your website in a real browser and finds
-              accessibility problems people can actually experience.
+              A11yForge checks your website in a real browser, shows exactly
+              where people may have trouble, and can repair supported problems.
             </span>
           </Reveal>
           <div data-reveal>{urlForm("site-url")}</div>
@@ -161,83 +169,51 @@ export default function Home(): React.JSX.Element {
               <AlertDescription>
                 The check service is not responding right now. You can still
                 watch the recorded example in the{" "}
-                <Link href="/console">demo</Link>.
+                <Link href="/console">demo theatre</Link>.
               </AlertDescription>
             </Alert>
           )}
           <p className="demo-link" data-reveal>
             <Link href="/console">Watch a recorded real repair</Link>
-            {" — start to finish, in the demo theatre."}
+            {" — start to finish, with deterministic verification."}
           </p>
         </div>
-        <div data-depth="0.6" data-reveal style={{ minWidth: 0 }}>
-          <OrbitalHero active={focused || starting} />
+        <div data-depth="0.4" data-reveal style={{ minWidth: 0 }}>
+          <WebsiteHeroChassis url={url} active={focused || starting} />
         </div>
       </section>
 
       <div ref={storyRef} className="story" aria-label="How A11yForge works">
         <section className="story-scene" data-scene aria-labelledby="s1">
-          <span className="story-index" data-reveal>01 / Visit</span>
+          <span className="story-index" data-reveal>01 / Inspect</span>
           <h2 id="s1" className="display-2" data-reveal>
-            Your website, floating in the inspection orbit.
+            Your website, tested the way real people use it.
           </h2>
           <p className="lede-xl" data-reveal>
-            A real browser opens your site, moves through its pages, and uses
-            the keyboard the way people do.
+            A real headless browser opens your website, navigates through its
+            controls, and tests with the keyboard just like assistive tools do.
           </p>
         </section>
         <section className="story-scene" data-scene aria-labelledby="s2">
-          <span className="story-index" data-reveal>02 / Notice</span>
+          <span className="story-index" data-reveal>02 / Understand</span>
           <h2 id="s2" className="display-2" data-reveal>
-            Barriers light up where they actually happen.
+            Problems highlighted right on the website.
           </h2>
           <p className="lede-xl" data-reveal>
-            Text that is hard to read. Controls with no clear purpose. Pages
-            that trap keyboard users. Each one pinned to its exact location.
+            Buttons with no names. Text that is hard to read. Trapped focus.
+            Each issue is shown in plain language with its exact location.
           </p>
         </section>
         <section className="story-scene" data-scene aria-labelledby="s3">
-          <span className="story-index" data-reveal>03 / Break</span>
+          <span className="story-index" data-reveal>03 / Repair & Prove</span>
           <h2 id="s3" className="display-2" data-reveal>
-            Watch the focus path break.
+            Connect your code, test the fix, and verify it works.
           </h2>
           <p className="lede-xl" data-reveal>
-            See the exact moment keyboard focus moves somewhere users
-            can&apos;t understand — explained in plain language, not jargon.
+            A11yForge finds the code behind the problem, creates a repair, rejects
+            bad fixes that fail project checks, and replays the original problem
+            to prove it is resolved.
           </p>
-        </section>
-        <section className="story-scene" data-scene aria-labelledby="s4">
-          <span className="story-index" data-reveal>04 / Trace</span>
-          <h2 id="s4" className="display-2" data-reveal>
-            The code behind the problem slides into view.
-          </h2>
-          <p className="lede-xl" data-reveal>
-            Connect your repository and A11yForge draws a line from the broken
-            element straight to the responsible source file.
-          </p>
-        </section>
-        <section className="story-scene" data-scene aria-labelledby="s5">
-          <span className="story-index" data-reveal>05 / Prove</span>
-          <h2 id="s5" className="display-2" data-reveal>
-            The repair only counts if the browser agrees.
-          </h2>
-          <p className="lede-xl" data-reveal>
-            A11yForge replays the original problem after every repair. Fixes
-            that don&apos;t verify get rejected — and you see exactly why.
-          </p>
-        </section>
-        <section className="story-finale" data-scene aria-labelledby="finale">
-          <p className="workflow-strip" data-reveal>
-            <span>Find</span>
-            <span className="sep" aria-hidden="true">·</span>
-            <span>Fix</span>
-            <span className="sep" aria-hidden="true">·</span>
-            <span>Prove</span>
-          </p>
-          <h2 id="finale" className="display-2" data-reveal>
-            Test your website now.
-          </h2>
-          <div data-reveal>{urlForm("site-url-2")}</div>
         </section>
       </div>
     </main>

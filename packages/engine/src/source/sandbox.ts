@@ -145,10 +145,20 @@ async function runProcessSandboxed(
       if (settled) return;
       settled = true;
       try {
-        if (child.pid !== undefined) process.kill(-child.pid, "SIGKILL");
+        if (child.pid !== undefined) {
+          if (process.platform === "win32") {
+            try { child.kill("SIGKILL"); } catch { /* ignore */ }
+            try { spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"]); } catch { /* ignore */ }
+          } else {
+            process.kill(-child.pid, "SIGKILL");
+          }
+        }
       } catch {
         // Already exited.
       }
+      try { child.stdout?.destroy(); } catch { /* ignore */ }
+      try { child.stderr?.destroy(); } catch { /* ignore */ }
+      try { child.unref(); } catch { /* ignore */ }
       resolve({
         ...result,
         isolation: "process-disposable",

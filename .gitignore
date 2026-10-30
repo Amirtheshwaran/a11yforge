@@ -15,3 +15,4 @@ coverage/
 .env
 .env.*
 !.env.example
+stitch_remix_of_a11yforge_autonomous_accessibility_platform/
