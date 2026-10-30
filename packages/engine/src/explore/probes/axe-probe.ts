@@ -142,6 +142,32 @@ export const axeProbe: AccessibilityProbe = {
     const boxBySelector = new Map<string, MeasuredBox | null>(
       uniqueSelectors.map((selector, index) => [selector, measured[index] ?? null]),
     );
+    const shotBySelector = new Map<string, string>();
+    // An offscreen box cannot be highlighted on the initial viewport capture.
+    // Record a bounded extra viewport and measure again at that exact scroll.
+    const originalScroll = await ctx.page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }));
+    try {
+      for (const selector of uniqueSelectors.slice(0, 50)) {
+        ctx.checkCancelled();
+        const box = boxBySelector.get(selector);
+        if (box == null || (box.y >= 0 && box.y + box.height <= box.viewportHeight
+          && box.x >= 0 && box.x + box.width <= box.viewportWidth)) continue;
+        try {
+          await ctx.page.locator(selector).first().scrollIntoViewIfNeeded({ timeout: 1000 });
+          const [visible] = await ctx.page.evaluate(measureSelectors, [selector]);
+          if (visible == null) continue;
+          const shot = await ctx.captureScreenshot("axe-element", null);
+          if (shot === null) break; // The existing screenshot budget remains authoritative.
+          screenshots.push(shot);
+          boxBySelector.set(selector, visible);
+          shotBySelector.set(selector, shot);
+        } catch {
+          // Keep the finding, without claiming an unrecorded visual location.
+        }
+      }
+    } finally {
+      await ctx.page.evaluate(({ x, y }) => window.scrollTo({ left: x, top: y, behavior: "instant" }), originalScroll);
+    }
 
     if (scan.findings.length === 0) {
       trace.record("axe-clean", "No automated rule violations on this page.");
@@ -195,6 +221,7 @@ export const axeProbe: AccessibilityProbe = {
             failureSummary: finding.failureSummary,
             box,
             boxLabel: box === null ? "" : labelOf(box),
+            screenshot: shotBySelector.get(finding.selector) ?? screenshot,
           },
         };
       }),

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ForgeNav } from "@/components/forge-nav";
 import "./globals.css";
+import "./spatial.css";
+import "./tour.css";
 
 export const metadata: Metadata = {
   title: "A11yForge — See what your users can't",

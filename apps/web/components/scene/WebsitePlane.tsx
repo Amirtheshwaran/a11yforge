@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import * as THREE from "three";
 import { useThree } from "@react-three/fiber";
-import { Line } from "@react-three/drei";
+import { Line, RoundedBox } from "@react-three/drei";
 import type { PlaneSize } from "../../lib/scene-model";
 
 /**
@@ -77,6 +77,9 @@ export function WebsitePlane({ textureUrl, plane }: Props): React.JSX.Element {
 
   return (
     <group>
+      <RoundedBox args={[plane.width + 0.2, plane.height + 0.2, 0.2]} radius={0.08} smoothness={4} position={[0, 0, -0.12]}>
+        <meshStandardMaterial color="#464b48" roughness={0.3} metalness={0.7} />
+      </RoundedBox>
       <mesh position={[0, 0, 0]}>
         <planeGeometry args={[plane.width, plane.height]} />
         {texture !== null ? (

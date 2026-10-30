@@ -23,6 +23,17 @@ function baseResult(overrides: Partial<ProbeResult>): ProbeResult {
 }
 
 describe("projectFindings", () => {
+  it("associates offscreen measurements with their exact bounded screenshot", () => {
+    const box = { x: 80, y: 210, width: 240, height: 30, viewportWidth: 1280, viewportHeight: 720 };
+    const result = baseResult({ probeId: "page-axe-scan", status: "failed", screenshots: ["initial.png", "scrolled.png"], evidence: [
+      { kind: "axe-violation", summary: "contrast", data: { ruleId: "color-contrast", selector: "p", box, boxLabel: "Text", screenshot: "scrolled.png" } },
+    ] });
+    const [finding] = projectFindings([result]);
+    assert.equal(finding?.highlights[0]?.screenshot, "scrolled.png");
+    assert.equal(finding?.highlights[0]?.y, 210);
+    result.evidence[0]!.data["screenshot"] = "unrecorded.png";
+    assert.equal(projectFindings([result])[0]?.highlights.length, 0);
+  });
   it("groups axe violations by rule into automated findings", () => {
     const axe = baseResult({
       probeId: "page-axe-scan",
