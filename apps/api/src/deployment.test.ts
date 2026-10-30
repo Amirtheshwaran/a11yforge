@@ -1,6 +1,6 @@
 import { describe, it, before, after } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { buildServer } from "./index.js";
@@ -134,6 +134,32 @@ describe("deployment health and degraded modes", () => {
       const res = await app.inject({ method: "POST", url: "/runs" });
       assert.equal(res.statusCode, 503);
       assert.match(res.json().error as string, /not configured/);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it("keeps the recorded demo and its artifacts available alongside scan-only and incomplete runs", async () => {
+    process.env["A11YFORGE_RUNS_DIR"] = emptyRuns;
+    await mkdir(join(emptyRuns, "exp-scan-only"), { recursive: true });
+    await writeFile(join(emptyRuns, "exp-scan-only", "exploration.json"), "{}");
+    await mkdir(join(emptyRuns, "incomplete-repair"), { recursive: true });
+    await writeFile(join(emptyRuns, "incomplete-repair", "scenario.json"), "{}");
+    const app = buildServer();
+    try {
+      const res = await app.inject({ method: "GET", url: "/runs/demo" });
+      assert.equal(res.statusCode, 200);
+      const body = res.json() as { finalStatus: string; runId: string };
+      assert.equal(body.finalStatus, "ACCEPTED");
+      const listed = await app.inject({ method: "GET", url: "/runs" });
+      assert.ok((listed.json() as { runs: { runId: string }[] }).runs.some((run) => run.runId === body.runId));
+      for (const path of [
+        `/runs/${body.runId}`,
+        `/runs/${body.runId}/artifacts/focus-escaped.png`,
+        `/runs/${body.runId}/artifacts/repair-diff.patch`,
+      ]) {
+        assert.equal((await app.inject({ method: "GET", url: path })).statusCode, 200);
+      }
     } finally {
       await app.close();
     }

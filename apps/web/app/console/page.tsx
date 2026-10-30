@@ -63,6 +63,9 @@ export default function Home() {
   const [selected, setSelected] = useState<string>("demo");
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   const [attempt, setAttempt] = useState<number>(2);
+  const selectReplayBeat = useCallback((index: number) => {
+    setAttempt(index === 2 || index === 3 ? 1 : 2);
+  }, []);
 
   const [health, setHealth] = useState<ApiHealth | null>(null);
   const [livePhase, setLivePhase] = useState<LivePhase>("idle");
@@ -520,6 +523,7 @@ export default function Home() {
       {state.kind === "ready" && (
         <div style={{ marginTop: 20 }}>
           <DemoReplay
+            onBeatChange={selectReplayBeat}
             beats={[
               {
                 label: "The problem",
@@ -873,7 +877,7 @@ export default function Home() {
                   Evidence code inspector · unified diff
                 </Badge>
                 <CardTitle asChild>
-                  <h2 id="h-diff">Generated patch payload (accepted change)</h2>
+                  <h2 id="h-diff">Generated patch payload (selected attempt)</h2>
                 </CardTitle>
               </CardHeader>
               <CardDescription>

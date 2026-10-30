@@ -86,7 +86,7 @@ export type RunsSource = "local" | "bundled-recorded";
 export function resolveRunsDirWithSource(): { dir: string; source: RunsSource } {
   const local = resolveLiveRunsDir();
   try {
-    if (existsSync(local) && readdirSync(local).length > 0) {
+    if (existsSync(local) && readdirSync(local).some((id) => existsSync(join(local, id, "scenario.json")))) {
       return { dir: local, source: "local" };
     }
   } catch {
@@ -100,6 +100,13 @@ export function resolveRunsDirWithSource(): { dir: string; source: RunsSource } 
 /** Local runs root: live artifacts, else the bundled recorded demo. */
 export function resolveRunsDir(): string {
   return resolveRunsDirWithSource().dir;
+}
+
+/** Artifact URLs must keep resolving when local scans coexist with the bundle. */
+function resolveRunsDirForRun(runId: string): string {
+  const local = resolveLiveRunsDir();
+  if (existsSync(join(local, runId))) return local;
+  return findBundledDemoDir() ?? local;
 }
 
 function artifactUrlFor(runId: string, fileName: string): string {
@@ -127,14 +134,23 @@ function errorBody(error: unknown): { status: number; body: { error: string } } 
 
 export function registerRunRoutes(app: FastifyInstance): void {
   app.get("/runs", async (_request, reply) => {
-    const runsDir = resolveRunsDir();
-    const runs = await listRunSummaries(runsDir);
+    const local = await listRunSummaries(resolveLiveRunsDir());
+    const bundledDir = findBundledDemoDir();
+    const bundled = bundledDir === null ? [] : await listRunSummaries(bundledDir);
+    const runs = local.length > 0 ? local : bundled;
     return reply.send({ runs });
   });
 
   app.get("/runs/demo", async (_request, reply) => {
-    const runsDir = resolveRunsDir();
-    const demoId = await findDemoRunId(runsDir);
+    let runsDir = resolveRunsDir();
+    let demoId = await findDemoRunId(runsDir);
+    if (demoId === null) {
+      const bundled = findBundledDemoDir();
+      if (bundled !== null) {
+        runsDir = bundled;
+        demoId = await findDemoRunId(bundled);
+      }
+    }
     if (demoId === null) {
       return reply.status(404).send({
         error:
@@ -159,7 +175,7 @@ export function registerRunRoutes(app: FastifyInstance): void {
       if (!RUN_ID_PATTERN.test(request.params.runId)) {
         return reply.status(404).send({ error: "unknown run" });
       }
-      const runsDir = resolveRunsDir();
+      const runsDir = resolveRunsDirForRun(request.params.runId);
       try {
         const view = await buildRunViewModel(runsDir, request.params.runId, artifactUrlFor);
         if (!containsNoSecrets(view)) {
@@ -180,7 +196,7 @@ export function registerRunRoutes(app: FastifyInstance): void {
       if (!RUN_ID_PATTERN.test(runId) || !isAllowedArtifactName(name)) {
         return reply.status(404).send({ error: "unknown artifact" });
       }
-      const runsDir = resolveRunsDir();
+      const runsDir = resolveRunsDirForRun(runId);
       const runDir = resolve(runsDir, runId);
       if (!runDir.startsWith(resolve(runsDir) + sep)) {
         return reply.status(404).send({ error: "unknown artifact" });

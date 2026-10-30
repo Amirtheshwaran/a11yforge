@@ -196,7 +196,7 @@ export function IssueWalkthrough(props: IssueWalkthroughProps): React.JSX.Elemen
         </>
       )}
 
-      {steps.length > 0 && !props.isKeyboard && (
+      {props.developer && steps.length > 0 && !props.isKeyboard && (
         <>
           <h4>How it was checked</h4>
           <ol className="finding-steps">
@@ -237,8 +237,8 @@ export function IssueWalkthrough(props: IssueWalkthroughProps): React.JSX.Elemen
           </p>
           <p className="help" style={{ color: "var(--ink-dim)" }}>
             The marker shows the browser problem; this panel shows the code.
-            Web-based repair is not available yet — use the repair command on
-            the connect page.
+            Web-based repair is not available yet. The connect page offers
+            local source inspection and a recorded verified repair.
           </p>
         </div>
       )}

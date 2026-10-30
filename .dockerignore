@@ -4,6 +4,7 @@
 .a11yforge
 .playwright-browsers
 node_modules
+.pnpm-store
 apps/*/node_modules
 packages/*/node_modules
 fixtures/*/node_modules
@@ -25,3 +26,6 @@ dist
 npm-debug.log*
 pnpm-debug.log*
 .docker
+stitch_a11yforge_autonomous_accessibility_platform
+stitch_remix_of_a11yforge_autonomous_accessibility_platform
+submission-assets

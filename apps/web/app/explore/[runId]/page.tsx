@@ -57,7 +57,6 @@ import {
   fitDistanceFor,
   focusPathOf,
   highlightToPlane,
-  markerCategoryCounts,
   planeSizeFor,
   repairStateFromStages,
   type CameraRequest,
@@ -282,7 +281,7 @@ function ExploreRunContent(): React.JSX.Element {
   const observations = run?.findings.filter((finding) => finding.category === "observation") ?? [];
   const notTestedFindings = run?.findings.filter((finding) => finding.category === "not-tested") ?? [];
   const shots = run?.screenshots ?? [];
-  const newestShot = shots.length > 0 ? shots[shots.length - 1] : null;
+  const overviewShot = shots[0] ?? null;
   const problems = [...confirmed, ...automated];
   const issueCount = problems.length;
   const targetUrl = entryUrl !== "" ? entryUrl : (run?.target.entryUrl ?? "…");
@@ -341,7 +340,7 @@ function ExploreRunContent(): React.JSX.Element {
     walkFinding !== null && isKeyboard && walkFinding.screenshots.length > 1
       ? (walkFinding.screenshots[Math.min(storyIndex, walkFinding.screenshots.length - 1)] ?? null)
       : null;
-  const activeShot = storyShot ?? walkFinding?.screenshots[0] ?? newestShot ?? null;
+  const activeShot = storyShot ?? walkFinding?.screenshots[0] ?? overviewShot;
 
   const plane = useMemo(() => {
     if (run !== null && activeShot !== null) {
@@ -382,7 +381,7 @@ function ExploreRunContent(): React.JSX.Element {
   const showFocusPath = focusPath !== null && focusPath.nodes.length > 0;
   const focusSeq = focusPath !== null ? Math.min(storyIndex, focusPath.nodes.length - 1) : 0;
 
-  const markerCounts = useMemo(() => markerCategoryCounts(problems, groupOf), [problems]);
+  const categoryCounts = Object.fromEntries(GROUP_ORDER.map((id) => [id, grouped.get(id)?.length ?? 0]));
   const selectedIssueLabel =
     walkFinding !== null && walk !== null
       ? `Issue ${walkPosition} · ${humanFindingOf(walkFinding).title}`
@@ -704,14 +703,14 @@ function ExploreRunContent(): React.JSX.Element {
               >
                 All<span className="count">{walkProblems.length}</span>
               </button>
-              {GROUP_ORDER.filter((id) => (markerCounts[id] ?? 0) > 0).map((id) => (
+              {GROUP_ORDER.filter((id) => (categoryCounts[id] ?? 0) > 0).map((id) => (
                 <button
                   key={id}
                   type="button"
                   aria-pressed={walk !== null && walk.scope === id}
                   onClick={() => startReview(id)}
                 >
-                  {PROBLEM_GROUPS[id].heading}<span className="count">{markerCounts[id]}</span>
+                  {PROBLEM_GROUPS[id].heading}<span className="count">{categoryCounts[id]}</span>
                 </button>
               ))}
             </div>
@@ -730,9 +729,16 @@ function ExploreRunContent(): React.JSX.Element {
                         elementIndex={walk?.ei ?? 0}
                         onElementSelect={onElementSelect}
                       />
-                    ) : (
-                      <p className="help">3D is unavailable — use the issue list to review each problem.</p>
-                    )}
+                    ) : activeShot !== null ? (
+                      <EvidenceViewer
+                        src={explorationShotSrc(runId, activeShot)}
+                        alt="Recorded screenshot of the tested website"
+                        highlights={[]}
+                        selectedIndex={0}
+                        onSelect={() => undefined}
+                        caption="3D is unavailable — use the issue list to review each problem."
+                      />
+                    ) : <p className="help">No screenshot was captured. Use the issue list to review each problem.</p>}
                   </div>
                 ) : (
                   <SpatialScene
@@ -764,7 +770,7 @@ function ExploreRunContent(): React.JSX.Element {
                   <div className="xp-float xp-float-tl">
                     <span className="mono-label">Results</span>
                     <p className="xp-float-strong" role="status">
-                      Organizing findings…
+                      {issueCount} problems ready to review
                     </p>
                   </div>
                 )}

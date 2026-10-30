@@ -108,13 +108,13 @@ body {
   color: #0b0b0d;
 }
 
-a {
+a:where(:not([data-slot="button"])) {
   color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-a:hover {
+a:where(:not([data-slot="button"])):hover {
   color: var(--ink);
 }
 
@@ -1216,6 +1216,11 @@ footer.footnote {
   outline: none;
 }
 
+.url-row input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
 .help {
   color: var(--ink-faint);
   font-size: 13px;
@@ -1672,6 +1677,12 @@ footer.footnote {
 
 .spatial-panel {
   min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .source-layout {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
 }
 
 .scene-wrap {

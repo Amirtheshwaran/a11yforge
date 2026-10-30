@@ -48,7 +48,7 @@ export function FindingListFallback({
               aria-current={active ? "true" : undefined}
               aria-label={`Issue ${index + 1} of ${findings.length}: ${human.title}. ${severityWordOf(finding.severity)}${tier === 0 ? ", needs attention first" : ""}`}
               onClick={() => onSelect(finding.findingId)}
-              className="w-full justify-start"
+              className="h-auto w-full justify-start whitespace-normal text-left break-words"
             >
               <span aria-hidden="true" className="font-mono">
                 {index + 1}
@@ -79,7 +79,7 @@ export function EvidenceFallback({
   const human = humanFindingOf(finding);
   const drawable = drawableHighlights(finding.highlights);
   const shot = finding.screenshots[0] ?? null;
-  if (shot === null || drawable.length === 0) {
+  if (shot === null) {
     return (
       <p className="help" style={{ color: "var(--ink-dim)" }}>
         We found this problem but could not visually locate it in the
@@ -94,7 +94,7 @@ export function EvidenceFallback({
       highlights={drawable}
       selectedIndex={Math.min(elementIndex, drawable.length - 1)}
       onSelect={onElementSelect}
-      caption="This is the exact element to look at."
+      caption={drawable.length > 0 ? "This is the exact element to look at." : "Recorded page screenshot; the affected element could not be located visually."}
     />
   );
 }

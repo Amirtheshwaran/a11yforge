@@ -80,9 +80,9 @@ export function WebsitePlane({ textureUrl, plane }: Props): React.JSX.Element {
       <mesh position={[0, 0, 0]}>
         <planeGeometry args={[plane.width, plane.height]} />
         {texture !== null ? (
-          <meshBasicMaterial map={texture} toneMapped={false} />
+          <meshBasicMaterial key={texture.uuid} map={texture} toneMapped={false} />
         ) : (
-          <meshBasicMaterial color={BLANK} toneMapped={false} />
+          <meshBasicMaterial key="blank" color={BLANK} toneMapped={false} />
         )}
       </mesh>
       <Line points={corners} color={FRAME} lineWidth={1} transparent opacity={0.9} />

@@ -15,8 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EvidenceViewer } from "@/components/evidence-viewer";
+import { humanFindingOf } from "../../lib/human-copy";
 import {
   connectSourceRepo,
+  explorationShotSrc,
   fetchExploration,
   fetchSourceConnection,
   fetchSourceTrace,
@@ -152,7 +155,7 @@ function ConnectSourceContent(): React.JSX.Element {
           ? 2
           : 1;
 
-  const cliCommand = `a11yforge repair --run ${runId !== "" ? runId : "<run-id>"} --finding ${findingId !== "" ? findingId : "<finding-id>"} --source .`;
+  const cliCommand = `pnpm --filter @a11yforge/engine repair -- --run ${runId !== "" ? runId : "<run-id>"} --finding ${findingId !== "" ? findingId : "<finding-id>"} --source .`;
 
   function onCopyCli(): void {
     if (typeof navigator === "undefined" || navigator.clipboard === undefined) return;
@@ -165,10 +168,11 @@ function ConnectSourceContent(): React.JSX.Element {
   // Derive target finding information from exploration or query params
   const matchedFinding = exploration?.findings.find((f) => f.findingId === findingId) ?? null;
   const targetSelector =
-    matchedFinding?.highlights[0]?.selector || (findingId !== "" ? `#${findingId}` : "input#reserve-email");
-  const targetLabel = matchedFinding?.highlights[0]?.label || "Form input";
-  const targetTitle = matchedFinding?.title || "Missing accessible label or name";
-  const siteUrl = exploration?.target.normalizedUrl || exploration?.target.entryUrl || "https://yourwebsite.com";
+    matchedFinding?.highlights[0]?.selector || "No measured selector available";
+  const targetLabel = matchedFinding?.highlights[0]?.label || "Selected problem";
+  const targetTitle = matchedFinding === null ? "Choose a finding from a website check" : humanFindingOf(matchedFinding).title;
+  const siteUrl = exploration?.target.normalizedUrl || exploration?.target.entryUrl || "No website selected";
+  const screenshot = matchedFinding?.screenshots[0] ?? exploration?.screenshots[0] ?? null;
 
   const traceCandidate =
     trace !== null && trace.status === "FOUND" ? trace.candidates[0] ?? null : null;
@@ -210,10 +214,10 @@ function ConnectSourceContent(): React.JSX.Element {
       </nav>
 
       {/* Main Spatial Grid: Left Website Plane + Right Code Chamber */}
-      <div className="w-full py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+      <div className="source-layout w-full py-8 grid gap-8 lg:gap-12 items-start">
         
         {/* LEFT COLUMN: Physical Website Plane */}
-        <section aria-label="Website preview" className="lg:col-span-5 flex flex-col gap-4">
+        <section aria-label="Website preview" className="flex flex-col gap-4">
           <div className="flex items-center justify-between font-mono text-[11px] text-inkdim">
             <span className="flex items-center gap-1.5 text-[#ffc53d]">
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -242,11 +246,21 @@ function ConnectSourceContent(): React.JSX.Element {
                 <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
-                Secure
+                {exploration !== null ? "Recorded page" : "No check selected"}
               </span>
             </div>
 
-            {/* Chassis Body */}
+            {screenshot !== null && (
+              <EvidenceViewer
+                src={explorationShotSrc(runId, screenshot)}
+                alt="Recorded browser screenshot for the source inspection"
+                highlights={matchedFinding?.highlights.filter((highlight) => highlight.screenshot === screenshot).slice(0, 1) ?? []}
+                selectedIndex={0}
+                onSelect={() => undefined}
+                caption="Evidence from the selected website check."
+              />
+            )}
+            {/* Selected finding summary */}
             <div className="p-5 bg-[#0e0e10] flex flex-col gap-4 relative">
               {/* Subtle grid */}
               <div className="absolute inset-0 bg-[radial-gradient(#2a2a30_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
@@ -265,7 +279,7 @@ function ConnectSourceContent(): React.JSX.Element {
 
                 {/* Reticle Pill */}
                 <div className="absolute -top-3 left-3 px-2 py-0.5 rounded bg-[#ffc53d] text-[#0B0B0C] font-sans text-[11px] font-semibold tracking-tight">
-                  Problem on page: {targetLabel}
+                  Selected problem: {targetLabel}
                 </div>
 
                 <div className="flex flex-col gap-2 pt-1">
@@ -295,7 +309,7 @@ function ConnectSourceContent(): React.JSX.Element {
               <div className="pt-2 flex items-center justify-between text-[11px] font-mono text-inkfaint">
                 <span className="flex items-center gap-1.5 text-[#c6ff4d]">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff4d]" />
-                  Problem highlighted
+                  {screenshot !== null ? "Browser evidence loaded" : "Select a website check first"}
                 </span>
                 <span>Website view</span>
               </div>
@@ -318,12 +332,12 @@ function ConnectSourceContent(): React.JSX.Element {
           </div>
 
           <p className="font-mono text-xs text-inkfaint leading-relaxed">
-            We highlight the problem on your website so you can see where it happens.
+            {screenshot !== null ? "This screenshot comes from the selected browser check. A highlight appears only when its location was measured." : "Open a problem from your website results to see its browser evidence here."}
           </p>
         </section>
 
         {/* RIGHT COLUMN: Code Chamber */}
-        <section aria-labelledby="connect-title" className="lg:col-span-7 flex flex-col gap-6">
+        <section aria-labelledby="connect-title" className="flex flex-col gap-6">
           <div className="relative rounded-xl border border-white/[0.12] bg-[#18181B] shadow-2xl p-6 sm:p-8 overflow-hidden">
             {/* Top Specular Lip */}
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
@@ -351,7 +365,7 @@ function ConnectSourceContent(): React.JSX.Element {
               <p className="mt-2 text-sm sm:text-base text-inkdim leading-relaxed">
                 {traceCandidate !== null
                   ? "This part of the code creates the element we highlighted on your website."
-                  : "We already found the problem. Connect your source code so A11yForge can look for the part that caused it."}
+                  : matchedFinding !== null ? "We already found the problem. Connect your source code so A11yForge can look for the part that caused it." : "Choose a problem from a website check, then connect its source code."}
               </p>
             </div>
 
@@ -366,10 +380,10 @@ function ConnectSourceContent(): React.JSX.Element {
                   Problem element
                 </span>
                 <span className="font-mono text-xs sm:text-sm text-ink truncate">
-                  <code>{targetSelector}</code>
+                  {targetTitle}
                 </span>
                 <span className="text-xs text-inkfaint mt-0.5">
-                  Found on your page · Connect your code to locate the file and line.
+                  {matchedFinding !== null ? "Connect your code to look for the file and line." : "No finding selected."}
                 </span>
               </div>
             </div>
@@ -467,10 +481,10 @@ function ConnectSourceContent(): React.JSX.Element {
                 {/* Local CLI Option - Labeled "Fix locally instead" per specification */}
                 <section aria-labelledby="local-title" className="pt-4 border-t border-white/[0.08]">
                   <p className="font-mono text-xs text-ink uppercase tracking-wider font-semibold" id="local-title">
-                    Fix locally instead
+                    Inspect source locally
                   </p>
                   <p className="text-xs text-inkdim mt-1.5 leading-relaxed">
-                    If you want to test or repair this directly on your computer, run this command in your project directory:
+                    From your local A11yForge checkout, run this command to trace the finding into your code. Replace the source path with your project directory. This command inspects source; it does not execute a repair.
                   </p>
                   <Card className="mt-3 bg-[#111113] border-white/10">
                     <CardHeader className="p-3 border-b border-white/[0.06]">
@@ -545,7 +559,7 @@ function ConnectSourceContent(): React.JSX.Element {
                     </div>
                     <span className="font-mono text-[10px] text-[#c6ff4d] flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff4d]" />
-                      Verified code match
+                      Source match
                     </span>
                   </div>
 
@@ -595,7 +609,7 @@ function ConnectSourceContent(): React.JSX.Element {
 
                   <p id="fix-note" className="text-xs text-inkfaint leading-relaxed">
                     Online repair execution is locked on this deployment to protect code.
-                    Use the local command above to fix on your machine, or watch the recorded verified repair.
+                    Use the local command above to inspect source on your machine, or watch the recorded verified repair.
                   </p>
                 </div>
 
@@ -678,6 +692,18 @@ function ConnectSourceContent(): React.JSX.Element {
               </Alert>
             )}
 
+            {trace !== null && trace.status === "NOT_FOUND" && (
+              <Alert>
+                <AlertTitle>We could not find the code behind this problem.</AlertTitle>
+                <AlertDescription>No reliable source match was found. No repair was proposed.</AlertDescription>
+              </Alert>
+            )}
+            {trace !== null && trace.status !== "FOUND" && (
+              <Button type="button" variant="secondary" onClick={() => { setSourceId(null); setTrace(null); setState(null); }}>
+                Try another repository
+              </Button>
+            )}
+
             {state !== null && state.state === "FAILED" && (
               <Alert variant="destructive" className="bg-[#ff4b2e]/10 border-[#ff4b2e]/30 text-[#ff4b2e]">
                 <AlertTitle>[✕] Source connection failed</AlertTitle>
@@ -709,7 +735,7 @@ function ConnectSourceContent(): React.JSX.Element {
         </div>
         <div className="flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff4d]" />
-          <span>Website ↔ Source code connected</span>
+          <span>{traceCandidate !== null ? "Source match found" : state?.state === "CONNECTED" ? "Repository connected; source match not confirmed" : "Source not connected"}</span>
         </div>
       </footer>
     </main>

@@ -1,4 +1,5 @@
 node_modules/
+.pnpm-store/
 apps/web/.next/
 apps/web/out/
 */dist/

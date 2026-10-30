@@ -11,9 +11,11 @@
 
 FROM node:20-bookworm
 
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001
+
 ENV PNPM_HOME=/pnpm-store \
     PATH=/pnpm-store:$PATH \
-    NEXT_PUBLIC_API_URL=http://localhost:3001 \
+    NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} \
     A11YFORGE_VERSION=0.7.0 \
     A11YFORGE_DATA_DIR=/data/a11yforge \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \

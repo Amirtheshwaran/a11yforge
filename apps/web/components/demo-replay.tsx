@@ -17,10 +17,14 @@ export interface ReplayBeat {
  * verified). Each beat jumps to the recorded artifact section below, so the
  * replay never invents content — it navigates real evidence.
  */
-export function DemoReplay({ beats }: { beats: ReplayBeat[] }): React.JSX.Element {
+export function DemoReplay({ beats, onBeatChange }: { beats: ReplayBeat[]; onBeatChange?: (index: number) => void }): React.JSX.Element {
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const beat = beats[Math.min(index, beats.length - 1)];
+
+  useEffect(() => {
+    onBeatChange?.(index);
+  }, [index, onBeatChange]);
 
   useEffect(() => {
     if (!playing || beats.length < 2) return;
