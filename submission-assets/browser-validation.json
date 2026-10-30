@@ -1,0 +1,89 @@
+{
+  "checkedAt": "2026-10-30T12:50:17.549Z",
+  "run": "exp-1793364189507-cbcbae31",
+  "checks": [
+    {
+      "name": "landing and screenshot",
+      "result": "PASS"
+    },
+    {
+      "name": "persisted results, categories and screenshot",
+      "result": "PASS"
+    },
+    {
+      "name": "Show me, keyboard next/previous, details, rapid category change",
+      "result": "PASS"
+    },
+    {
+      "name": "source form, connection, refresh and browser history",
+      "result": "PASS"
+    },
+    {
+      "name": "recorded demo, first fix selection, rejection and proof screenshots",
+      "result": "PASS"
+    },
+    {
+      "name": "responsive 2560x1440: landing/results/source/demo",
+      "result": "PASS"
+    },
+    {
+      "name": "responsive 1920x1080: landing/results/source/demo",
+      "result": "PASS"
+    },
+    {
+      "name": "responsive 768x1024: landing/results/source/demo",
+      "result": "PASS"
+    },
+    {
+      "name": "responsive 390x844: landing/results/source/demo",
+      "result": "PASS"
+    },
+    {
+      "name": "keyboard-only landing URL entry and scan with SSE",
+      "result": "PASS"
+    },
+    {
+      "name": "reduced motion: results controls and manual demo scrub",
+      "result": "PASS"
+    },
+    {
+      "name": "unavailable WebGL retains overview screenshot, findings and details",
+      "result": "PASS"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "liveScan": {
+    "pages": 1,
+    "findings": 12,
+    "screenshots": 3,
+    "limitations": 0
+  },
+  "sourceResult": "RESULTS\n/\nPAGE-AXE-SCAN-COLOR-CONTRAST-1\n/\nCONNECT CODE\nCONNECT CODE\nREAD-ONLY INSPECTION\nWebsite preview\nProblem location\nhttps://dequeuniversity.com/demo/mars/\nRecorded page\n1\n\"Be Bold...\" h3\nEvidence from the selected website check. Affected item 1 of 1: \"Be Bold...\" h3.\nYOUR WEBSITE\nHIGHLIGHTED PROBLEM\nSelected problem: \"Be Bold...\" h3\nSome text is hard to read\na[href=\"mars2.html?a=be_bold\"] > h3\nProblem\nBrowser evidence loaded\nWebsite view\n\nThis screenshot comes from the selected browser check. A highlight appears only when its location was measured.\n\nREADY TO INSPECT CODE\nRead-only\nConnect the code behind this website.\n\nWe already found the problem. Connect your source code so A11yForge can look for the part that caused it.\n\nPROBLEM ELEMENT\nSome text is hard to read\nConnect your code to look for the file and line.\nConnecting code\nFinding the problem area\n[?] SEVERAL FILES MATCHED (8 CANDIDATES)\nSeveral files matched the browser evidence closely (appflow.md vs apps/web/app/connect/page.tsx); automatic repair is withheld until the source is disambiguated.\nappflow.md (score 79.25)\napps/web/app/connect/page.tsx (score 78.93)\napps/web/app/console/page.tsx (score 74.88)\napps/web/app/explore/[runId]/page.tsx (score 72.19)\nTry another repository\nWatch full verified repair in demo theatre →\nRepository connected; source match not confirmed",
+  "focusStyle": {
+    "outline": "rgb(245, 242, 234) solid 2px",
+    "boxShadow": "none"
+  },
+  "keyboardScanUrl": "http://localhost:3100/explore/exp-1793364647430-6ecfbb6e?url=https%3A%2F%2Fexample.com",
+  "captureRun": "exp-1793366127151-e96a89d8",
+  "finalCapture": {
+    "checkedAt": "2026-10-30T13:15:58.265Z",
+    "result": "PASS",
+    "checks": [
+      "navigation appearance",
+      "desktop source panes",
+      "primary link contrast",
+      "recorded attempt selection",
+      "mobile overflow",
+      "WebGL fallback",
+      "nine final screenshots"
+    ],
+    "consoleErrors": [],
+    "liveScan": {
+      "pages": 1,
+      "findings": 12,
+      "screenshots": 3,
+      "limitations": 0
+    }
+  }
+}

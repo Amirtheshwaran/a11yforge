@@ -1,63 +1,53 @@
-# A11yForge Hackathon Compliance & Architecture Disclosure
+# Hackathon compliance and technology disclosure
 
-## 1. Submission Overview
-- **Event:** Meta Global AI Developer Hackathon
-- **Track:** Indie Developer Track (Individual student project by `Amirtheshwaran`)
-- **Theme:** Push the Frontier
-- **Positioning:** Evidence-driven autonomous accessibility repair system combining deterministic browser probes, Meta model reasoning, bounded source patching, and deterministic replay verification.
+Verified October 30, 2026 (Asia/Kolkata). This records evidence, not a claim that the submission has been filed.
 
----
+## CONFIRMED — official sources
 
-## 2. Meta Technology Actually Used
-- **Model:** `muse-spark-1.3-contributor` / `meta-models/muse-spark-open-1026`
-- **Provider Layer:** OpenAI-compatible Chat Completions API with constrained JSON Schema decoding (`packages/meta/src/provider.ts`).
-- **Grounded AI Operations:**
-  1. `accessibility-diagnosis`: Diagnoses observed browser failure from evidence bundle.
-  2. `accessibility-repair-proposal`: Proposes bounded source code patches anchored to exact file lines.
-  3. `accessibility-repair-revision`: Revises failed repairs using deterministic compiler feedback.
-  4. `repair-critic-review`: Evaluates patched code against safety constraints.
-- **Credit Discipline:** Maximum model calls per repair run is strictly bounded (default 1, maximum 2 during revision). Exploration and scanning are 100% deterministic and consume zero model credits.
+Source priority: [Official Rules and Event Waiver](https://cerebralvalley.ai/e/meta-ai-developer-hackathon/waiver), then the [submission portal](https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/submit), then [Cerebral Valley event page](https://cerebralvalley.ai/e/meta-ai-developer-hackathon) and [Meta event page](https://dev.meta.ai/events/global-hackathon).
 
----
+The rules were read in a JavaScript-enabled browser. The plain web fetch initially returned only “Loading”; this was resolved by inspecting the rendered page.
 
-## 3. Provider & Inference Architecture (CONFIRMED vs. UNCONFIRMED)
-- **Active Production Runtime (CONFIRMED):** Direct Meta Model API (`https://api.meta.ai/v1`) using `muse-spark-1.3-contributor`. Configured via `MODEL_API_KEY` and tested via live provider integration tests.
-- **Baseten Integration (DOCUMENTED / OPTIONAL ARCHITECTURE):** Baseten is supported as an open-weights host for Meta models (e.g. Llama 3 / Muse Spark models) through the configurable `MODEL_BASE_URL` environment variable. In this local host environment, runtime traffic routes directly to the Meta API. We do not claim active Baseten cloud execution when operating against the primary Meta endpoint.
+| Requirement | Confirmed information |
+| --- | --- |
+| Submission destination | Cerebral Valley project submission portal linked above |
+| Deadline | November 4, 2026, 9:00 PM ET, from both event pages; equivalent November 5, 7:30 AM IST |
+| Track | One track per project; Indie accepts individuals, students and teams up to four under the rules |
+| Theme | Push the Frontier is one of the two published themes |
+| Judging | Impact 30%; use of Meta AI tooling 25%; technical depth and execution 20%; demo 25% |
+| Demo | Rules explicitly assess a working demo and video quality; they do not specify video length |
+| Technology | Participants build with Meta AI products identified by the event |
+| Eligibility | Selected applicants; 18+ and local age of majority; geographic and affiliation exclusions apply |
+| Teams | A representative submits and identifies the other team members |
+| Rights | Original work and compliance with applicable open-source licenses are required; participant retains ownership while granting organizer usage rights |
 
----
+The public pages' short Indie description is less specific than the rules' weighted criteria. Use the rules for the presentation and team constraints. The user must confirm their own accepted rules and eligibility; no acceptance was submitted by this agent.
 
-## 4. Deterministic Gates vs. Model Roles
-The model is never allowed to establish facts or certify its own repairs:
+## UNCONFIRMED — authenticated form required
 
-```text
-Browser Facts:        Playwright + axe-core (Authoritative)
-Model Role:           Synthesize explanation & propose code edit
-Source Facts:         AST parsing + git inventory (Authoritative)
-Build / Typecheck:    TypeScript compiler `tsc` (Deterministic Gate)
-Replay Verification:  Playwright reproduces original scenario (Deterministic Gate)
-Regression Gate:      Full page axe re-scan verifies no new defects (Deterministic Gate)
-```
+The portal linked from the rules redirects to Cerebral Valley sign-in in the available browser. No submission was entered.
 
-If a proposed fix fails `tsc` or fails replay, **the fix is rejected**, demonstrating the system's safety architecture.
+- Whether a repository URL is required, whether it must be public, and any required license.
+- Whether video is mandatory; exact duration, host, upload size and format.
+- Whether a deployed app URL is mandatory.
+- Description character limits and exact form fields.
+- Required screenshot count, dimensions and formats.
+- Exact model-disclosure and participant/team fields.
+- Whether the authenticated portal shows updated terms or deadlines.
 
----
+Manual action: sign in to the submission portal with the accepted participant account, check these fields against this document, adapt the prepared copy, supply verified deployment/video URLs, and submit before the deadline. Do not describe the proposed 2:40 video as an official length requirement.
 
-## 5. Live Scans vs. Recorded Demo
-- **Live Scans (Real Target Verification):**
-  1. `https://example.com/`: 1 page, 4 findings (3 automated findings, 1 observation), 1 screenshot (`screenshot-0.png`), 0 errors, 0 limitations.
-  2. `https://dequeuniversity.com/demo/mars/`: 1 page, 12 findings (including `keyboard-traversal-10` focus escape and `form-relationships-11` missing labels, plus 10 axe findings), 3 screenshots, 46 spatial markers mapped, 0 errors.
-  3. `https://news.ycombinator.com/`: 1 page, 3 findings (keyboard traversal observation, 1 unlabeled form control, color contrast), 2 screenshots, 50 spatial markers, 0 errors.
-- **Recorded Demo:** Explicitly labeled as `"Recorded real repair"` in the UI and powered by committed artifacts in `demo/accepted-run`. Recorded runs are never misrepresented as live inference.
+## CONFIRMED — implementation and artifacts
 
----
+- Meta defaults: `muse-spark-1.3-contributor`; `https://api.meta.ai/v1`; server-side `MODEL_API_KEY`. The four committed usage files identify this model.
+- Four bounded roles: diagnosis, proposal, optional one-time revision, eligible critic. Live fixture orchestration caps the complete run at four calls. Standalone diagnosis defaults to one; recovery has its own two-call revision/critic budget.
+- Fixed wire schemas, local Zod validation, evidence-reference checks; invalid output fails closed without automatic retries.
+- Exploration and recorded playback make zero model calls.
+- Recorded run `2026-10-26T19-04-29-541Z-27affb` validates with 28 artifacts and four screenshots. Attempt 1 fails TS18048; attempt 2 passes deterministic gates and critic acceptance.
+- Runtime code does not read `MODEL_BASE_URL`; no Baseten-specific implementation or configuration was found. Provider base URL injection exists, but there is no evidence of Baseten execution. Do not claim the open-weight Muse model was used.
+- Hosted generic source mutation is disabled. The generic CLI connects and traces source but does not execute repairs. Full autonomous repair is implemented for the controlled Broken Shop fixture.
+- Model tests mock transport. No new live inference was purchased during final UI validation.
 
-## 6. Execution Model: Web Platform vs. Local CLI
-- **Web Platform:** Handles live website exploration, 3D element spatial mapping, visual screenshot capture, guided issue walkthrough, and source AST matching.
-- **Local CLI Helper:** For developers who prefer not to give hosted cloud services push access to their local source code or private repositories, A11yForge provides the `Fix locally instead` path (`pnpm --filter @a11yforge/cli repair ...`) which runs the sandbox repair and compiler/replay verification loop locally on the developer's machine.
+## Evidence and safety
 
----
-
-## 7. Security & Guardrails
-- **SSRF Protections:** Validates URL schemes, rejects private/loopback IP addresses unless explicitly permitted in development mode.
-- **Source Sandbox:** Isolated disposable workspaces for git clones and patches (`packages/engine/src/source/sandbox.ts`).
-- **Secret Hygiene:** Environment variables, API keys, and credential patterns are actively stripped from execution environments and rejected from telemetry artifacts.
+See [final validation](FINAL_VALIDATION.md), [asset provenance](../submission-assets/README.md) and [deployment instructions](DEPLOYMENT.md). Live scan captures and recorded repair screenshots are labeled separately. No public deployment or finished video is claimed until those URLs are tested.

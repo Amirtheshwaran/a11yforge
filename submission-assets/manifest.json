@@ -1,0 +1,71 @@
+{
+  "capturedAt": "2026-10-30T13:15:58.265Z",
+  "source": "running-production-ui",
+  "captureRun": "exp-1793366127151-e96a89d8",
+  "recordedRepairRun": "2026-10-26T19-04-29-541Z-27affb",
+  "screenshots": [
+    {
+      "file": "screenshots/01-landing.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 299357,
+      "sha256": "70e2866cd0ab086bee71c3a4e27bd35273ee523ce6ef2e8c87f8be570c9fb341"
+    },
+    {
+      "file": "screenshots/02-live-results.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 332109,
+      "sha256": "cd8ad2f4296bff0011072fede5bd6c5444545f84910c1cc52753839e7f2977ff"
+    },
+    {
+      "file": "screenshots/03-show-me.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 437871,
+      "sha256": "49edae0b2db9ee79443941ea520c30e43f5792da0690d8421da62d27d3c72368"
+    },
+    {
+      "file": "screenshots/04-source-trace.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 139545,
+      "sha256": "0fab2a695d94fcd982ab709beefbd4eb4f9a052feff6da4a7ec2fbd101f6ee2b"
+    },
+    {
+      "file": "screenshots/05-first-fix-rejected.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 191516,
+      "sha256": "9a76baba0123cbdf5de97d0ddf6bf4c375b07bc2794d6bd407716881215c8c29"
+    },
+    {
+      "file": "screenshots/06-verified.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 150543,
+      "sha256": "f88f3a15dec1baaaa8f34cef00204942d1a449432850c10c4de3414fc6661ab4"
+    },
+    {
+      "file": "screenshots/07-mobile-demo.png",
+      "width": 390,
+      "height": 8540,
+      "bytes": 394177,
+      "sha256": "e596617c253a0a384d00976a26c2355ae10623470dfba69c696aa9e951dd701e"
+    },
+    {
+      "file": "screenshots/08-webgl-fallback.png",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 264012,
+      "sha256": "1e5cab5d3d2545681adef6abdff6258ddcb4040afd516f88c27b567cc41a5578"
+    },
+    {
+      "file": "screenshots/09-source-connection.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 187580,
+      "sha256": "f7e26ca17a43ade1e99c0ad673b408ad28abbc5d538b196e76268ae1ab5b9caa"
+    }
+  ]
+}
