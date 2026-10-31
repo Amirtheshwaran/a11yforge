@@ -1,6 +1,6 @@
 import type { ElementHighlight, ExplorationFinding, ExplorationRun, RunViewModel } from "@a11yforge/shared";
 
-export type TourKind = "overview" | "categories" | "finding" | "interaction" | "source" | "repair" | "rejection" | "revision" | "verification" | "summary";
+export type TourKind = "overview" | "page" | "categories" | "finding" | "interaction" | "source" | "repair" | "rejection" | "revision" | "verification" | "summary";
 export interface TourMarker { finding: ExplorationFinding; box: ElementHighlight; number: number }
 export interface TourFocusStep { label: string; box: ElementHighlight | null; failed: boolean }
 export interface TourSource { path: string; text: string }
@@ -18,6 +18,7 @@ export interface TourChapter {
   focusSteps: TourFocusStep[];
   source: TourSource | null;
   outcome: "unresolved" | "rejected" | "verified";
+  pageUrl: string | null;
 }
 export interface TourModel {
   id: string;
@@ -42,7 +43,7 @@ export function canFrameHighlight(box: ElementHighlight): boolean {
 }
 
 function chapter(input: Pick<TourChapter, "id" | "kind" | "title" | "eyebrow" | "body" | "imageUrl"> & Partial<TourChapter>): TourChapter {
-  return { facts: [], highlight: null, finding: null, markers: [], focusSteps: [], source: null, outcome: "unresolved", ...input };
+  return { facts: [], highlight: null, finding: null, markers: [], focusSteps: [], source: null, outcome: "unresolved", pageUrl: null, ...input };
 }
 
 /** Live projection accepts the real run only; recorded evidence is never a fallback. */
@@ -52,10 +53,19 @@ export function liveTourModel(
   human: (finding: ExplorationFinding) => { title: string; why: string },
 ): TourModel {
   const knownShots = new Set(run.screenshots);
+  const capturedPages = new Map<string, { pageUrl: string; screenshot: string; title: string }>();
+  for (const capture of run.pageCaptures ?? []) if (knownShots.has(capture.screenshot)) capturedPages.set(capture.pageUrl, capture);
+  // Older runs retain page provenance through their probes.
+  for (const probe of run.probeResults ?? []) {
+    const screenshot = probe.screenshots.find((name) => knownShots.has(name));
+    if (screenshot !== undefined && !capturedPages.has(probe.pageUrl)) capturedPages.set(probe.pageUrl, { pageUrl: probe.pageUrl, screenshot, title: "" });
+  }
   const rank = { critical: 0, serious: 1, moderate: 2, minor: 3, info: 4 };
   const problems = run.findings.filter((finding) => finding.category === "confirmed-failure" || finding.category === "automated-finding")
     .sort((a, b) => rank[a.severity] - rank[b.severity]);
-  const overviewShot = run.screenshots[0] ?? null;
+  const firstPage = capturedPages.values().next().value;
+  const measuredOverview = (run.probeResults ?? []).find((probe) => probe.probeId === "page-axe-scan" && probe.pageUrl === firstPage?.pageUrl)?.screenshots.find((name) => knownShots.has(name));
+  const overviewShot = measuredOverview ?? firstPage?.screenshot ?? run.screenshots[0] ?? null;
   const overviewUrl = overviewShot === null ? null : imageUrl(overviewShot);
   const untested = run.probeResults?.length === 0;
   const accessMessage = run.limitations.map((item) => item.message).join(" ");
@@ -78,7 +88,7 @@ export function liveTourModel(
       title: copy.title, eyebrow: `ISSUE ${String(index + 1).padStart(2, "0")} / ${finding.severity.toUpperCase()}`,
       body: copy.why, facts: [finding.category === "confirmed-failure" ? "Reproduced interaction failure" : "Automated accessibility finding",
         box === null ? "Visual location unavailable — see the recorded evidence." : `${boxes.length} measured ${boxes.length === 1 ? "element" : "elements"}`],
-      finding, imageUrl: shot === null ? null : imageUrl(shot), highlight: box,
+      finding, imageUrl: shot === null ? null : imageUrl(shot), highlight: box, pageUrl: finding.pageUrl,
       markers: markers.filter((marker) => marker.box.screenshot === shot), focusSteps,
     });
   });
@@ -88,13 +98,23 @@ export function liveTourModel(
       chapter({ id: "overview", kind: "overview", title: untested ? "Here’s where the check stopped." : "Your website. A closer look.", eyebrow: untested ? "LIVE WEBSITE SCAN / ACCESS LIMITED" : "LIVE WEBSITE SCAN / CAPTURED EVIDENCE",
         body: untested ? accessMessage || "The browser could not complete accessibility checks on this website." : `${problems.length} accessibility ${problems.length === 1 ? "issue" : "issues"} recorded across ${run.pagesVisited.length} ${run.pagesVisited.length === 1 ? "page" : "pages"}. Scroll to inspect what the browser found.`,
         facts: untested ? [overviewUrl === null ? "No page capture is available for this run." : "This capture shows the visible page only. Content beyond it was not tested."] : [],
-        imageUrl: overviewUrl, markers: overviewMarkers }),
+        imageUrl: overviewUrl, markers: overviewMarkers, pageUrl: firstPage?.pageUrl ?? run.target.entryUrl }),
       ...(problems.length === 0 ? [] : [chapter({ id: "categories", kind: "categories", title: "The barriers beneath the surface.", eyebrow: "REAL FINDINGS / REAL LOCATIONS",
-        body: "Start with the whole page. Then move into each problem, keeping the surrounding interface in view.", imageUrl: overviewUrl, markers: overviewMarkers })]),
+        body: "Start with the whole page. Then move into each problem, keeping the surrounding interface in view.", imageUrl: overviewUrl, markers: overviewMarkers, pageUrl: firstPage?.pageUrl ?? run.target.entryUrl })]),
+      ...[...capturedPages.values()].slice(1).map((capture, index) => {
+        const tested = run.probeResults.some((probe) => probe.pageUrl === capture.pageUrl && (probe.status === "passed" || probe.status === "failed"));
+        const pageProblems = problems.filter((finding) => finding.pageUrl === capture.pageUrl).length;
+        return chapter({ id: `page:${capture.pageUrl}`, kind: "page", title: capture.title || new URL(capture.pageUrl).hostname,
+          eyebrow: `CAPTURED PAGE ${String(index + 2).padStart(2, "0")}`, imageUrl: imageUrl(capture.screenshot), pageUrl: capture.pageUrl,
+          body: tested ? `${pageProblems} accessibility ${pageProblems === 1 ? "issue" : "issues"} recorded on this page. This capture comes from the same website check.` : "The browser captured this page, but its accessibility checks did not complete. This page remains untested.",
+          facts: [capture.pageUrl, ...run.limitations.filter((item) => item.pageUrl === capture.pageUrl).map((item) => item.message)],
+          markers: markers.filter((marker) => marker.box.screenshot === capture.screenshot),
+        });
+      }),
       ...issueChapters,
       chapter({ id: "summary", kind: "summary", title: untested ? "This website remains untested." : problems.length > 0 ? "Evidence before a fix." : "The checks are complete.", eyebrow: "SCAN SUMMARY",
         body: untested ? "Try a publicly accessible page. Pages behind sign-in need an authorized connection before their accessibility can be checked." : problems.length > 0 ? "These findings are unresolved. Connect source code from the detailed evidence to investigate a supported repair." : "No failures were reported by these checks. This is not a complete accessibility certification.",
-        facts: run.limitations.map((item) => item.message), imageUrl: overviewUrl, markers: overviewMarkers }),
+        facts: run.limitations.map((item) => item.message), imageUrl: overviewUrl, markers: overviewMarkers, pageUrl: firstPage?.pageUrl ?? run.target.entryUrl }),
     ],
   };
 }
@@ -118,7 +138,7 @@ export function recordedTourModel(
     && run.verification.primaryReplayPassed && run.verification.reverseReplayPassed && run.verification.axeBaselinePreserved;
   const focusSteps = run.focusTrace.map((step, index) => ({ label: step.accessibleName || step.role || `Focus stop ${index + 1}`, box: null, failed: !step.insideModal }));
   const chapters: TourChapter[] = [
-    chapter({ id: "overview", kind: "overview", title: home ? "See where your website is hard to use." : "Watch A11yForge find, reject, and repair a real accessibility failure.",
+    chapter({ id: "overview", kind: "overview", title: home ? "See where your website is hard to use." : "A real repair. From failure to proof.",
       eyebrow: "RECORDED REAL REPAIR / CONTROLLED TEST WEBSITE", body: "One website. One real failure. Follow the evidence from the first broken interaction to the verified repair.", imageUrl: shot(before) }),
     chapter({ id: "problem", kind: "finding", title: "The surface is only the beginning.", eyebrow: "01 / THE PROBLEM", body: "The dialog stays open, but keyboard focus can escape to the page behind it. The browser reproduced the failure before a repair was attempted.",
       facts: [run.finding.passedBefore ? "Original assertion passed" : "Original assertion failed"], imageUrl: shot(failure) }),

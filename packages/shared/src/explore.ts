@@ -298,6 +298,12 @@ export const ExplorationRunSchema = z.object({
   startedAt: z.string().min(1),
   finishedAt: z.string().nullable().default(null),
   error: z.string().nullable().default(null),
+  /** Page-level captures survive scanner failures and retain their actual URL. */
+  pageCaptures: z.array(z.object({
+    pageUrl: z.string().url(),
+    screenshot: z.string().min(1),
+    title: z.string(),
+  })).optional(),
 });
 
 export type ExplorationRun = z.infer<typeof ExplorationRunSchema>;

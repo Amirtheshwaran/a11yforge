@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { ForgeNav } from "@/components/forge-nav";
 import "./globals.css";
@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description:
     "A11yForge tests your website in a real browser, shows exactly where accessibility problems happen, and can repair supported issues.",
 };
+
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
 
 export default function RootLayout({
   children,

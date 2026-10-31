@@ -22,8 +22,14 @@ view the demo, record spatial evidence, or explore a website.
 - Source planes use the actual recorded diffs. They emerge from behind the
   website; rejection, revision, and proof retain the same physical composition.
 - Screenshot textures are loaded, decoded, and uploaded before revealing the
-  scene. Screenshot changes crossfade on the same object. Missing images or
-  WebGL failure retain real 2D evidence and chapter navigation.
+  scene. Screenshot changes crossfade on the same object. A bounded image-load
+  timeout and an outer error boundary switch failures to a CSS perspective
+  renderer using the same real captures, measured outlines, and chapter controls.
+- Full and lightweight 3D are selectable. Renderer handoff checks ownership of
+  the shared animation wake callback, so an old canvas cannot stop its successor.
+- One time-based progress filter controls camera and object poses directly.
+  Screenshot fitting uses the actual field of view and scene aspect ratio.
+  Blur filters and a second camera smoothing pass were removed.
 - High-frequency progress lives in refs. React updates only chapter selection
   and other coarse state. The renderer runs on demand, caps DPR at 1.5, reuses
   vectors, and adds no post-processing or dynamic shadows.
@@ -59,7 +65,8 @@ waits for DOM content rather than every dependent resource; the existing bounded
 stability check still runs before probes.
 
 A run without a capture does not start WebGL or report a graphics failure.
-Actual viewer failures retain the screenshot and provide a retry control.
+Viewer failures use the lightweight spatial renderer; the mode control can
+retry the full viewer.
 Finished scans and their evidence can be read from validated saved run artifacts
 after an API restart; interrupted scans are never resumed or marked complete.
 
@@ -68,16 +75,41 @@ sign-in redirects and HTTP errors, and confirm that the screenshot budget is
 honored. A fresh public Facebook run also captured its visible sign-in page and
 rendered it in the production 3D viewer. No protected content was accessed.
 
+## Page coverage and responsive layout
+
+Each usable page is captured before scanner execution. Page captures retain
+their actual URL and title in optional, backward-compatible run metadata. The
+existing screenshot budget reserves room for queued page overviews before
+allowing extra probe images. A scanner failure cannot discard the overview.
+Safe visible documents that exceed the navigation timeout can also be captured,
+but their checks remain explicitly incomplete. The request/redirect guard stays
+in force. Sites that never deliver content or require authentication cannot be
+promised complete coverage.
+
+The tour includes each registered captured page, including pages with no
+findings and visible HTTP error pages. Page selection and issue navigation use
+the same scroll timeline and retain page provenance; missing screenshots never
+become fabricated geometry.
+
+Below 1000px, the tour uses separate grid rows for the capture, scrollable copy,
+and 44px controls. Landscape phones use adjacent scene and copy columns. Inactive
+articles are hidden so their scrollbars cannot overlap the active chapter.
+The selected chapter stays in the horizontal navigation rail, and resize
+preserves tour progress. URL inputs use 16px text on mobile and a full-width
+submit button. Safe-area insets and reduced-motion controls are respected.
+
 ## Validation
 
 - `pnpm typecheck`: passed across workspaces.
 - `pnpm lint`: passed repository-wide.
 - `pnpm build`: passed across workspaces.
-- Web tests: 69 passed, including timeline reversal, evidence isolation,
+- Web tests: 76 passed, including timeline reversal, evidence isolation,
   verification gates, screenshot validity, replay provenance, and website
   address normalization.
-- Targeted engine tests: 16 passed across finding projection, keyboard focus
-  evidence, and anti-fixture-coupling suites.
+- Targeted engine tests: 20 passed across page capture, finding projection,
+  and anti-fixture-coupling suites. Capture tests include CSP-blocked scanning,
+  tight multi-page budgets, HTTP errors, sign-in walls, and partial navigation.
+- Exploration API tests: 7 passed, including saved evidence restoration.
 - Real product UI scan: `https://dequeuniversity.com/demo/mars/`, run
   `exp-1793385881031-2c08c414`; 12 accessibility findings on one tested page,
   with the actual scan's limitations retained. Its tour was checked against
@@ -85,10 +117,13 @@ rendered it in the production 3D viewer. No protected content was accessed.
 - Desktop browser checks covered the hero, reverse scrolling, source reveal,
   rejection, proof, manual issue jumps, rapid chapter changes, and reduced
   motion. One canvas remained present throughout chapter navigation.
-- The mobile layout was rendered in a real 390 × 844 iframe viewport and
-  inspected for page overflow and readable stacked content. The available
-  browser automation could read that iframe but could not deliver pointer or
-  keyboard actions to it, so mobile interaction automation remains a limitation.
+- Browser viewport checks covered 320 × 568, 390 × 844, 768 × 1024, and
+  844 × 390 layouts. These are desktop browser viewport checks, not physical
+  iOS/Android device certification. Mobile chapter controls, renderer switching,
+  page selection, and reduced-motion navigation were exercised directly.
+- New Mars run `exp-1793473827234-26e7f022` retained 12 findings and three
+  distinct page captures, including two linked HTTP 404 responses. Each page
+  was selectable without claiming the error pages had been accessibility-tested.
 - The reduced-motion execution path was checked through the tour control;
   changing the operating system preference was not emulated.
 - WebGL fallback was inspected after context loss during development. A forced

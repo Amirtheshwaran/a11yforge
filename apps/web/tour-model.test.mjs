@@ -54,6 +54,28 @@ describe("shared spatial tour evidence", () => {
       assert.equal(canFrameHighlight(candidate), isDrawableHighlight(candidate));
     }
   });
+  it("includes captured pages with no findings and keeps their own image and URL", () => {
+    const secondUrl = "https://example.com/about";
+    const model = render({ ...live, screenshots: ["capture.png", "second.png"], pageCaptures: [
+      { pageUrl: finding.pageUrl, screenshot: "capture.png", title: "Home" },
+      { pageUrl: secondUrl, screenshot: "second.png", title: "About" },
+      { pageUrl: "https://example.com/missing", screenshot: "unrecorded.png", title: "Missing" },
+    ], probeResults: [{ pageUrl: secondUrl, screenshots: ["second.png"], status: "passed" }] });
+    const page = model.chapters.find((item) => item.kind === "page");
+    assert.equal(page.title, "About");
+    assert.equal(page.imageUrl, "/live/second.png");
+    assert.deepEqual(page.facts, [secondUrl]);
+    assert.match(page.body, /0 accessibility issues/);
+    assert.equal(model.chapters.filter((item) => item.kind === "page").length, 1);
+    assert.equal(page.finding, null);
+  });
+  it("does not treat an independent page capture as a completed test", () => {
+    const model = render({ ...live, findings: [], probeResults: [], screenshots: ["capture.png", "wall.png"], pageCaptures: [
+      { pageUrl: finding.pageUrl, screenshot: "capture.png", title: "Home" },
+      { pageUrl: "https://example.com/sign-in", screenshot: "wall.png", title: "Sign in" },
+    ] });
+    assert.match(model.chapters.find((item) => item.kind === "page").body, /untested/);
+  });
 });
 
 describe("reversible tour timeline", () => {

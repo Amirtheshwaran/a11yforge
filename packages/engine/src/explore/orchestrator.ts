@@ -97,6 +97,7 @@ export async function runExploration(options: RunExplorationOptions): Promise<Ex
   const startedAt = new Date().toISOString();
   const runDir = join(options.runsDir, options.runId);
   await mkdir(runDir, { recursive: true });
+  const pageCaptures: NonNullable<ExplorationRun["pageCaptures"]> = [];
 
   const emit = (
     stage: ExplorationStage,
@@ -117,7 +118,7 @@ export async function runExploration(options: RunExplorationOptions): Promise<Ex
     partial: Omit<ExplorationRun, "stages"> & { stages?: ExplorationRun["stages"] },
     stages: ExplorationRun["stages"],
   ): Promise<ExplorationRun> => {
-    const run = ExplorationRunSchema.parse({ ...partial, stages });
+    const run = ExplorationRunSchema.parse({ ...partial, stages, pageCaptures });
     await writeFile(join(runDir, "exploration.json"), `${JSON.stringify(run, null, 2)}\n`, "utf8");
     return run;
   };
@@ -173,6 +174,7 @@ export async function runExploration(options: RunExplorationOptions): Promise<Ex
   const limitations: ExplorationLimitation[] = [];
   const screenshotNames: string[] = [];
   let screenshotCounter = 0;
+  let reservedCaptures = 0;
   const doneStages: ExplorationStage[] = [];
 
   let browser: Browser | null = null;
@@ -198,10 +200,12 @@ export async function runExploration(options: RunExplorationOptions): Promise<Ex
     const page = await context.newPage();
 
     const captureScreenshot = async (
-      _label: string,
+      label: string,
       highlight: { x: number; y: number; width: number; height: number } | null = null,
     ): Promise<string | null> => {
       if (screenshotNames.length >= policy.maxScreenshots) return null;
+      if (label !== "page-overview" && screenshotNames.length >= policy.maxScreenshots - reservedCaptures) return null;
+      if (outOfTime()) return null;
       const name = `screenshot-${screenshotCounter}.png`;
       screenshotCounter += 1;
       try {
@@ -221,21 +225,29 @@ export async function runExploration(options: RunExplorationOptions): Promise<Ex
             document.body.appendChild(overlay);
           }, highlight);
         }
-        await page.screenshot({ path: join(runDir, name) });
-        await page.evaluate(() => {
-          document.querySelector('[data-a11yforge-highlight="true"]')?.remove();
-        }).catch(() => undefined);
+        await page.screenshot({ path: join(runDir, name), timeout: Math.min(5000, Math.max(1, deadline - Date.now())) });
         screenshotNames.push(name);
         return name;
       } catch {
+        if (label === "page-overview") limitations.push({ code: "capture-failed", message: "The page opened, but its visual capture could not finish. Other recorded checks remain available.", pageUrl: page.url() });
         return null;
+      } finally {
+        if (highlight !== null) await page.evaluate(() => {
+          document.querySelector('[data-a11yforge-highlight="true"]')?.remove();
+        }).catch(() => undefined);
       }
+    };
+
+    const capturePage = async (pageUrl: string): Promise<void> => {
+      const screenshot = await captureScreenshot("page-overview");
+      if (screenshot !== null) pageCaptures.push({ pageUrl, screenshot, title: await page.title().catch(() => "") });
     };
 
     const queue: string[] = [validated.normalizedUrl];
     const seen = new Set<string>([validated.normalizedUrl]);
 
     while (queue.length > 0 && pagesVisited.length < policy.maxPages) {
+      reservedCaptures = 0;
       checkCancelled();
       if (outOfTime()) {
         limitations.push({
@@ -251,6 +263,8 @@ export async function runExploration(options: RunExplorationOptions): Promise<Ex
       emit(isFirst ? "opening" : "exploring", "running", isFirst ? `Opening ${pageUrl}.` : `Exploring ${pageUrl}.`);
 
       let responseStatus: number | null = null;
+      let incompleteNavigation = false;
+      const previousUrl = page.url();
       try {
         const response = await page.goto(pageUrl, {
           waitUntil: "domcontentloaded",
@@ -260,13 +274,15 @@ export async function runExploration(options: RunExplorationOptions): Promise<Ex
       } catch (error) {
         const reason = error instanceof ExplorationCancelledError ? "cancelled" : "unreachable";
         if (reason === "cancelled") throw error;
+        incompleteNavigation = error instanceof Error && error.name === "TimeoutError" && page.url() !== previousUrl
+          && await page.evaluate(() => document.readyState !== "loading" && document.body !== null && document.body.childElementCount > 0).catch(() => false);
         limitations.push({
           code: "navigation-failed",
           message: `Could not load ${pageUrl}. The site may be down, blocking automated browsers, or unreachable from here.`,
           pageUrl,
         });
         emit("exploring", "failed", `Could not load ${pageUrl}.`);
-        continue;
+        if (!incompleteNavigation) continue;
       }
 
       // Every redirect hop already passed the request guard; revalidate the
@@ -278,9 +294,13 @@ export async function runExploration(options: RunExplorationOptions): Promise<Ex
         emit("exploring", "failed", "That page redirected somewhere unsafe, so it was skipped.");
         continue;
       }
+      if (incompleteNavigation) {
+        await capturePage(finalUrl);
+        continue; // Visible partial content is evidence, not a completed accessibility test.
+      }
       if (responseStatus !== null && responseStatus >= 400) {
         // Preserve what the server actually displayed, without testing its error page.
-        await captureScreenshot("page-unavailable");
+        await capturePage(finalUrl);
         limitations.push({
           code: "page-unavailable",
           message: `The server answered ${responseStatus} for ${finalUrl}, so there was no usable page to test.`,
@@ -291,6 +311,8 @@ export async function runExploration(options: RunExplorationOptions): Promise<Ex
 
       await waitForStablePage(page, policy.navigationTimeoutMs);
       checkCancelled();
+      // Capture independently of axe and interaction probes, which can fail or time out.
+      await capturePage(finalUrl);
 
       if (!doneStages.includes("opening")) {
         doneStages.push("opening");
@@ -303,7 +325,6 @@ export async function runExploration(options: RunExplorationOptions): Promise<Ex
       if (passwordFields > 0 && finalUrl !== pageUrl) {
         // A visible sign-in page is still valid visual evidence for the tour.
         // Capture it before stopping; it is never a finding about private content.
-        await captureScreenshot("authentication-required");
         limitations.push({
           code: "authentication-required",
           message: "This site redirected to a sign-in page. A11yForge does not sign in or guess credentials, so testing stopped at the login wall.",
@@ -333,6 +354,7 @@ export async function runExploration(options: RunExplorationOptions): Promise<Ex
       }
 
       // Probes run against live state, most observational first.
+      reservedCaptures = Math.min(queue.length, Math.max(0, policy.maxPages - pagesVisited.length));
       const probeCtx: ProbeContext = {
         targetId: target.targetId,
         page,

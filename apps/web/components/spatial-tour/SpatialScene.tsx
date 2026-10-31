@@ -7,6 +7,7 @@ import * as THREE from "three";
 import type { TourChapter, TourModel } from "../../lib/tour-model";
 import { tourSegment } from "../../lib/tour-model";
 import { highlightToPlane } from "../../lib/scene-model";
+import { fitCaptureDistance, followProgress } from "../../lib/tour-motion";
 
 export interface TourMotion {
   target: number;
@@ -43,7 +44,7 @@ interface Frame { x: number; y: number; distance: number; rotationX: number; rot
 function frameFor(chapter: TourChapter, texture: THREE.Texture | undefined, aspect: number, mobile: boolean): Frame {
   const img = texture?.image as { width: number; height: number } | undefined;
   const height = img === undefined ? 5.625 : 10 * img.height / img.width;
-  const home = Math.max(height * 2, 10 / Math.max(0.35, aspect * (mobile ? 0.61 : 0.4))) * (mobile ? 1.08 : 1);
+  const home = fitCaptureDistance(10, height, aspect, mobile ? 43 : 40, mobile ? 0.88 : 0.52, mobile ? 0.82 : 0.68);
   const hasSource = chapter.source !== null ? 1 : 0;
   let x = 0, y = 0, distance = home;
   if (chapter.highlight !== null) {
@@ -63,7 +64,7 @@ function frameFor(chapter: TourChapter, texture: THREE.Texture | undefined, aspe
       distance = Math.min(home, Math.max(7, (maxY - minY) * 2.3, (maxX - minX) / Math.max(0.5, aspect * 0.37)));
     }
   }
-  if (hasSource > 0) distance = Math.max(home, mobile ? 22 : 17.5);
+  if (hasSource > 0) distance = fitCaptureDistance(15.8, Math.max(height, 5), aspect, mobile ? 43 : 40, mobile ? 0.9 : 0.67, mobile ? 0.82 : 0.68);
   return {
     x, y, distance, height, source: hasSource,
     rotationX: mobile ? 0 : chapter.kind === "overview" ? -0.035 : 0.018,
@@ -144,10 +145,9 @@ function CameraRig({ model, motion, textures, root, source, frontA, frontB, fram
   onFrame: (from: number, to: number, mix: number) => void;
 }): null {
   const { camera, size, invalidate } = useThree();
-  const mobile = size.width < 760;
+  const mobile = size.width < 1000;
   const aspect = size.width / Math.max(size.height, 1);
   const poses = useMemo(() => model.chapters.map((chapter) => frameFor(chapter, chapter.imageUrl === null ? undefined : textures.get(chapter.imageUrl), aspect, mobile)), [model, textures, aspect, mobile]);
-  const lookAt = useMemo(() => new THREE.Vector3(), []);
   const destination = useMemo(() => new THREE.Vector3(), []);
   const target = useMemo(() => new THREE.Vector3(), []);
   const center = useMemo(() => new THREE.Vector3(), []);
@@ -155,16 +155,13 @@ function CameraRig({ model, motion, textures, root, source, frontA, frontB, fram
   const segment = useRef({ from: 0, to: 0, mix: 0 });
   useEffect(() => {
     motion.current.wake = invalidate; invalidate();
-    return () => { motion.current.wake = null; };
+    return () => { if (motion.current.wake === invalidate) motion.current.wake = null; };
   }, [motion, invalidate]);
   useFrame((state, delta) => {
     const rig = root.current;
     if (rig === null) return;
-    const dt = Math.min(0.05, Math.max(0.001, delta));
     const snap = motion.current.reduced || !initialized.current;
-    const damp = snap ? 1 : 1 - Math.exp(-9 * dt);
-    motion.current.current += (motion.current.target - motion.current.current) * damp;
-    if (Math.abs(motion.current.target - motion.current.current) < 0.0001) motion.current.current = motion.current.target;
+    motion.current.current = followProgress(motion.current.current, motion.current.target, delta, snap);
     const { from, to, mix } = tourSegment(motion.current.current, poses.length, segment.current);
     const a = poses[from], b = poses[to];
     if (a === undefined || b === undefined) return;
@@ -172,21 +169,21 @@ function CameraRig({ model, motion, textures, root, source, frontA, frontB, fram
     const distance = lerp(a.distance, b.distance, mix);
     const sourceAmount = lerp(a.source, b.source, mix);
     const height = lerp(a.height, b.height, mix);
-    rig.rotation.x += (lerp(a.rotationX, b.rotationX, mix) - rig.rotation.x) * damp;
-    rig.rotation.y += (lerp(a.rotationY, b.rotationY, mix) - rig.rotation.y) * damp;
-    rig.position.x += (-sourceAmount * 1.8 - rig.position.x) * damp;
+    rig.rotation.x = lerp(a.rotationX, b.rotationX, mix);
+    rig.rotation.y = lerp(a.rotationY, b.rotationY, mix);
+    rig.position.x = -sourceAmount * 1.8;
     rig.updateMatrixWorld();
     center.set(lerp(a.x, b.x, mix), lerp(a.y, b.y, mix), 0).applyMatrix4(rig.matrixWorld);
     // Reserve a stable editorial lane. The website stays recognizable beside its explanation.
     const overviewAmount = Math.max(0, 1 - motion.current.current);
     const offset = mobile ? 0 : lerp(0.21, -0.21, overviewAmount) * distance * aspect * 0.65;
-    target.copy(center); target.x += offset; target.y += mobile ? 0 : overviewAmount * 0.25;
+    target.copy(center); target.x += offset + sourceAmount * (mobile ? 1.9 : 1.1); target.y += mobile ? 0 : overviewAmount * 0.25;
     destination.copy(target); destination.z += distance;
     destination.y += Math.sin(mix * Math.PI) * (mobile ? 0 : 0.18);
-    camera.position.lerp(destination, damp); lookAt.lerp(target, damp); camera.lookAt(lookAt);
+    camera.position.copy(destination); camera.lookAt(target);
     const perspective = camera as THREE.PerspectiveCamera;
     const desiredFov = mobile ? 43 : 40;
-    perspective.fov += (desiredFov - perspective.fov) * damp; perspective.updateProjectionMatrix();
+    if (perspective.fov !== desiredFov) { perspective.fov = desiredFov; perspective.updateProjectionMatrix(); }
     if (frontA.current !== null) frontA.current.scale.y = height;
     if (frontB.current !== null) frontB.current.scale.y = height;
     if (frame.current !== null) frame.current.scale.y = height / 5.625;
@@ -198,9 +195,7 @@ function CameraRig({ model, motion, textures, root, source, frontA, frontB, fram
     }
     onFrame(from, to, mix);
     motion.current.present?.(motion.current.current);
-    const moving = camera.position.distanceToSquared(destination) > 0.00001 || lookAt.distanceToSquared(target) > 0.00001
-      || Math.abs(motion.current.target - motion.current.current) > 0.00001
-      || Math.abs(rig.rotation.y - lerp(a.rotationY, b.rotationY, mix)) > 0.00001;
+    const moving = Math.abs(motion.current.target - motion.current.current) > 0.00001;
     initialized.current = true;
     if (moving) state.invalidate();
   });
@@ -263,7 +258,20 @@ function Contents({ model, motion, textures, codes, onSelect }: Omit<Props, "onF
   </>;
 }
 
-export function SpatialScene(props: Props): React.JSX.Element {
+function RendererHealth({ textures, codes, onReady, onFail }: { textures: ReadonlyMap<string, THREE.Texture>; codes: ReadonlyMap<string, THREE.Texture>; onReady: () => void; onFail: () => void }): null {
+  const { gl, invalidate } = useThree();
+  useEffect(() => {
+    const lost = (event: Event): void => { event.preventDefault(); onFail(); };
+    gl.domElement.addEventListener("webglcontextlost", lost);
+    for (const texture of [...textures.values(), ...codes.values()]) gl.initTexture(texture);
+    invalidate();
+    const frame = requestAnimationFrame(onReady);
+    return () => { cancelAnimationFrame(frame); gl.domElement.removeEventListener("webglcontextlost", lost); };
+  }, [gl, textures, codes, onReady, onFail, invalidate]);
+  return null;
+}
+
+function SceneContent(props: Props): React.JSX.Element {
   const [textures, setTextures] = useState<ReadonlyMap<string, THREE.Texture> | null>(null);
   const codes = useMemo(() => {
     const map = new Map<string, THREE.Texture>();
@@ -276,6 +284,8 @@ export function SpatialScene(props: Props): React.JSX.Element {
     const loaded: THREE.Texture[] = [];
     const urls = [...new Set(props.model.chapters.flatMap((chapter) => chapter.imageUrl === null ? [] : [chapter.imageUrl]))];
     if (urls.length === 0) { props.onFail(); return; }
+    // A stalled image must not hold the entire tour in its loading state forever.
+    const timeout = window.setTimeout(() => { if (live) props.onFail(); }, 8000);
     const loader = new THREE.TextureLoader(); loader.setCrossOrigin("anonymous");
     void Promise.all(urls.map(async (url) => {
       const texture = await loader.loadAsync(url);
@@ -286,16 +296,20 @@ export function SpatialScene(props: Props): React.JSX.Element {
       texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4;
       return [url, texture] as const;
     })).then((entries) => {
+      window.clearTimeout(timeout);
       if (!live) { for (const texture of loaded) texture.dispose(); return; }
       setTextures(new Map(entries));
-    }).catch(() => { if (live) props.onFail(); });
-    return () => { live = false; for (const texture of loaded) texture.dispose(); };
+    }).catch(() => { window.clearTimeout(timeout); if (live) props.onFail(); });
+    return () => { live = false; window.clearTimeout(timeout); for (const texture of loaded) texture.dispose(); };
   }, [props.model, props.onReady, props.onFail]);
   if (textures === null) return <div className="tour-loading" role="status">Preparing the recorded website…</div>;
-  return <SceneBoundary onFail={props.onFail}>
-    <Canvas frameloop="demand" dpr={[1, 1.5]} camera={{ position: [0, 0, 16], fov: 40, near: 0.1, far: 150 }}
-      gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }} onCreated={({ gl }) => { for (const texture of [...textures.values(), ...codes.values()]) gl.initTexture(texture); props.onReady(); gl.domElement.addEventListener("webglcontextlost", props.onFail, { once: true }); }}>
+  return <Canvas frameloop="demand" dpr={[1, window.matchMedia("(max-width: 999px)").matches ? 1.25 : 1.5]} camera={{ position: [0, 0, 16], fov: 40, near: 0.1, far: 150 }}
+      gl={{ antialias: true, alpha: false, powerPreference: "default" }}>
+      <RendererHealth textures={textures} codes={codes} onReady={props.onReady} onFail={props.onFail} />
       <Contents model={props.model} motion={props.motion} textures={textures} codes={codes} onSelect={props.onSelect} />
-    </Canvas>
-  </SceneBoundary>;
+    </Canvas>;
+}
+
+export function SpatialScene(props: Props): React.JSX.Element {
+  return <SceneBoundary onFail={props.onFail}><SceneContent {...props} /></SceneBoundary>;
 }

@@ -7,13 +7,15 @@ import type { TourModel } from "../../lib/tour-model";
 import type { TourMotion } from "./SpatialScene";
 import { usePrefersReducedMotion } from "../scene/use-reduced-motion";
 import { groupOf, PROBLEM_GROUPS } from "../../lib/human-copy";
-import { EvidenceViewer } from "../evidence-viewer";
+import { CaptureScene } from "./CaptureScene";
 
 const Scene = dynamic(() => import("./SpatialScene").then((module) => module.SpatialScene), { ssr: false });
 
 /** One persistent renderer and one scroll timeline for both recorded and live evidence. */
 export function SpatialTour({ model, id = "spatial-tour" }: { model: TourModel; id?: string }): React.JSX.Element {
   const root = useRef<HTMLElement>(null);
+  const sticky = useRef<HTMLDivElement>(null);
+  const chapterNav = useRef<HTMLElement>(null);
   const panels = useRef<(HTMLElement | null)[]>([]);
   const rail = useRef<HTMLProgressElement>(null);
   const motion = useRef<TourMotion>({ target: 0, current: 0, reduced: false, wake: null, present: null });
@@ -23,8 +25,11 @@ export function SpatialTour({ model, id = "spatial-tour" }: { model: TourModel; 
   const [active, setActive] = useState(0);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [lightweight, setLightweight] = useState(false);
   const [sceneAttempt, setSceneAttempt] = useState(0);
   const hasCapture = model.chapters.some((item) => item.imageUrl !== null);
+  const useCaptureScene = hasCapture && (failed || lightweight);
+  const presented = hasCapture && (ready || useCaptureScene);
   const lastActive = useRef(0);
   const seek = useRef<((progress: number) => void) | null>(null);
   const onReady = useCallback(() => setReady(true), []);
@@ -35,7 +40,7 @@ export function SpatialTour({ model, id = "spatial-tour" }: { model: TourModel; 
     const element = root.current;
     if (element === null) return;
     const rect = element.getBoundingClientRect();
-    const distance = Math.max(1, rect.height - window.innerHeight + 58);
+    const distance = Math.max(1, rect.height - (sticky.current?.offsetHeight ?? window.innerHeight - 58));
     const bounded = Math.max(0, Math.min(count - 1, index));
     window.scrollTo({ top: window.scrollY + rect.top - 58 + distance * bounded / Math.max(1, count - 1), behavior: reduced ? "instant" : "smooth" });
   }, [count, reduced]);
@@ -55,8 +60,8 @@ export function SpatialTour({ model, id = "spatial-tour" }: { model: TourModel; 
         if (panel === null) return;
         const children = Array.from(panel.querySelectorAll<HTMLElement>("[data-tour-copy]"));
         children.forEach((child, order) => {
-          if (index > 0) timeline?.add(child, { opacity: [0, 1], y: [20, 0], filter: ["blur(2px)", "blur(0px)"], duration: 340, ease: "outExpo" }, index * 1000 - 380 + order * 28);
-          if (index < count - 1) timeline?.add(child, { opacity: [1, 0], y: [0, -16], filter: ["blur(0px)", "blur(2px)"], duration: 260, ease: "inOutQuad" }, index * 1000 + 300 + order * 18);
+          if (index > 0) timeline?.add(child, { opacity: [0, 1], y: [12, 0], duration: 320, ease: "outCubic" }, index * 1000 - 420 + Math.min(order, 3) * 16);
+          if (index < count - 1) timeline?.add(child, { opacity: [1, 0], y: [0, -10], duration: 240, ease: "inOutQuad" }, index * 1000 + 320 + Math.min(order, 3) * 12);
         });
       });
       seek.current = (progress) => timeline?.seek(progress * 1000);
@@ -79,33 +84,50 @@ export function SpatialTour({ model, id = "spatial-tour" }: { model: TourModel; 
       raf = 0;
       const rect = root.current?.getBoundingClientRect();
       if (rect === undefined) return;
-      const distance = Math.max(1, rect.height - window.innerHeight + 58);
+      const distance = Math.max(1, rect.height - (sticky.current?.offsetHeight ?? window.innerHeight - 58));
       const progress = Math.max(0, Math.min(1, (58 - rect.top) / distance)) * Math.max(count - 1, 1);
       motion.current.target = progress;
-      if (failed || !ready) { motion.current.current = progress; motion.current.present?.(progress); }
+      if (!presented) { motion.current.current = progress; motion.current.present?.(progress); }
       motion.current.wake?.();
     };
     const schedule = (): void => { if (raf === 0) raf = requestAnimationFrame(measure); };
-    window.addEventListener("scroll", schedule, { passive: true }); window.addEventListener("resize", schedule);
+    const resized = (): void => {
+      const rect = root.current?.getBoundingClientRect();
+      const height = sticky.current?.offsetHeight ?? window.innerHeight - 58;
+      if (rect !== undefined && rect.top <= 58 && rect.bottom >= height + 58) {
+        const distance = Math.max(1, rect.height - height);
+        window.scrollTo({ top: window.scrollY + rect.top - 58 + distance * motion.current.target / Math.max(1, count - 1), behavior: "instant" });
+      }
+      schedule();
+    };
+    window.addEventListener("scroll", schedule, { passive: true }); window.addEventListener("resize", resized);
     const resize = new ResizeObserver(schedule); if (root.current !== null) resize.observe(root.current);
     measure();
-    return () => { cancelAnimationFrame(raf); resize.disconnect(); window.removeEventListener("scroll", schedule); window.removeEventListener("resize", schedule); };
-  }, [count, failed, ready]);
+    return () => { cancelAnimationFrame(raf); resize.disconnect(); window.removeEventListener("scroll", schedule); window.removeEventListener("resize", resized); };
+  }, [count, presented]);
+
+  useEffect(() => {
+    const nav = chapterNav.current;
+    const button = nav?.querySelector<HTMLButtonElement>('[aria-current="step"]');
+    if (nav !== null && button != null) nav.scrollTo({ left: button.offsetLeft - nav.offsetLeft - nav.clientWidth / 2 + button.offsetWidth / 2, behavior: reduced ? "instant" : "smooth" });
+    panels.current[active]?.scrollTo({ top: 0, behavior: "instant" });
+  }, [active, reduced]);
 
   const categories = [...new Set(model.chapters.flatMap((item) => item.finding === null ? [] : [groupOf(item.finding)]))];
   if (chapter === undefined) return <p>No recorded tour chapters are available.</p>;
-  return <section ref={root} id={id} className="spatial-tour" aria-label={`${model.label} spatial tour`} style={{ "--tour-chapters": count } as React.CSSProperties} data-ready={ready && !failed} data-reduced={reduced}>
+  const pageChapters = model.chapters.map((item, index) => ({ item, index })).filter(({ item }) => item.kind === "overview" || item.kind === "page");
+  return <section ref={root} id={id} className="spatial-tour" aria-label={`${model.label} spatial tour`} style={{ "--tour-chapters": count } as React.CSSProperties} data-ready={presented} data-renderer={useCaptureScene ? "css" : hasCapture ? "webgl" : "missing"} data-reduced={reduced}>
     <a className="skip-link" href={`#${id}-end`}>Skip spatial tour</a>
-    <div className="tour-sticky">
-      <div className="tour-topline"><span><i aria-hidden="true" />{model.label}</span><span>{model.target}</span></div>
+    <div ref={sticky} className="tour-sticky">
+      <div className="tour-topline"><span><i aria-hidden="true" />{model.label}</span><span title={model.target}>{model.target}</span></div>
       <div className="tour-stage" aria-label="Captured website in 3D">
-        {(!ready || failed) && <div className="tour-capture-fallback">
+        {!presented && <div className="tour-capture-fallback">
           {chapter.imageUrl !== null ? <img src={chapter.imageUrl} alt="Recorded website capture" /> : <p>No page capture is available for this run.</p>}
-          <span role="status">{!hasCapture ? "The browser could not capture this site. Review the access limitation and try a public page." : failed ? "The 3D viewer could not load. The captured page and evidence remain available." : "Preparing the website for inspection…"}</span>
-          {hasCapture && failed && <button type="button" onClick={() => { setReady(false); setFailed(false); setSceneAttempt((value) => value + 1); }}>Retry 3D viewer</button>}
+          <span role="status">{!hasCapture ? "The browser could not capture this site. Review the access limitation and try a public page." : "Preparing the website for inspection…"}</span>
           {!hasCapture && <Link href="/#check-site">Check a public page</Link>}
         </div>}
-        {hasCapture && !failed && <div className="tour-webgl" aria-hidden="true"><Scene key={sceneAttempt} model={model} motion={motion} onReady={onReady} onFail={onFail} onSelect={selectFinding} /></div>}
+        {useCaptureScene && <CaptureScene model={model} motion={motion} />}
+        {hasCapture && !failed && !lightweight && <div className="tour-webgl" aria-hidden="true"><Scene key={sceneAttempt} model={model} motion={motion} onReady={onReady} onFail={onFail} onSelect={selectFinding} /></div>}
       </div>
       <div className="tour-copy-scrim" aria-hidden="true" />
       {model.chapters.map((item, index) => <article key={item.id} ref={(element) => { panels.current[index] = element; }} className={`tour-copy tour-copy-${item.kind}`} data-active={active === index} aria-hidden={active !== index} inert={active !== index}>
@@ -117,12 +139,15 @@ export function SpatialTour({ model, id = "spatial-tour" }: { model: TourModel; 
         {item.kind === "categories" && <div data-tour-copy className="tour-category-controls" role="group" aria-label="Finding categories">{categories.map((category) => <button type="button" key={category} onClick={() => goTo(model.chapters.findIndex((candidate) => candidate.finding !== null && groupOf(candidate.finding) === category))}>{PROBLEM_GROUPS[category].heading}</button>)}</div>}
         {index === 0 && <button data-tour-copy className="tour-scroll-hint" type="button" onClick={() => goTo(1)}><span aria-hidden="true">↓</span>{model.label === "Live website scan" ? model.chapters.some((item) => item.finding !== null) ? "Explore the problems" : "Review the check" : "Scroll to explore"}</button>}
         {item.finding !== null && <div data-tour-copy className="tour-finding-actions"><Link href={`/connect?run=${encodeURIComponent(model.id)}&finding=${encodeURIComponent(item.finding.findingId)}`}>How do I fix this? <span aria-hidden="true">↗</span></Link></div>}
-        {failed && item.highlight !== null && item.imageUrl !== null && <div data-tour-copy><EvidenceViewer src={item.imageUrl} alt="Measured problem location in the website capture" highlights={[item.highlight]} selectedIndex={0} onSelect={() => undefined} /></div>}
       </article>)}
       <div className="tour-bottom">
+        <div className="tour-view-controls">
+          {pageChapters.length > 1 && <label>Page <select aria-label="Captured pages" value={pageChapters.find(({ item }) => item.pageUrl === chapter.pageUrl)?.index ?? 0} onChange={(event) => goTo(Number(event.target.value))}>{pageChapters.map(({ item, index }, pageIndex) => <option key={item.id} value={index}>{pageIndex + 1}. {index === 0 ? "First page" : item.title}</option>)}</select></label>}
+          {hasCapture && <button type="button" aria-pressed={useCaptureScene} onClick={() => { if (useCaptureScene) { setFailed(false); setReady(false); setLightweight(false); setSceneAttempt((value) => value + 1); } else setLightweight(true); }}>{useCaptureScene ? "Lightweight 3D" : "Full 3D"}<span aria-hidden="true"> ⇄</span></button>}
+        </div>
         <div className="tour-position"><span>SCROLL TO INSPECT</span><span>{String(active + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}</span></div>
         <progress ref={rail} max={1} value={0} aria-label="Spatial tour progress" />
-        <nav className="tour-chapter-nav" aria-label="Tour chapters">{model.chapters.map((item, index) => <button key={item.id} type="button" onClick={() => goTo(index)} aria-current={active === index ? "step" : undefined}><span>{String(index + 1).padStart(2, "0")}</span>{item.kind === "finding" && item.finding !== null ? `Issue ${model.chapters.slice(0, index + 1).filter((entry) => entry.finding !== null).length}` : item.kind === "rejection" ? "Rejected" : item.kind === "verification" ? "Proof" : item.kind === "interaction" ? "Interaction" : item.kind === "overview" ? "Website" : item.kind.charAt(0).toUpperCase() + item.kind.slice(1)}</button>)}</nav>
+        <nav ref={chapterNav} className="tour-chapter-nav" aria-label="Tour chapters">{model.chapters.map((item, index) => <button key={item.id} type="button" onClick={() => goTo(index)} aria-current={active === index ? "step" : undefined}><span>{String(index + 1).padStart(2, "0")}</span>{item.kind === "finding" && item.finding !== null ? `Issue ${model.chapters.slice(0, index + 1).filter((entry) => entry.finding !== null).length}` : item.kind === "rejection" ? "Rejected" : item.kind === "verification" ? "Proof" : item.kind === "interaction" ? "Interaction" : item.kind === "overview" ? "Website" : item.kind === "page" ? item.eyebrow.replace("CAPTURED ", "") : item.kind.charAt(0).toUpperCase() + item.kind.slice(1)}</button>)}</nav>
         <div className="tour-step-controls"><button type="button" disabled={active === 0} onClick={() => goTo(active - 1)} aria-label="Previous tour chapter">← Previous</button><button type="button" disabled={systemReduced} aria-pressed={reduced} onClick={() => setUserReduced((value) => !value)} aria-label="Reduce tour motion">{reduced ? "Reduced motion on" : "Reduce motion"}</button><button type="button" disabled={active === count - 1} onClick={() => goTo(active + 1)} aria-label="Next tour chapter">Next →</button></div>
       </div>
     </div>
