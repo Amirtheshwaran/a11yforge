@@ -68,8 +68,16 @@ Browser automation with SSRF-guarded targets. Evidence provenance, in which ever
 ## Links
 
 - Repository: https://github.com/Amirtheshwaran/a11yforge
-- Public deployment: **PENDING.** Not deployed yet.
-- Demo video: **PENDING.** The file is ready at `submission-assets/video/a11yforge-demo.mp4`, but it needs hosting.
+- Public deployment: **PENDING.** Not deployed yet. Do not enter a URL until it has been tested. If the form requires one, stop and deploy first.
+- Demo video: https://cdn.jsdelivr.net/gh/Amirtheshwaran/a11yforge@513704cecfe59f075cdd52f5429354c8f3bc7011/submission-assets/video/a11yforge-demo.mp4
+
+The video link was checked on 1 November 2026 without signing in: it plays and seeks in a browser (2:45, 1920 × 1080), and the downloaded bytes match the committed file's SHA-256. It is a direct file link, not a video platform. If the form accepts only hosts such as YouTube, Vimeo or Loom, upload `submission-assets/video/a11yforge-demo.mp4` there and use that link instead. GitHub's own file view does not play this video, so do not use a `github.com` link for it.
+
+## How to try it
+
+For use only while no public deployment exists:
+
+Watch the demo video. To run it, use Node.js 22.18+ and pnpm 10.34.9: clone the repository, run `pnpm install --frozen-lockfile`, `pnpm --filter @a11yforge/engine exec playwright install chromium`, `pnpm build` and `pnpm start`, then open http://localhost:3000. Website scans, the spatial tour and the recorded repair need no API key.
 
 ## Known limitations
 
@@ -85,6 +93,6 @@ Amirtheshwaran Navaneethakrishnan (solo, per the Git history). **The entrant mus
 [ ] Entrant personally confirmed waiver eligibility
 [ ] Entrant confirmed no other human materially contributed
 [ ] Fields and character limits checked against the signed-in portal
-[ ] Public deployment URL tested and filled in
-[ ] Video hosted, playable while signed out, and filled in
+[ ] Public deployment URL tested and filled in, or confirmed not required by the form
+[x] Video link plays while signed out (recheck it if the form requires another host)
 ```

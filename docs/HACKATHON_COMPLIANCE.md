@@ -20,7 +20,7 @@ public pages above and may be in the sign-in-only portal. They are treated as bi
 | New work only, 26 October to 4 November | See below | Entrant's materials |
 | Judges must be able to identify hackathon contributions | See below | Entrant's materials |
 | Public repository | Met | Entrant's materials |
-| Demo video, maximum 3 minutes | Video is 2:45; not yet hosted | Entrant's materials |
+| Demo video, maximum 3 minutes | Video is 2:45, with a public link; accepted hosts unconfirmed | Entrant's materials |
 | Not a medical, RAG, image-analysis, education, job-screening, nutrition, personality or sports project | Met: software engineering accessibility | Entrant's materials |
 
 ## New-work period
@@ -62,7 +62,12 @@ contributor. There are no co-author trailers. AI tools are development assistanc
 
 [`submission-assets/video/a11yforge-demo.mp4`](../submission-assets/video/a11yforge-demo.mp4) runs
 2:45 at 1080p. It uses real app footage and a Windows text-to-speech voice, and labels the repair as
-recorded. Where it must be hosted is unconfirmed, and uploading needs the entrant's account.
+recorded.
+
+[Public link](https://cdn.jsdelivr.net/gh/Amirtheshwaran/a11yforge@513704cecfe59f075cdd52f5429354c8f3bc7011/submission-assets/video/a11yforge-demo.mp4):
+checked on 1 November 2026 without signing in. It plays and seeks in a browser, and its bytes match
+the committed file's SHA-256. Whether the portal accepts a direct file link is unconfirmed. Uploading
+to a video platform would need the entrant's account.
 
 ## Theme
 
@@ -90,9 +95,21 @@ directly. Baseten and open-weight inference are not claimed.
 
 ## Deployment
 
-No public deployment exists yet. Images build and pass the smoke test in [CI](../.github/workflows/ci.yml),
-and [`deploy/huggingface`](../deploy/huggingface) is ready. Hosting needs the entrant's account. See
-[deployment](DEPLOYMENT.md). **Public URL:** none yet.
+No public deployment exists yet; the entrant deferred it on 1 November 2026. Images build and pass the
+smoke test in [CI](../.github/workflows/ci.yml), and [`deploy/huggingface`](../deploy/huggingface) is
+ready. Hosting needs the entrant's account. See [deployment](DEPLOYMENT.md). **Public URL:** none yet.
+
+## Physical device testing
+
+**Needs manual action.** Only browser viewports were tested. Once a public URL exists, on one iPhone
+and one Android phone:
+
+```text
+[ ] Run a scan of https://example.com and see it finish
+[ ] Open a finding and use Show me
+[ ] Open /console and step through to the verified repair
+[ ] Nothing is cut off, and no page scrolls sideways
+```
 
 ## Submission deadline
 

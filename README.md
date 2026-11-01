@@ -4,7 +4,7 @@ A11yForge observes accessibility failures in a real browser, uses Meta models to
 
 **Find it. Fix it. Prove it.**
 
-[Demo video](submission-assets/video/a11yforge-demo.mp4) · [Run locally](#run-locally) · [What is live and what is recorded](#what-is-live-and-what-is-recorded) · [Built during the hackathon](#built-during-the-hackathon) · [Limitations](#limitations)
+[Demo video](https://cdn.jsdelivr.net/gh/Amirtheshwaran/a11yforge@513704cecfe59f075cdd52f5429354c8f3bc7011/submission-assets/video/a11yforge-demo.mp4) · [Run locally](#run-locally) · [What is live and what is recorded](#what-is-live-and-what-is-recorded) · [Built during the hackathon](#built-during-the-hackathon) · [Limitations](#limitations)
 
 ![The recorded repair: the first Meta repair rejected on the compiler's own output](submission-assets/screenshots/06-first-fix-rejected.png)
 
@@ -79,7 +79,7 @@ These establish the facts, and no model can overrule them: Playwright, axe-core,
 
 ## See the demo
 
-- Watch [the 2:45 video](submission-assets/video/a11yforge-demo.mp4) ([transcript](submission-assets/video/a11yforge-demo-transcript.md)).
+- Watch [the 2:45 video](https://cdn.jsdelivr.net/gh/Amirtheshwaran/a11yforge@513704cecfe59f075cdd52f5429354c8f3bc7011/submission-assets/video/a11yforge-demo.mp4) ([transcript](submission-assets/video/a11yforge-demo-transcript.md)). GitHub's file view won't play it, so this link serves the committed file from a public CDN.
 - Or run the app and open `/console` for the recorded repair, which needs no key.
 
 ## Run locally
