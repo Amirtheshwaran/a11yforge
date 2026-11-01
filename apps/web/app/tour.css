@@ -45,6 +45,7 @@
 .tour-facts { margin: 22px 0 0; padding: 0; list-style: none; color: var(--ink-dim); font: 10px/1.7 var(--mono); max-height: 120px; overflow: auto; scrollbar-width: thin; color-scheme: dark; }
 .tour-facts li { padding: 5px 0; border-bottom: 1px solid var(--line-soft); overflow-wrap: anywhere; }
 .tour-copy-rejection .tour-eyebrow, .tour-copy-rejection h2 { color: #f26a5b; }
+.tour-copy-rejection .tour-facts { color: #ffb4a8; font-size: 12px; }
 .tour-copy-verification .tour-eyebrow { color: #a1c5a7; }
 .tour-scroll-hint { display: inline-flex; align-items: center; gap: 15px; border: 0; background: none; color: var(--ink); font-size: 12px; padding: 0; margin-top: 32px; min-height: 44px; cursor: pointer; }
 .tour-scroll-hint > span { display: grid; place-items: center; border: 1px solid var(--line); width: 40px; height: 40px; border-radius: 50%; }

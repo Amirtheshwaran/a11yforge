@@ -69,8 +69,27 @@ physical iOS or Android device testing.
   The working live repair loop targets the controlled fixture and requires the
   server's model configuration; the recorded demo requires no model calls.
 - Source matching can remain ambiguous. A match alone is not verification.
-- A public deployment and physical-device testing remain outstanding. Local
-  preview uses web port 3005 and API port 3006.
+- A public deployment and physical-device testing remain outstanding.
+- Live model use was not re-verified on 1 November: the local `.env` key returned
+  401 from Meta's API. See [hackathon compliance](HACKATHON_COMPLIANCE.md#meta-model-usage).
+
+## Final submission work, 1 November
+
+- One public port: the web app proxies `/backend/*` to the API on loopback. Containers
+  run as uid 1000. CI runs every project check and builds and smoke-tests both images.
+- Git targets now get the same DNS and address checks as website targets. Git redirects
+  are not followed, and concurrent source connections are capped at 3.
+- The recorded story shows the compiler's own lines, the model behind each reasoning
+  step, and that the first repair improved behavior before TypeScript rejected it.
+- Developer details gained a way back to the tour. Axe findings on A11yForge's own tour
+  and undersized touch targets were fixed.
+- Generic repair decision: **high risk, not built.** `source/repair-run.ts` exists but is
+  not connected. Executing untrusted repositories requires the Docker sandbox, which
+  could not be tested here and which a public container host cannot provide.
+
+Current results are in [`browser-validation.json`](../submission-assets/browser-validation.json)
+and the [CI runs](https://github.com/Amirtheshwaran/a11yforge/actions). The Validation
+table above records the state at `971aa6d`.
 
 ## Git milestones
 

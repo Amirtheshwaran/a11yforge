@@ -1,38 +1,71 @@
-# Deployment preparation
+# Deployment
 
-## Current status
+**Status:** no public deployment exists yet. Hosting needs an account the entrant owns.
+Both images are built and smoke-tested by [CI](../.github/workflows/ci.yml) on every push
+to `main`, but that is not a hosted test. Record the public URL here only after
+`deploy/smoke.mjs` passes against it.
 
-No hosted deployment URL, hosting project binding, Vercel configuration or GitHub deployment workflow was found in this checkout. Docker CLI is unavailable on the inspected machine. The production workspace build and local Next/Fastify servers were validated; the Docker image itself has not been built or deployed.
+## Shape
 
-## Existing deployment shape
+The image serves everything from **one public port**. Next.js proxies `/backend/*` to
+Fastify on `127.0.0.1:3001`, so the API is not published and no public API hostname is
+compiled into the build. The container runs as uid 1000 and needs no secrets.
 
-The Dockerfile packages Next.js on port 3000, Fastify on 3001, Playwright Chromium and the committed recorded demo. It runs as an unprivileged user and uses `/data/a11yforge` for runtime artifacts. The image excludes local environment files, raw Stitch exports and submission assets.
+It needs a Linux container host with HTTPS, enough memory for Chromium (plan on 2 GB),
+and long-lived responses for the scan progress stream. Serverless platforms that cannot
+run Chromium and a long-lived process are not compatible.
 
-The web API URL is compiled at build time. The Dockerfile now accepts the documented `NEXT_PUBLIC_API_URL` build argument.
+## Recommended: Hugging Face Docker Space
 
-## Concrete operator steps
+This fits a key-less public demo: free, Docker-based, enough memory for Chromium, and no
+credit card. Spaces can sleep after long inactivity and wake on the next visit, so
+open the URL before a demo. Their disk is not persistent: saved scan results disappear
+when the Space restarts, while the recorded repair ships in the image.
 
-Use a Linux container host with persistent storage and HTTPS ingress for two services/ports. Replace the example domain with your actual public API hostname before building.
+1. Create a **public** Space with the **Docker** SDK.
+2. Add two files from [`deploy/huggingface/`](../deploy/huggingface):
+   `Dockerfile` and `README.md`. The Dockerfile fetches this public repository at
+   `A11YFORGE_REF`. Set that to the final tag or commit once one exists.
+3. Add no secrets. Leave `MODEL_API_KEY` unset.
+4. When the build finishes, run:
+
+   ```sh
+   node deploy/smoke.mjs https://<owner>-<space>.hf.space
+   ```
+
+## Any other container host
 
 ```sh
-docker build --build-arg NEXT_PUBLIC_API_URL=https://api.YOUR-DOMAIN.example -t a11yforge:submission .
-docker run -d --name a11yforge --restart unless-stopped -p 127.0.0.1:3000:3000 -p 127.0.0.1:3001:3001 -v a11yforge-data:/data/a11yforge -e A11YFORGE_CORS_ORIGIN=https://YOUR-DOMAIN.example a11yforge:submission
+docker build -t a11yforge:submission .
+docker run -d --restart unless-stopped -p 3000:3000 -v a11yforge-data:/data/a11yforge a11yforge:submission
 ```
 
-Configure your HTTPS ingress to send the app hostname to port 3000 and API hostname to port 3001. Preserve API paths. Disable proxy buffering for `/explorations/*/events` and `/runs/*/events`; permit long-lived SSE connections. Keep screenshot and artifact routes accessible to the same browser origin.
+The web server uses the platform's `PORT` if one is injected, and otherwise 3000. Mount
+`/data/a11yforge` for scan results that survive restarts. If a proxy sits in front,
+disable response buffering for `/backend/explorations/*/events` and
+`/backend/runs/*/events`.
 
-Do not enable `A11YFORGE_ALLOW_PRIVATE_TARGETS` on a public host. Leave `MODEL_API_KEY` unset for the public scan/recorded-demo deployment. The paid `POST /runs` fixture route currently has no user authentication; if enabling it, restrict access at the ingress first. Store any key in server runtime configuration, never a build argument or browser variable.
+## Security on a public host
 
-Source connection clones public repositories. Generic source execution/mutation is not exposed by these web routes. Do not treat the container image as a safe arbitrary repository execution service.
+- **Leave `MODEL_API_KEY` unset.** `POST /runs` has no user authentication and starts a
+  paid fixture run. With no key it answers 503. Exploration and the recorded demo make no
+  model calls, so they lose nothing.
+- **Leave `A11YFORGE_ALLOW_PRIVATE_TARGETS` unset.** Website and Git targets are then
+  checked by DNS against private, loopback, link-local and reserved addresses. The smoke
+  test confirms refusal.
+- A key, if ever needed, belongs in runtime configuration: never in a build argument or
+  a `NEXT_PUBLIC_` variable.
+- Source connection clones public repositories into the data directory, read-only. It runs
+  no repository code. Local paths are refused over HTTP. At most 3 scans and 3 connections
+  run at once.
+- Anyone holding a scan's URL can open its results, and scan identifiers are not secrets.
+- The image is not a safe service for executing arbitrary repositories. Generic repair
+  execution is deliberately not exposed.
 
 ## Post-deployment proof
 
-1. Fetch HTTPS `/health` on the API; expect status ok and writable runtime data.
-2. Open landing, `/console`, and `/connect` anonymously.
-3. Verify recorded demo artifacts, screenshots, both attempt diffs, and acceptance gates.
-4. Run one real public-site scan. Confirm SSE events, result screenshots, categories and Show me.
-5. Refresh, navigate Back/Forward, test keyboard and mobile width; inspect browser errors.
-6. Confirm private/loopback target rejection remains active.
-7. Record the tested app/API URLs, deployment version and time in `docs/FINAL_VALIDATION.md`; replace pending URLs in submission copy.
-
-Manual blocker: choose/provide a container hosting target and configure its domain, credentials, persistent volume and HTTPS ingress. No deployment success is claimed.
+`deploy/smoke.mjs` covers API health, pages, the recorded demo and its artifacts, refusal
+of private targets and server paths, refusal of paid runs, one real scan with its SSE
+stream, a real screenshot and the result deep link. After it passes, check the following
+by hand or with a browser: spatial tour, finding selection, source inspection, refresh,
+keyboard use and a phone-sized viewport.

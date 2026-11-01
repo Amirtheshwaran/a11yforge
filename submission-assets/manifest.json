@@ -1,71 +1,88 @@
 {
-  "capturedAt": "2026-10-30T13:15:58.265Z",
-  "source": "running-production-ui",
-  "captureRun": "exp-1793366127151-e96a89d8",
-  "recordedRepairRun": "2026-10-26T19-04-29-541Z-27affb",
-  "screenshots": [
+  "capturedFrom": "local production build, single-port and without a model key",
+  "capturedAt": "2026-11-01T06:49:06.353Z",
+  "liveRun": "exp-1793515705953-1113cbc4",
+  "liveTarget": "https://dequeuniversity.com/demo/mars/",
+  "images": [
     {
       "file": "screenshots/01-landing.png",
+      "what": "Landing page and website address entry",
+      "evidence": "Product UI",
       "width": 1920,
       "height": 1080,
-      "bytes": 299357,
-      "sha256": "70e2866cd0ab086bee71c3a4e27bd35273ee523ce6ef2e8c87f8be570c9fb341"
+      "sha256": "aa4edc2a30073b3543d85a5f82c6a4df33a76673634bb2d41671c7d3690bc5d7"
     },
     {
-      "file": "screenshots/02-live-results.png",
+      "file": "screenshots/02-live-scan.png",
+      "what": "Scan of https://dequeuniversity.com/demo/mars/",
+      "evidence": "Live deterministic scan in progress",
       "width": 1920,
       "height": 1080,
-      "bytes": 332109,
-      "sha256": "cd8ad2f4296bff0011072fede5bd6c5444545f84910c1cc52753839e7f2977ff"
+      "sha256": "9fc6d3c37acbd6bc1e715404dcbf69fd30c6b9fca081a1b29ff63a899ee33d0d"
     },
     {
-      "file": "screenshots/03-show-me.png",
+      "file": "screenshots/03-spatial-results.png",
+      "what": "Spatial tour opening on the real capture, run exp-1793515705953-1113cbc4",
+      "evidence": "Live deterministic scan",
       "width": 1920,
       "height": 1080,
-      "bytes": 437871,
-      "sha256": "49edae0b2db9ee79443941ea520c30e43f5792da0690d8421da62d27d3c72368"
+      "sha256": "8f983d448357e81d34268bb5d67c562c0f98ac3ec453a82bacd671d1e8245960"
     },
     {
-      "file": "screenshots/04-source-trace.png",
+      "file": "screenshots/04-show-me.png",
+      "what": "Low-contrast heading framed at its measured location",
+      "evidence": "Live deterministic scan; box is measured browser geometry",
       "width": 1920,
       "height": 1080,
-      "bytes": 139545,
-      "sha256": "0fab2a695d94fcd982ab709beefbd4eb4f9a052feff6da4a7ec2fbd101f6ee2b"
+      "sha256": "9163a26b3249334b96d8bdba1382557944329e29bca009a93f8e654cf8446b13"
     },
     {
-      "file": "screenshots/05-first-fix-rejected.png",
+      "file": "screenshots/05-source-inspection.png",
+      "what": "Source inspection for the selected finding",
+      "evidence": "Live scan evidence; no repository connected, no source claim made",
       "width": 1920,
       "height": 1080,
-      "bytes": 191516,
-      "sha256": "9a76baba0123cbdf5de97d0ddf6bf4c375b07bc2794d6bd407716881215c8c29"
+      "sha256": "e50f3c74b727459839bd0481746a8b78eb868831003515079819b6c262936fb3"
     },
     {
-      "file": "screenshots/06-verified.png",
+      "file": "screenshots/06-first-fix-rejected.png",
+      "what": "First Meta repair rejected on the compiler's TS18048 output",
+      "evidence": "Recorded real repair of the controlled Broken Shop target, run 2026-10-26T19-04-29-541Z-27affb",
       "width": 1920,
       "height": 1080,
-      "bytes": 150543,
-      "sha256": "f88f3a15dec1baaaa8f34cef00204942d1a449432850c10c4de3414fc6661ab4"
+      "sha256": "3407669d7ebb2e86bcac92f8e01fd3d22a741306b9b71b8434daa70b8f9e4ef6"
     },
     {
-      "file": "screenshots/07-mobile-demo.png",
-      "width": 390,
-      "height": 8540,
-      "bytes": 394177,
-      "sha256": "e596617c253a0a384d00976a26c2355ae10623470dfba69c696aa9e951dd701e"
-    },
-    {
-      "file": "screenshots/08-webgl-fallback.png",
-      "width": 1440,
-      "height": 1000,
-      "bytes": 264012,
-      "sha256": "1e5cab5d3d2545681adef6abdff6258ddcb4040afd516f88c27b567cc41a5578"
-    },
-    {
-      "file": "screenshots/09-source-connection.png",
+      "file": "screenshots/07-bounded-revision.png",
+      "what": "One bounded revision, given the compiler output",
+      "evidence": "Recorded real repair of the controlled Broken Shop target, run 2026-10-26T19-04-29-541Z-27affb",
       "width": 1920,
       "height": 1080,
-      "bytes": 187580,
-      "sha256": "f7e26ca17a43ade1e99c0ad673b408ad28abbc5d538b196e76268ae1ab5b9caa"
+      "sha256": "92712dcfa137117b4ccebc89e77471ae1bdf9de9c3df26567a1fe37bf33a4fe5"
+    },
+    {
+      "file": "screenshots/08-verified.png",
+      "what": "Replay and gates passed; accepted",
+      "evidence": "Recorded real repair of the controlled Broken Shop target, run 2026-10-26T19-04-29-541Z-27affb",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "61b719fe0cd3d186718fd8845c3a1ab393b7cf20aab3d28686e3101eb323203f"
+    },
+    {
+      "file": "screenshots/09-mobile-issue.png",
+      "what": "The same finding at a 390 x 844 browser viewport (not a physical device)",
+      "evidence": "Live deterministic scan",
+      "width": 780,
+      "height": 1688,
+      "sha256": "cd1839fa40129235d9fcab6e4fe409cd4aa63c01950db681f271f264e4a13bdf"
+    },
+    {
+      "file": "screenshots/10-webgl-fallback.png",
+      "what": "Tour with WebGL made unavailable",
+      "evidence": "Live deterministic scan; browser failure simulated",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "c36f9944822fdfee9049b33419c5b088d4ae9b63a68e38ce8bd0d2e69f12db9b"
     }
   ]
 }

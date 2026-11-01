@@ -1,32 +1,37 @@
 # A11yForge demo script
 
-Target: **2 minutes 40 seconds**, a proposed editorial duration; official video limits remain unconfirmed. Show the current production UI. Keep the “Recorded real repair” label visible whenever historical artifacts appear.
+Hard limit: **3:00**. The finished video runs **2:45**. It is at
+[`submission-assets/video/a11yforge-demo.mp4`](../submission-assets/video/a11yforge-demo.mp4),
+with a [word-for-word transcript](../submission-assets/video/a11yforge-demo-transcript.md).
 
-## Capture setup
-
-- Start the API and web app; verify the recorded demo with `pnpm demo:validate`.
-- Use the live MarsCommuter scan for finding explanation. Preserve any coverage warnings.
-- Prepare the recorded console separately. Do not claim MarsCommuter's source was repaired.
-- Playback and layout checks require no model calls. Do not press “Start Autonomous Repair” just to record the UI.
-- Use the numbered assets in `submission-assets/screenshots/` as reference frames.
-- Record screen and narration, export a video, upload it, and test its anonymous playback. No finished video is included in this checkout.
+The first half is a real scan in real time. The second half is labeled
+**Recorded real repair** throughout and is never presented as a live repair of the
+scanned website. Recording makes zero model calls.
 
 | Time | Screen | Narration |
 | --- | --- | --- |
-| 0:00–0:10 | Landing, website URL | “Most accessibility tools can tell you something is wrong. A11yForge goes further: find it, fix it, prove it.” |
-| 0:10–0:30 | Start a **live website scan**; SSE progress and real result | “It opens a real website in a browser, checks its controls and keyboard behavior, and captures evidence. There are no model calls during exploration.” |
-| 0:30–0:50 | Category, finding, Show me; briefly open Developer details | “The result stays attached to the website. Here, text and its background are too similar. Show me focuses the measured area, and developer details retain the original evidence.” |
-| 0:50–1:08 | Source connection view, then switch explicitly to recorded console/source trace | “A11yForge can connect browser evidence to source. For the complete repair story, I'm switching to a recorded real run against our controlled Broken Shop fixture.” |
-| 1:08–1:28 | Recorded timeline: Problem → Code → First fix; attempt 1 diff | “Meta diagnosed a keyboard-focus escape and proposed a small anchored repair. The first change improved browser behavior. But looking better wasn't enough.” |
-| 1:28–1:50 | Rejected; attempt 1, TS18048 compiler evidence | “The repair failed strict TypeScript. A11yForge rejected it. The model couldn't overrule the compiler. That failure became evidence for exactly one bounded revision.” |
-| 1:50–2:12 | Revision → Verified; attempt 2 and gate table | “The revision passed typecheck and build. A11yForge replayed the original keyboard interaction, checked reverse Shift+Tab, and ran accessibility regression checks. Only then was the repair accepted.” |
-| 2:12–2:30 | Architecture graphic | “Meta models reason, propose, revise and critique. Playwright, axe, the compiler, build and replay establish facts and proof. The complete controlled workflow allows at most four model calls.” |
-| 2:30–2:40 | Verified proof; close on A11yForge | “Live public-site exploration works today. The full repair loop is demonstrated on a controlled fixture; arbitrary hosted code mutation is disabled. Find it. Fix it. Prove it.” |
+| 0:00–0:19 | Landing, then the website address field | Most accessibility tools can tell you something is wrong. A11yForge goes further. It finds the problem in a real browser, connects it to source evidence, proposes a repair with Meta models, and refuses to call it fixed until deterministic replay proves it. |
+| 0:19–0:37 | Type `https://dequeuniversity.com/demo/mars/`, press Enter, watch real progress | Here is a live scan of a real public website, Deque's Mars Commuter demo. A real Chromium browser opens it, runs axe, tests the keyboard and forms, and records screenshots and measured positions. This step uses zero model calls. |
+| 0:37–0:52 | Spatial tour: categories, then "Some text is hard to read" framed at its measured location, then an untested 404 page | The results stay attached to the website. Each chapter moves to a measured location on the real page and explains the problem in plain language. Pages it could not test are reported as untested, not as passing. |
+| 0:52–1:06 | Source inspection for that finding, then the labeled recorded demo | A finding can be traced into a connected repository, as ranked candidates, and ambiguity stays visible. For the autonomous repair loop, here is a recorded real run against our controlled regression target. |
+| 1:06–1:24 | Finding, Interaction, Source, Repair chapters | Keyboard focus escapes an open checkout dialog. Meta's Muse Spark model diagnosed it from the browser evidence, then proposed a bounded, exact edit to the traced source. The browser replay improved: focus stayed in the dialog. |
+| 1:24–1:38 | Rejected chapter with the compiler's own lines | But strict TypeScript failed. TS18048: 'last' is possibly undefined. A11yForge rejected its own AI repair. The model cannot overrule the compiler. |
+| 1:38–1:58 | Revision chapter, then Proof | That compiler output became evidence for exactly one bounded revision. The revised repair passed type checking and the build. Then A11yForge replayed the exact original interaction, checked reverse Shift+Tab, and ran accessibility regression checks. Only then was it accepted. |
+| 1:58–2:18 | Architecture diagram and the run's real Meta usage table | Meta models do the reasoning: diagnosis, proposal, one revision, and a critic review, each with a fixed schema, inside a hard limit of four calls. Playwright, axe, the compiler, the build and replay establish the facts. Meta reasons. Tools verify. |
+| 2:18–2:45 | Failure-to-proof chain, limitations, close | Accessibility bugs usually arrive as reports, detached from the code and the interaction. A11yForge connects the failure, the evidence, the implementation, the attempted repair, and the proof. Live scanning works on public websites today; the full repair loop runs on a controlled target. Find it. Fix it. Prove it. |
 
-## Director notes
+## How this cut was made
 
-The first failure is the central moment. Keep TS18048 legible. Use the timeline's First fix/Rejected beats for attempt 1 and Revision/Verified for attempt 2. If scanning takes longer, shorten the waiting period with an explicit edit; do not fabricate progress or imply recorded inference is live.
+- Footage comes from the real production build, served as the container serves it:
+  one port, with no model key.
+- The scan is shown in real time with no cuts. The scan run was
+  `exp-1793515536914-ee2a56ae`.
+- The repair footage plays the committed run
+  `2026-10-26T19-04-29-541Z-27affb`.
+- The two closing cards are explanatory. The usage table on the first one is read
+  from that run's `model-usage-summary.json`.
+- The narration is a Windows text-to-speech voice. To replace it, read the
+  transcript over the same timings.
 
-Use the source trace from the recorded fixture to demonstrate a successful match. An unrelated public repository is not proof of source attribution for MarsCommuter. A verified outcome establishes the tested interaction, not whole-site conformance.
-
-See [official requirement status](HACKATHON_COMPLIANCE.md) before recording the final export.
+Keep the distinction the narration makes. MarsCommuter's source was not repaired.
+A verified outcome covers the tested interaction, not the whole site's conformance.
