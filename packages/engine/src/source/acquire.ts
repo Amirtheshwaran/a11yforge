@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { cp, mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { createHash, randomUUID } from "node:crypto";
 import { join } from "node:path";
+import { validateTargetUrl } from "../explore/target.js";
 import { parseGitSource, sanitizeGitError } from "./git-url.js";
 import { assertPathWithin, requireAbsolutePath } from "./paths.js";
 
@@ -89,9 +90,19 @@ export async function cloneGitSource(args: {
   sourceId?: string | undefined;
   timeoutMs?: number | undefined;
   allowPrivate?: boolean | undefined;
+  /** Resolve and classify the hostname. Disable only in unit tests. */
+  resolveDns?: boolean | undefined;
 }): Promise<CloneResult> {
   const parsed = parseGitSource(args.gitUrl, {
     allowPrivate: args.allowPrivate,
+  });
+  // Same DNS and address classification as website targets: a public-looking
+  // hostname that resolves to a private network is refused before git runs.
+  await validateTargetUrl(parsed.cloneUrl, {
+    allowPrivate: args.allowPrivate ?? false,
+    resolveDns: args.resolveDns,
+  }).catch((error: unknown) => {
+    throw new Error(`Could not connect that repository: ${sanitizeGitError(error)}`);
   });
   const sourceId = args.sourceId ?? `src-${randomUUID().slice(0, 8)}`;
   const destDir = join(args.sourcesDir, sourceDirName(sourceId), "repo");
@@ -109,6 +120,9 @@ export async function cloneGitSource(args: {
         "core.hooksPath=/dev/null",
         "--config",
         "protocol.file.allow=never",
+        // A redirect could lead to an address that was never validated.
+        "--config",
+        "http.followRedirects=false",
         parsed.cloneUrl,
         destDir,
       ],

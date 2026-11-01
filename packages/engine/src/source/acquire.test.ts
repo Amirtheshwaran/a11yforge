@@ -1,10 +1,10 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, rm, symlink, writeFile } from "node:fs/promises";
+import { access, mkdtemp, mkdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { assertPathWithin, requireAbsolutePath } from "./paths.js";
-import { cleanSourceWorkspace, copyLocalSource } from "./acquire.js";
+import { cleanSourceWorkspace, cloneGitSource, copyLocalSource } from "./acquire.js";
 
 async function tempDir(prefix: string): Promise<string> {
   return mkdtemp(join(tmpdir(), prefix));
@@ -45,6 +45,24 @@ describe("source path containment", () => {
     assert.throws(() => requireAbsolutePath("Source directory", "relative/path"));
     assert.throws(() => requireAbsolutePath("Source directory", "/tmp/../etc"));
   });
+});
+
+describe("git source acquisition", () => {
+  // Literal addresses that the hostname-string check in parseGitSource misses.
+  for (const host of ["100.64.0.1", "169.254.1.1", "[fd00::1]"]) {
+    it(`refuses a non-public address before running git: ${host}`, async () => {
+      const sourcesDir = await tempDir("a11y-clone-");
+      try {
+        await assert.rejects(
+          () => cloneGitSource({ gitUrl: `https://${host}/owner/repo`, sourcesDir, allowPrivate: false }),
+          /Could not connect that repository/,
+        );
+        await assert.rejects(() => access(join(sourcesDir, "repo")));
+      } finally {
+        await rm(sourcesDir, { recursive: true, force: true });
+      }
+    });
+  }
 });
 
 describe("local source acquisition", () => {

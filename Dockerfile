@@ -1,30 +1,29 @@
-# A11yForge production image: web console (3000) + API (3001).
+# A11yForge production image: one public port serves the web app, and the web
+# app proxies /backend/* to the API on a private loopback port.
 #
 # The committed recorded-demo bundle (demo/accepted-run) ships inside the
-# image, so the console is useful with zero credentials. Live repairs need
-# only runtime env (never baked in):
-#   MODEL_API_KEY — Meta model key for live autonomous runs (optional).
-# Build-time knobs:
-#   NEXT_PUBLIC_API_URL — public API base the browser calls
-#     (default http://localhost:3001; set to your host at build time).
+# image, so the app is useful with zero credentials. Live repairs need only
+# runtime env (never baked in):
+#   MODEL_API_KEY — Meta model key for live fixture repairs. Leave it unset on
+#   an unauthenticated public host; POST /runs then answers 503.
+# Runtime knobs:
+#   PORT — public web port (default 3000; platforms usually inject it).
 #   A11YFORGE_VERSION — release label reported by GET /health.
 
-FROM node:20-bookworm
-
-ARG NEXT_PUBLIC_API_URL=http://localhost:3001
+FROM node:22-bookworm
 
 ENV PNPM_HOME=/pnpm-store \
     PATH=/pnpm-store:$PATH \
-    NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} \
-    A11YFORGE_VERSION=0.7.0 \
+    NEXT_PUBLIC_API_URL=/backend \
+    A11YFORGE_API_PROXY_TARGET=http://127.0.0.1:3001 \
+    NEXT_TELEMETRY_DISABLED=1 \
+    A11YFORGE_VERSION=0.8.0 \
     A11YFORGE_DATA_DIR=/data/a11yforge \
-    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
-    HOST=0.0.0.0 \
-    PORT=3001
+    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
 WORKDIR /app
 
-# Deterministic toolchain: pinned Node, pnpm via corepack.
+# Deterministic toolchain: pinned Node major, pnpm via corepack.
 RUN corepack enable && corepack prepare pnpm@10.34.9 --activate
 
 # Workspace install first for layer caching.
@@ -37,22 +36,23 @@ COPY packages/shared/package.json packages/shared/package.json
 COPY fixtures/broken-shop/package.json fixtures/broken-shop/package.json
 RUN pnpm install --frozen-lockfile
 
-# Build everything, then the browser the verifier replays with.
+# Build everything, then the browser the explorer and verifier use.
 COPY . .
 RUN pnpm build
 RUN pnpm --filter @a11yforge/engine exec playwright install --with-deps chromium
 
-# Writable runtime root for live-run artifacts and repair workspaces.
-# The committed demo/accepted-run bundle stays read-only inside the image.
-RUN groupadd -r appuser && useradd -r -m -d /home/appuser -g appuser appuser && \
-    mkdir -p /data/a11yforge /ms-playwright /home/appuser/.cache/node/corepack && \
-    chown -R appuser:appuser /app /data/a11yforge /ms-playwright /home/appuser
+# Writable runtime root for live-run artifacts and source workspaces. The image
+# runs as the base image's `node` user (uid 1000), the uid container platforms
+# commonly force. The committed demo/accepted-run bundle stays read-only.
+RUN mkdir -p /data/a11yforge && chown -R node:node /app /data/a11yforge /ms-playwright
 
-USER appuser
-EXPOSE 3000 3001
+USER node
+EXPOSE 3000
 VOLUME /data/a11yforge
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD node -e "fetch('http://127.0.0.1:3001/health').then((r) => { if (!r.ok) process.exit(1); }).catch(() => process.exit(1))"
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:' + (process.env.PORT || 3000) + '/backend/health').then((r) => { if (!r.ok) process.exit(1); }).catch(() => process.exit(1))"
 
-CMD ["sh", "-c", "node apps/api/dist/index.js & exec pnpm --filter @a11yforge/web start"]
+# The API stays on loopback; only the web port is published. Each process gets
+# its own PORT because the platform's PORT belongs to the web server.
+CMD ["sh", "-c", "HOST=127.0.0.1 PORT=3001 node apps/api/dist/index.js & cd apps/web && exec node node_modules/next/dist/bin/next start --port ${PORT:-3000} --hostname 0.0.0.0"]

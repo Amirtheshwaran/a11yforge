@@ -39,6 +39,16 @@ interface SourceRecord {
 
 const records = new Map<string, SourceRecord>();
 
+const MAX_CONCURRENT_SOURCE_CONNECTIONS = 3;
+
+function connectingCount(): number {
+  let count = 0;
+  for (const record of records.values()) {
+    if (record.state === "CONNECTING") count += 1;
+  }
+  return count;
+}
+
 function publicRecord(record: SourceRecord): unknown {
   return {
     sourceId: record.sourceId,
@@ -109,6 +119,9 @@ export function registerSourceRoutes(app: FastifyInstance): void {
         return reply.status(400).send({ error: "Invalid verification commands." });
       }
       parsedCommands = parsed.data;
+    }
+    if (connectingCount() >= MAX_CONCURRENT_SOURCE_CONNECTIONS) {
+      return reply.status(429).send({ error: "Too many repositories are being connected. Try again shortly." });
     }
     const sourceId = `src-${Date.now()}-${randomUUID().slice(0, 8)}`;
     const record: SourceRecord = {

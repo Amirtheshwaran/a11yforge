@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable && corepack prepare pnpm@10.34.9 --activate
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @a11yforge/engine exec playwright install --with-deps chromium
+      - run: pnpm build
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test:meta
+      - run: pnpm test:engine
+      - run: pnpm --filter @a11yforge/web test
+      - run: pnpm --filter @a11yforge/api test
+      - run: pnpm demo:validate
+
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: root
+            context: .
+            port: 3000
+            build_args: ""
+          - name: huggingface
+            context: deploy/huggingface
+            port: 7860
+            build_args: --build-arg A11YFORGE_REF=${{ github.sha }}
+    name: image (${{ matrix.name }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: docker build ${{ matrix.build_args }} -t a11yforge:ci ${{ matrix.context }}
+      - name: Start the container as an unprivileged host would
+        run: docker run -d --name a11yforge --user 1000:1000 -e PORT=${{ matrix.port }} -p ${{ matrix.port }}:${{ matrix.port }} a11yforge:ci
+      - name: Smoke-test through the public port
+        run: node deploy/smoke.mjs http://127.0.0.1:${{ matrix.port }}
+      - name: Container logs
+        if: always()
+        run: docker logs a11yforge
