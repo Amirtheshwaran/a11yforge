@@ -1,8 +1,8 @@
 {
   "base": "http://127.0.0.1:3000",
-  "runId": "exp-1793516469000-450f88ea",
+  "runId": "exp-1793534887145-15d8c9e8",
   "liveTarget": "https://dequeuniversity.com/demo/mars/",
-  "at": "2026-11-01T07:04:00.784Z",
+  "at": "2026-11-01T12:10:59.089Z",
   "results": [
     {
       "group": "keyboard",
@@ -32,7 +32,7 @@
       "group": "keyboard",
       "name": "Enter starts a scan and routes to results",
       "pass": true,
-      "detail": "exp-1793516469000-450f88ea"
+      "detail": "exp-1793534887145-15d8c9e8"
     },
     {
       "group": "live",

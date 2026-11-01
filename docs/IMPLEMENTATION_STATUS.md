@@ -91,6 +91,29 @@ Current results are in [`browser-validation.json`](../submission-assets/browser-
 and the [CI runs](https://github.com/Amirtheshwaran/a11yforge/actions). The Validation
 table above records the state at `971aa6d`.
 
+### Final local validation, 1 November
+
+Product code unchanged since `dbb541b`. Run from a production build, served on one port with no model
+key, as the container serves it. This is not a hosted test: public deployment is deferred.
+
+| Check | Result |
+| --- | --- |
+| Build, typecheck, lint, `demo:validate` | Passed |
+| Tests | Meta 46 of 46, API 33 of 33, web 84 of 84. Engine 253 passed, 0 failed, 3 skipped (they need Windows symlink permission) |
+| `deploy/smoke.mjs` against the local server | All passed |
+| Browser QA | 108 of 108: keyboard, live scan, source, recorded demo, six viewports, reduced motion, WebGL off, axe on A11yForge's own pages |
+| Screenshots and video | All 10 screenshots match their manifest digests. Video is 2:45, 1920 × 1080, H.264 and AAC. Narration matches the script and transcript |
+| Secret scan, working tree and all history | No secrets. The only matches are dummy values in three test files |
+| Live Meta call | **Not verified:** `401 invalid_api_key` |
+
+| Real-site scan | Pages tested | Findings | Limitations |
+| --- | --- | --- | --- |
+| example.com | 1 | 4 | None |
+| Deque Mars demo | 1 | 12 | 2 linked pages returned 404 and are reported as untested |
+| W3C BAD, before | 3 | 12 | None |
+| W3C BAD, after | 3 | 8 | None |
+| Hacker News | 3 | 9 | None |
+
 ## Git milestones
 
 All work is kept on `main`. Earlier milestones include continuous spatial tours

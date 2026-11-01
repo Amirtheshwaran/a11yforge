@@ -92,9 +92,12 @@ to 4 November period.
 | Broader captures, responsive tours | `68ad080` | 2026-11-01 | `apps/web/lib/tour-motion.ts`, layouts | Yes |
 | Readable handoffs, restored selection | `fb2eb01` | 2026-11-01 | Return navigation keeps the selected finding | Yes |
 | Evidence-integrity cleanup | `971aa6d` | 2026-11-01 | Removed illustrative output; probe and page must both match | Yes |
+| Single-port hosting, CI, Git target checks | `10ee197` | 2026-11-01 | `Dockerfile`, `deploy/`, `.github/workflows/ci.yml`, `packages/engine/src/source/acquire.ts` | No |
+| Compiler lines and model names in the recorded story | `dbb541b` | 2026-11-01 | `apps/web/lib/tour-model.ts`, `packages/engine/src/runview/read-model.ts` | Yes |
+| Submission docs, screenshots, demo video | `513704c` | 2026-11-01 | `README.md`, `docs/`, `submission-assets/` | Yes: this is the demo |
 
-Commits made after this audit are listed by `git log 971aa6d..HEAD`; all of them
-are final-submission work made inside the period.
+Later commits are listed by `git log 513704c..HEAD`. They change documentation, ignore
+files and the recorded browser QA results only, and all of them were made inside the period.
 
 ## Reused, not claimed as new
 

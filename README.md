@@ -59,7 +59,7 @@ The recorded run's real usage:
 
 These numbers come from the run's committed [usage artifacts](demo/accepted-run/2026-10-26T19-04-29-541Z-27affb/model-usage-summary.json).
 
-**Baseten:** not used. The runtime calls Meta directly and has no Baseten configuration, and no Baseten or open-weight inference is claimed.
+**Baseten:** not part of the runtime. The product calls Meta directly, this repository has no Baseten configuration, and no Baseten or open-weight inference is claimed.
 
 ## What is deterministic
 

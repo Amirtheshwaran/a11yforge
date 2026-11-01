@@ -1,8 +1,10 @@
 # Submission copy
 
-Draft for the [portal](https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/submit). The
-form is behind sign-in, so its fields and character limits are unconfirmed. Do not paste a pending
-value.
+Draft for the [portal](https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/submit). Portal
+review is deferred: the form is behind sign-in, so its fields and character limits are unconfirmed. Text
+in `[SQUARE BRACKETS]` is a placeholder. Never submit one.
+
+Lengths in characters, to pick a block that fits each field's limit: tagline 91, one-line pitch 179, short description 480, medium description 908, long description 1883, built during the hackathon 339, Meta technology 869, architecture 337, impact 424, technical depth 522, how to try it 383, known limitations 398.
 
 ## Project name
 
@@ -16,6 +18,10 @@ Indie Developer
 
 Push the Frontier
 
+## Tagline
+
+Accessibility repairs reasoned by Meta models and accepted only after deterministic replay.
+
 ## One-line pitch
 
 A11yForge observes accessibility failures in a real browser, uses Meta models to propose bounded source repairs, and rejects bad fixes until deterministic replay proves they work.
@@ -23,6 +29,10 @@ A11yForge observes accessibility failures in a real browser, uses Meta models to
 ## Short description
 
 Accessibility reports tell developers something is wrong, but they are detached from the code and the failing interaction. A11yForge finds failures in a real browser, traces them to source, and uses Meta models to propose small repairs. In its recorded real run, the first repair improved keyboard behavior but failed strict TypeScript. A11yForge rejected its own AI repair, used the compiler output for one bounded revision, and replayed the original failure before accepting it.
+
+## Medium description
+
+A website can look fine while keyboard and screen-reader users hit barriers, and an AI patch that looks right can still break the build. A11yForge connects the failure to evidence, implementation, attempted repair and proof. A real browser scans public websites with no model involved, and findings appear in a 3D tour of the real page. Meta models then supply bounded reasoning inside a limit of four calls: diagnosis, exact edit, one revision and critic review. The compiler, build, replay and regression gates decide, and no model can overrule them. In a recorded real run on a controlled target, the first Meta repair improved keyboard behavior but failed strict TypeScript. A11yForge rejected it, used the compiler output for one revision, replayed the original failure, and only then accepted it. Live scanning works on public websites today; repair of arbitrary websites is deliberately not connected.
 
 ## Long description
 
@@ -51,7 +61,7 @@ Meta Model API with `muse-spark-1.3-contributor`, called only from `packages/met
 - **Revision:** at most one. Receives the compiler or verifier failure and returns corrected edits.
 - **Critic:** runs only after the deterministic gates pass, and may reject but cannot override a failed gate.
 
-Replies are validated locally and fail closed with no automatic retries. The run is capped at four calls. Exploration and recorded playback make none. The recorded run's real usage is in its committed artifacts. Baseten and open-weight inference are not used.
+Replies are validated locally and fail closed with no automatic retries. The run is capped at four calls. Exploration and recorded playback make none. The recorded run's real usage is in its committed artifacts. The runtime calls Meta directly, and Baseten and open-weight inference are not claimed.
 
 ## Architecture
 
@@ -68,7 +78,7 @@ Browser automation with SSRF-guarded targets. Evidence provenance, in which ever
 ## Links
 
 - Repository: https://github.com/Amirtheshwaran/a11yforge
-- Public deployment: **PENDING.** Not deployed yet. Do not enter a URL until it has been tested. If the form requires one, stop and deploy first.
+- Public deployment: `[PUBLIC DEPLOYMENT URL]`. Deferred; not deployed yet. Enter a URL only after `deploy/smoke.mjs` has passed against it. If the form requires one, deploy first.
 - Demo video: https://cdn.jsdelivr.net/gh/Amirtheshwaran/a11yforge@513704cecfe59f075cdd52f5429354c8f3bc7011/submission-assets/video/a11yforge-demo.mp4
 
 The video link was checked on 1 November 2026 without signing in: it plays and seeks in a browser (2:45, 1920 × 1080), and the downloaded bytes match the committed file's SHA-256. It is a direct file link, not a video platform. If the form accepts only hosts such as YouTube, Vimeo or Loom, upload `submission-assets/video/a11yforge-demo.mp4` there and use that link instead. GitHub's own file view does not play this video, so do not use a `github.com` link for it.
@@ -87,15 +97,20 @@ Repair of arbitrary websites is not connected; the repair loop targets a control
 
 Team size: 1. Entrant: Amirtheshwaran Navaneethakrishnan. Other team members: none.
 
+Track: Indie Developer.
+
 Do not enter development tools or anyone who gave informal help as team members. If the form asks directly about AI-assisted development, third-party tools or technical assistance, answer accurately and completely.
 
 ## Before submitting
 
 ```text
-[ ] Waiver eligibility: NEEDS MY CONFIRMATION
-[ ] Original work and sole ownership: NEEDS MY CONFIRMATION
 [x] Entrant confirmed a one-person team, 1 November 2026
+[x] Entrant confirmed being over 18 and of legal age where they live, 1 November 2026
+[ ] Not in an excluded location: NEEDS MY CONFIRMATION
+[ ] Not excluded by employment, government affiliation, family or household: NEEDS MY CONFIRMATION
+[ ] Original work, sole ownership, IP rights and other attestations, in their exact wording: NEEDS MY CONFIRMATION
 [ ] Fields and character limits checked against the signed-in portal
+[ ] No [SQUARE BRACKET] placeholder is left in the form
 [ ] Public deployment URL tested and filled in, or confirmed not required by the form
 [x] Video link plays while signed out (recheck it if the form requires another host)
 ```

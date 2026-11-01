@@ -92,17 +92,22 @@ and deterministic replay as the central story. A11yForge is not presented as a s
 | Re-verified live on 1 November 2026 | **No.** See below. |
 | Automated tests | Mocked transport; they do not prove a live call |
 
-**Blocker.** On this machine the key in the ignored `.env` returned `401 invalid_api_key` from
-`api.meta.ai/v1/models`, and the same file overrides the model to `meta-models/muse-spark-open-1026`.
-So a local live run would fail at its first call until `.env` is corrected. The committed defaults
-and the recorded run are not affected. The public deployment holds no key.
+**Blocker.** On this machine the key in the ignored `.env` returned `401 invalid_api_key` from both
+`api.meta.ai/v1/models` and one `chat/completions` request using the default model, which consumed no
+tokens. The same file overrides the model to `meta-models/muse-spark-open-1026`. So a local live run
+would fail at its first call until `.env` is corrected. The committed defaults and the recorded run are
+not affected. A public deployment holds no key.
 
-**Baseten.** No Baseten code, base-URL setting or inference was found, and the runtime calls Meta
-directly. Baseten and open-weight inference are not claimed.
+The recorded usage artifacts agree with the README's table on model and token counts. They hold
+`requestId: null`, so they don't include a provider request ID that could be checked independently.
+
+**Baseten.** Not part of the runtime. The repository has no Baseten code or configuration, `packages/meta`
+calls a fixed `https://api.meta.ai/v1` base URL, and no recorded run used Baseten. Baseten and
+open-weight inference are not claimed.
 
 ## Deployment
 
-No public deployment exists yet; the entrant deferred it on 1 November 2026. Images build and pass the
+**Deferred.** No public deployment exists yet; the entrant deferred it on 1 November 2026. Images build and pass the
 smoke test in [CI](../.github/workflows/ci.yml), and [`deploy/huggingface`](../deploy/huggingface) is
 ready. Hosting needs the entrant's account. See [deployment](DEPLOYMENT.md). **Public URL:** none yet.
 
@@ -130,17 +135,21 @@ Cerebral Valley, government-affiliated individuals, their immediate family, and 
 households. The repository cannot establish any of this.
 
 By submitting, the entrant also warrants that the project is their original work, is solely owned by
-them, and infringes no one else's rights. The audit cannot establish that either.
+them, and infringes no one else's rights. The audit cannot establish that either. The entrant reviews
+the exact wording in the [Official Rules](https://cerebralvalley.ai/e/meta-ai-developer-hackathon/waiver)
+personally. Nothing here confirms it for them.
 
 ```text
-[ ] Waiver eligibility: NEEDS MY CONFIRMATION
-[ ] Original work and sole ownership: NEEDS MY CONFIRMATION
+[x] Over 18 and of legal age where the entrant lives: entrant confirmed, 1 November 2026
+[ ] Not in an excluded location: NEEDS MY CONFIRMATION
+[ ] Not excluded by employment, government affiliation, family or household: NEEDS MY CONFIRMATION
+[ ] Original work, sole ownership, IP rights and other attestations, in their exact wording: NEEDS MY CONFIRMATION
 ```
 
 ## Unconfirmed portal details
 
-The [submission portal](https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/submit)
-redirects to sign-in, so these remain unknown:
+**Deferred.** The [submission portal](https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/submit)
+redirects to sign-in and has not been inspected, so these remain unknown:
 
 - exact fields and character limits;
 - accepted video hosts and upload requirements;

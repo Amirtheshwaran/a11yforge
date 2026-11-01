@@ -1,6 +1,6 @@
 # Deployment
 
-**Status:** no public deployment exists yet. Hosting needs an account the entrant owns.
+**Status:** deferred. No public deployment exists yet, and hosting needs an account.
 Both images are built and smoke-tested by [CI](../.github/workflows/ci.yml) on every push
 to `main`, but that is not a hosted test. Record the public URL here only after
 `deploy/smoke.mjs` passes against it.
