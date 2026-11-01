@@ -9,3 +9,9 @@ export function fitCaptureDistance(width: number, height: number, aspect: number
   const tangent = Math.tan(fov * Math.PI / 360);
   return Math.max(height / (2 * tangent * fillY), width / (2 * tangent * Math.max(0.1, aspect) * fillX));
 }
+
+/** Editorial fades overlap the camera handoff at half a chapter, so a paused scroll stays readable. */
+export function copyTransitionTiming(index: number, order: number): { enterAt: number; exitAt: number; duration: number } {
+  const stagger = Math.min(order, 3) * 12;
+  return { enterAt: index * 1000 - 620 + stagger, exitAt: index * 1000 + 320 + stagger, duration: 400 };
+}

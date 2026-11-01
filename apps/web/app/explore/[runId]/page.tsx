@@ -533,7 +533,7 @@ function ExploreRunContent(): React.JSX.Element {
   const scanPct = progress.length > 0 ? Math.round((doneSteps / progress.length) * 100) : 0;
 
   if (run?.state === "COMPLETED" && tourModel !== null && !showDetailedEvidence) return <main>
-    <SpatialTour model={tourModel} />
+    <SpatialTour model={tourModel} initialFindingId={search.get("finding")} />
     <section className="site-check-section"><h2>Keep the evidence in view.</h2><p>This tour uses only screenshots and measurements from this website check.</p><div className="finding-actions"><Button onClick={() => setShowDetailedEvidence(true)}>Developer details and full evidence</Button><Button variant="secondary" asChild><Link href="/#check-site">Check another website</Link></Button></div></section>
   </main>;
 
