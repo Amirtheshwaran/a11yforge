@@ -200,6 +200,7 @@ export function subscribeExplorationEvents(
     try {
       const raw = JSON.parse(message.data as string) as unknown;
       if (typeof raw === "object" && raw !== null && (raw as { done?: boolean }).done === true) {
+        source.close(); // Finished scans must not reconnect every few seconds while the tour is idle.
         return;
       }
       onEvent(ExplorationEventSchema.parse(raw));

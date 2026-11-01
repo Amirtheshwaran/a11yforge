@@ -1,0 +1,149 @@
+{
+  "sourceRunId": "2026-10-26T19-04-29-541Z-27affb",
+  "capturedAt": "2026-10-30T18:40:47.064Z",
+  "patchSha256": "6d5665278496e1cb443d27483b7d6cb539586cbe1ea56e2af03ca0b64c3d8192",
+  "before": {
+    "imageUrl": "/demo/spatial-replay/failure.jpg",
+    "steps": [
+      {
+        "box": {
+          "height": 38,
+          "label": "Close",
+          "screenshot": "failure.jpg",
+          "selector": "#checkout-modal-close",
+          "viewportHeight": 720,
+          "viewportWidth": 1280,
+          "width": 320,
+          "x": 472.5,
+          "y": 302.40625
+        },
+        "insideExpectedRegion": true,
+        "label": "Close",
+        "selector": "#checkout-modal-close"
+      },
+      {
+        "box": {
+          "height": 40,
+          "label": "Email for receipt",
+          "screenshot": "failure.jpg",
+          "selector": "#checkout-modal-email",
+          "viewportHeight": 720,
+          "viewportWidth": 1280,
+          "width": 320,
+          "x": 472.5,
+          "y": 395.40625
+        },
+        "insideExpectedRegion": true,
+        "label": "Email for receipt",
+        "selector": "#checkout-modal-email"
+      },
+      {
+        "box": {
+          "height": 38,
+          "label": "Continue",
+          "screenshot": "failure.jpg",
+          "selector": "#checkout-modal-continue",
+          "viewportHeight": 720,
+          "viewportWidth": 1280,
+          "width": 320,
+          "x": 472.5,
+          "y": 463.40625
+        },
+        "insideExpectedRegion": true,
+        "label": "Continue",
+        "selector": "#checkout-modal-continue"
+      },
+      {
+        "box": {
+          "height": 21,
+          "label": "Shipping info",
+          "screenshot": "failure.jpg",
+          "selector": "#background-control",
+          "viewportHeight": 720,
+          "viewportWidth": 1280,
+          "width": 94.296875,
+          "x": 352.5,
+          "y": 667.15625
+        },
+        "insideExpectedRegion": false,
+        "label": "Shipping info",
+        "selector": "#background-control"
+      }
+    ]
+  },
+  "after": {
+    "imageUrl": "/demo/spatial-replay/verified.jpg",
+    "steps": [
+      {
+        "box": {
+          "height": 38,
+          "label": "Close",
+          "screenshot": "verified.jpg",
+          "selector": "#checkout-modal-close",
+          "viewportHeight": 720,
+          "viewportWidth": 1280,
+          "width": 320,
+          "x": 472.5,
+          "y": 302.40625
+        },
+        "insideExpectedRegion": true,
+        "label": "Close",
+        "selector": "#checkout-modal-close"
+      },
+      {
+        "box": {
+          "height": 40,
+          "label": "Email for receipt",
+          "screenshot": "verified.jpg",
+          "selector": "#checkout-modal-email",
+          "viewportHeight": 720,
+          "viewportWidth": 1280,
+          "width": 320,
+          "x": 472.5,
+          "y": 395.40625
+        },
+        "insideExpectedRegion": true,
+        "label": "Email for receipt",
+        "selector": "#checkout-modal-email"
+      },
+      {
+        "box": {
+          "height": 38,
+          "label": "Continue",
+          "screenshot": "verified.jpg",
+          "selector": "#checkout-modal-continue",
+          "viewportHeight": 720,
+          "viewportWidth": 1280,
+          "width": 320,
+          "x": 472.5,
+          "y": 463.40625
+        },
+        "insideExpectedRegion": true,
+        "label": "Continue",
+        "selector": "#checkout-modal-continue"
+      },
+      {
+        "box": {
+          "height": 38,
+          "label": "Close",
+          "screenshot": "verified.jpg",
+          "selector": "#checkout-modal-close",
+          "viewportHeight": 720,
+          "viewportWidth": 1280,
+          "width": 320,
+          "x": 472.5,
+          "y": 302.40625
+        },
+        "insideExpectedRegion": true,
+        "label": "Close",
+        "selector": "#checkout-modal-close"
+      }
+    ]
+  },
+  "reverseCheck": {
+    "insideExpectedRegion": true,
+    "label": "Continue",
+    "selector": "#checkout-modal-continue"
+  },
+  "capturedPatchSha256": "5fba4256032ddf9e239d0a5610a94d378665631f7f4769d34f6d1818be7ffafa"
+}

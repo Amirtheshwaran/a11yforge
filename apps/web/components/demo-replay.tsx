@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { prefersReducedMotion, pulse } from "../lib/motion";
 
 export interface ReplayBeat {
@@ -14,10 +14,9 @@ export interface ReplayBeat {
 /**
  * Recorded-demo replay: play/pause + scrubber move the theatre through the
  * real repair arc (failure → trace → repair → rejection → revision →
- * verified). Each beat jumps to the recorded artifact section below, so the
- * replay never invents content — it navigates real evidence.
+ * verified). Each beat links to its recorded artifact section below.
  */
-export function DemoReplay({ beats, onBeatChange }: { beats: ReplayBeat[]; onBeatChange?: (index: number) => void }): React.JSX.Element {
+export function DemoReplay({ beats, onBeatChange, scene }: { beats: ReplayBeat[]; onBeatChange?: (index: number) => void; scene?: ReactNode }): React.JSX.Element {
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const beat = beats[Math.min(index, beats.length - 1)];
@@ -43,12 +42,10 @@ export function DemoReplay({ beats, onBeatChange }: { beats: ReplayBeat[]; onBea
   function goToBeat(next: number): void {
     setIndex(next);
     setPlaying(false);
-    const target = document.getElementById(beats[next]?.targetId ?? "");
-    target?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
   }
 
   return (
-    <div className="demo-theatre" aria-label="Recorded repair replay">
+    <div className={`demo-theatre${scene !== undefined ? " demo-theatre-spatial" : ""}`} aria-label="Recorded repair replay">
       <div className="demo-stage" aria-live="polite">
         <span className="mono-label">
           <span className="dot-live" aria-hidden="true">● </span>
@@ -73,6 +70,7 @@ export function DemoReplay({ beats, onBeatChange }: { beats: ReplayBeat[]; onBea
           <span className="arrow" aria-hidden="true">↓</span>
         </button>
       </div>
+      {scene}
       <div className="demo-scrub">
         <button
           type="button"

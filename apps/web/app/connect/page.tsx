@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { InspectionStage } from "@/components/inspection-stage";
 import { EvidenceViewer } from "@/components/evidence-viewer";
 import { humanFindingOf } from "../../lib/human-copy";
 import {
@@ -250,7 +251,15 @@ function ConnectSourceContent(): React.JSX.Element {
               </span>
             </div>
 
-            {screenshot !== null && (
+            <InspectionStage
+              className="source-inspection-stage"
+              phase={traceCandidate !== null ? "source" : "inspect"}
+              imageUrl={screenshot !== null ? explorationShotSrc(runId, screenshot) : null}
+              label={screenshot !== null ? "Captured website · source inspection" : "Illustrative website · connect a finding"}
+              sourceLabel={traceCandidate?.filePath ?? null}
+            />
+            {screenshot !== null && <details className="source-evidence-disclosure">
+              <summary>Inspect the measured problem location</summary>
               <EvidenceViewer
                 src={explorationShotSrc(runId, screenshot)}
                 alt="Recorded browser screenshot for the source inspection"
@@ -259,7 +268,7 @@ function ConnectSourceContent(): React.JSX.Element {
                 onSelect={() => undefined}
                 caption="Evidence from the selected website check."
               />
-            )}
+            </details>}
             {/* Selected finding summary */}
             <div className="p-5 bg-[#0e0e10] flex flex-col gap-4 relative">
               {/* Subtle grid */}

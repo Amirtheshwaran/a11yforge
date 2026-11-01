@@ -73,7 +73,10 @@ function SceneContents(props: Omit<AccessibilitySceneProps, "onWebGLFail">): Rea
 
   return (
     <>
-      <color attach="background" args={["#000000"]} />
+      <color attach="background" args={["#101611"]} />
+      <ambientLight intensity={1.1} />
+      <directionalLight position={[-4, 7, 5]} intensity={3} color="#fff0df" />
+      <pointLight position={[5, 1, 2]} intensity={12} color="#f1916e" />
       <WebsitePlane textureUrl={props.textureUrl} plane={props.plane} />
       {props.nodes.map((node) => (
         <FindingMarker

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/", label: "Scan a site" },
+  { href: "/#check-site", label: "Scan a site" },
   { href: "/console", label: "Demo" },
 ] as const;
 
@@ -23,7 +23,7 @@ export function ForgeNav(): React.JSX.Element {
         <nav aria-label="Primary" className="forge-nav-links">
           {LINKS.map((link) => {
             const active =
-              link.href === "/"
+              link.href.startsWith("/#")
                 ? pathname === "/"
                 : pathname === link.href || pathname.startsWith(`${link.href}/`);
             return (

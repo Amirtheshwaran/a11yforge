@@ -102,9 +102,11 @@ function projectAxeRule(
           const box = entry.data["box"];
           const label = entry.data["boxLabel"];
           if (!isHighlightBox(box) || typeof label !== "string" || label === "") return [];
+          const measuredShot = entry.data["screenshot"];
+          if (typeof measuredShot === "string" && !result.screenshots.includes(measuredShot)) return [];
           return [
             {
-              screenshot,
+              screenshot: typeof measuredShot === "string" && result.screenshots.includes(measuredShot) ? measuredShot : screenshot,
               x: box.x,
               y: box.y,
               width: box.width,

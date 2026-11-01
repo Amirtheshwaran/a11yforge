@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/table";
 import { EvidenceViewer } from "@/components/evidence-viewer";
 import { IssueWalkthrough } from "@/components/issue-walkthrough";
+import { SpatialTour } from "@/components/spatial-tour/spatial-tour";
+import { liveTourModel } from "../../../lib/tour-model";
 import {
   EvidenceFallback,
   FindingListFallback,
@@ -191,6 +193,8 @@ function ExploreRunContent(): React.JSX.Element {
 
   const [events, setEvents] = useState<ExplorationEvent[]>([]);
   const [run, setRun] = useState<ExplorationRun | null>(null);
+  const [showDetailedEvidence, setShowDetailedEvidence] = useState(false);
+  const tourModel = useMemo(() => run === null ? null : liveTourModel(run, (name) => explorationShotSrc(runId, name), humanFindingOf), [run, runId]);
   const [error, setError] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [developer, setDeveloper] = useState(false);
@@ -527,6 +531,11 @@ function ExploreRunContent(): React.JSX.Element {
       : 0;
 
   const scanPct = progress.length > 0 ? Math.round((doneSteps / progress.length) * 100) : 0;
+
+  if (run?.state === "COMPLETED" && tourModel !== null && !showDetailedEvidence) return <main>
+    <SpatialTour model={tourModel} />
+    <section className="site-check-section"><h2>Keep the evidence in view.</h2><p>This tour uses only screenshots and measurements from this website check.</p><div className="finding-actions"><Button onClick={() => setShowDetailedEvidence(true)}>Developer details and full evidence</Button><Button variant="secondary" asChild><Link href="/#check-site">Check another website</Link></Button></div></section>
+  </main>;
 
   return (
     <main className="xp">

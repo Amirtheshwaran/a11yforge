@@ -50,6 +50,8 @@ import {
 } from "@/components/domain";
 import { foldLiveEvidence, formatTokens } from "../../lib/live-evidence";
 import { BeforeAfter, DemoReplay } from "../../components/demo-replay";
+import { RecordedExperience } from "@/components/spatial-tour/recorded-experience";
+import { SiteCheck } from "@/components/site-check";
 
 type LoadState =
   | { kind: "loading" }
@@ -58,7 +60,12 @@ type LoadState =
 
 type LivePhase = "idle" | "starting" | "running" | "done" | "failed";
 
-export default function Home() {
+export default function DemoPage(): React.JSX.Element {
+  const [showDetails, setShowDetails] = useState(false);
+  return <main><RecordedExperience /><SiteCheck /><details className="tour-technical" onToggle={(event) => setShowDetails(event.currentTarget.open)}><summary>Developer details · original repair artifacts, diff, compiler results, and verification</summary>{showDetails && <RecordedConsole />}</details></main>;
+}
+
+function RecordedConsole() {
   const [runs, setRuns] = useState<RunSummary[]>([]);
   const [selected, setSelected] = useState<string>("demo");
   const [state, setState] = useState<LoadState>({ kind: "loading" });
@@ -248,7 +255,7 @@ export default function Home() {
 
   return (
     <div className="xp">
-      <main id="main">
+      <section id="main">
       <a className="skip-link" href="#main">
         Skip to run evidence
       </a>
@@ -275,6 +282,8 @@ export default function Home() {
         </p>
       </div>
 
+      <details className="live-repair-disclosure">
+      <summary>Run a live repair on the controlled fixture</summary>
       <Card className="live-panel" aria-labelledby="h-live">
         <CardHeader className="p-0">
           <span className="mono-label" style={{ margin: "0 0 4px" }}>
@@ -483,6 +492,8 @@ export default function Home() {
             </>
           )}
       </Card>
+
+      </details>
 
       <Separator className="my-7" />
 
@@ -940,7 +951,7 @@ export default function Home() {
                     A11yForge replayed the original problem and confirmed it no
                     longer occurs.
                   </p>
-                  <p style={{ display: "flex", flexWrap: "wrap", gap: 12, margin: 0 }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 12, margin: 0 }}>
                     <Button asChild>
                       <a href="#h-diff">View change</a>
                     </Button>
@@ -957,7 +968,7 @@ export default function Home() {
                     <Button variant="secondary" asChild>
                       <a href="#h-critic">Developer details</a>
                     </Button>
-                  </p>
+                  </div>
                 </div>
               ) : (
                 <CardHeader className="p-0">
@@ -1100,7 +1111,7 @@ export default function Home() {
         </>
       )}
       </section>
-      </main>
+      </section>
     </div>
   );
 }
