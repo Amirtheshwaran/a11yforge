@@ -1,6 +1,6 @@
 # Final validation and submission readiness
 
-> **Historical.** This report describes the state on October 30, 2026. For current status, see [implementation status](IMPLEMENTATION_STATUS.md) and [hackathon compliance](HACKATHON_COMPLIANCE.md). Its statement that no model override was found is out of date.
+> **Historical.** This report describes the state on October 30, 2026. For current status, see [implementation status](IMPLEMENTATION_STATUS.md) and [hackathon compliance](HACKATHON_COMPLIANCE.md). Its statements that no model override was found, that `MODEL_BASE_URL` is not read and that Baseten must not be claimed are out of date.
 
 Validated October 30, 2026, Asia/Kolkata. This report describes executed checks and remaining manual steps. No deployment or completed video is claimed.
 

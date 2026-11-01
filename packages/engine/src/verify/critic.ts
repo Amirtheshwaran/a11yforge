@@ -10,6 +10,7 @@ import {
 } from "@a11yforge/shared";
 import {
   critiqueRepairWithMeta,
+  getMetaBaseUrl,
   getMetaModel,
   requireApiKey,
   type MetaFetch,
@@ -97,8 +98,10 @@ export async function requestCriticDecision(
   const env = deps.env ?? process.env;
   const apiKey = requireApiKey(env);
   const model = getMetaModel(env);
+  const baseUrl = getMetaBaseUrl(env);
   const { decision, usage } = await critiqueRepairWithMeta(deps.input, {
     ...(deps.fetchFn !== undefined ? { fetchFn: deps.fetchFn } : {}),
+    baseUrl,
     model,
     apiKey,
   });

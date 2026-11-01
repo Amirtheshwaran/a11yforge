@@ -1,0 +1,28 @@
+{
+  "diagnosisId": "diagnosis-checkout-modal-keyboard-2026-11-01",
+  "issueType": "contrast",
+  "title": "Focus escapes checkout modal to background on Tab",
+  "summary": "Focus wrapped inside #checkout-modal for earlier Tabs but escaped to #background-control on the third Tab while modal stayed open.",
+  "severity": "critical",
+  "confidence": 0.96,
+  "affectedStrategies": [
+    "keyboard",
+    "screenReaderLandmarks"
+  ],
+  "evidenceIds": [
+    "ev-modal-open",
+    "ev-focus-step-1",
+    "ev-focus-step-2",
+    "ev-focus-escape",
+    "ev-assertion-failed"
+  ],
+  "observedFailure": "FACT: Modal #checkout-modal opened with focus on #checkout-modal-close per ev-modal-open. FACT: Tab advanced focus within modal to #checkout-modal-email (ev-focus-step-1) then to #checkout-modal-continue (ev-focus-step-2). FACT: On next Tab, focus moved to #background-control outside modal while #checkout-modal remained open (ev-focus-escape) causing focus-contained-in-modal assertion failure at step 3 with actualFocus #background-control (ev-assertion-failed).",
+  "likelyCause": "INFERENCE: Focus trap/containment for #checkout-modal was incomplete – Tab cycling from last focusable element did not wrap to first element or otherwise contain focus, allowing sequential focus navigation to reach background page.",
+  "recommendedRepairStrategy": "Ensure when #checkout-modal is open, Tab / Shift+Tab cycles only among focusable elements inside #checkout-modal (wrap from last to first and first to last), prevent focus leaving modal, and restore focus appropriately on close. Verify with keyboard test covering forward and reverse Tab from all endpoints.",
+  "relevantWcagCriteria": [
+    "2.1.1 Keyboard",
+    "2.1.2 No Keyboard Trap",
+    "2.4.3 Focus Order"
+  ],
+  "needsSourceContext": true
+}

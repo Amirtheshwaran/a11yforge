@@ -24,4 +24,8 @@ run `2026-10-26T19-04-29-541Z-27affb`.
 `video/a11yforge-demo.mp4` is the demo; see [its transcript](video/a11yforge-demo-transcript.md)
 and [how it was made](../docs/DEMO_SCRIPT.md#how-this-cut-was-made).
 
+`live-verification-2026-11-01/` holds the 1 November diagnosis verification through Baseten-hosted
+Meta Muse Spark Open: the fresh browser scenario and its screenshots, the diagnosis, and the usage
+record with the provider request ID. It covers diagnosis only and is separate from the recorded repair.
+
 MarsCommuter's source was not repaired. Do not relabel either kind of evidence as the other.

@@ -96,15 +96,18 @@ to 4 November period.
 | Compiler lines and model names in the recorded story | `dbb541b` | 2026-11-01 | `apps/web/lib/tour-model.ts`, `packages/engine/src/runview/read-model.ts` | Yes |
 | Submission docs, screenshots, demo video | `513704c` | 2026-11-01 | `README.md`, `docs/`, `submission-assets/` | Yes: this is the demo |
 
-Later commits are listed by `git log 513704c..HEAD`. They change documentation, ignore
-files and the recorded browser QA results only, and all of them were made inside the period.
+| Configurable model base URL, live diagnosis verification | The commit adding `MODEL_BASE_URL` | 2026-11-01 | `packages/meta/src/config.ts`, `submission-assets/live-verification-2026-11-01` | No |
+
+Later commits are listed by `git log 513704c..HEAD`. Apart from `MODEL_BASE_URL`, they change
+documentation, ignore files and evidence files only, and all of them were made inside the period.
 
 ## Reused, not claimed as new
 
 | Item | Status | How it is used |
 | --- | --- | --- |
 | Open-source dependencies in `pnpm-lock.yaml`, including Next.js, React, Three.js, React Three Fiber, drei, Anime.js, Radix UI, Fastify, Zod, Playwright and axe-core | Pre-existing third-party software | Installed as dependencies under their own licenses; not vendored and not claimed |
-| Meta Model API, `muse-spark-1.3-contributor` | Event-provided model | Called from `packages/meta` |
+| Meta Model API, `muse-spark-1.3-contributor` | Event-provided model | Called from `packages/meta`; used in the recorded full repair run |
+| Baseten-hosted Meta Muse Spark Open, `meta-models/muse-spark-open-1026` | Hosted model | Called from `packages/meta` through `MODEL_BASE_URL`; used for the 1 November diagnosis verification only |
 | AI development tools | Development assistance, not team members | Used while building; not listed as contributors |
 | Google Stitch mockups in `stitch_a11yforge_autonomous_accessibility_platform/` | Generated design references, committed in `7af9f2b` | Not imported by product code and excluded from the Docker image |
 

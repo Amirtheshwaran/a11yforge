@@ -26,6 +26,7 @@ import {
 import {
   MetaApiError,
   ModelCallBudget,
+  getMetaBaseUrl,
   getMetaModel,
   proposeRepairRevisionWithMeta,
   requireApiKey,
@@ -271,11 +272,13 @@ function defaultDrivers(
     requestRevision: async (request) => {
       const apiKey = requireApiKey(env);
       const model = getMetaModel(env);
+      const baseUrl = getMetaBaseUrl(env);
       // At most one transport retry, only when no usable response was
       // received (network-level failure, status unknown).
       try {
         const result = await proposeRepairRevisionWithMeta(request, {
           ...(fetchFn !== undefined ? { fetchFn } : {}),
+          baseUrl,
           model,
           apiKey,
         });
@@ -284,6 +287,7 @@ function defaultDrivers(
         if (error instanceof MetaApiError && error.status === null) {
           const result = await proposeRepairRevisionWithMeta(request, {
             ...(fetchFn !== undefined ? { fetchFn } : {}),
+            baseUrl,
             model,
             apiKey,
           });

@@ -1,0 +1,11 @@
+{
+  "model": "meta-models/muse-spark-open-1026",
+  "operation": "accessibility-diagnosis",
+  "inputTokens": 762,
+  "cachedInputTokens": 0,
+  "outputTokens": 541,
+  "reasoningTokens": 92,
+  "latencyMs": 5163,
+  "timestamp": "2026-11-01T12:34:24.759Z",
+  "requestId": "chatcmpl-5c36074e7b1846c99b982cda140e38d0"
+}

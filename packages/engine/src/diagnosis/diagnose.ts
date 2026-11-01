@@ -2,6 +2,7 @@ import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   getMaxModelCallsPerRun,
+  getMetaBaseUrl,
   getMetaModel,
   requireApiKey,
   MetaMalformedResultError,
@@ -73,6 +74,7 @@ export async function runDiagnoseFixture(
   // Fail BEFORE any network attempt when the key is missing.
   const apiKey = requireApiKey(env);
   const model = getMetaModel(env);
+  const baseUrl = getMetaBaseUrl(env);
   const maxModelCalls = getMaxModelCallsPerRun(env);
   const runsDir =
     deps.runsDir ?? join(findWorkspaceRoot(), ".a11yforge", "runs");
@@ -93,6 +95,7 @@ export async function runDiagnoseFixture(
   try {
     ({ diagnosis, usage } = await diagnoseWithMeta(bundle, {
       ...(deps.fetchFn !== undefined ? { fetchFn: deps.fetchFn } : {}),
+      baseUrl,
       model,
       apiKey,
     }));

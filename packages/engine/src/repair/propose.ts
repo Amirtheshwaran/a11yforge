@@ -2,6 +2,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   getMaxModelCallsPerRun,
+  getMetaBaseUrl,
   getMetaModel,
   requireApiKey,
   MetaMalformedResultError,
@@ -205,6 +206,7 @@ export async function runProposeFixture(
   // Fail BEFORE any network attempt when the key is missing.
   const apiKey = requireApiKey(env);
   const model = getMetaModel(env);
+  const baseUrl = getMetaBaseUrl(env);
   const maxModelCalls = getMaxModelCallsPerRun(env);
 
   const bundle = buildFocusContainmentBundle(selection.result);
@@ -235,6 +237,7 @@ export async function runProposeFixture(
   try {
     ({ proposal, usage } = await proposeRepairWithMeta(context, {
       ...(deps.fetchFn !== undefined ? { fetchFn: deps.fetchFn } : {}),
+      baseUrl,
       model,
       apiKey,
     }));

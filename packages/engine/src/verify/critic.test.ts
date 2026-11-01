@@ -172,6 +172,38 @@ describe("critic request shape", () => {
     assert.equal(calls, 0);
   });
 
+  it("sends the request to the configured base URL", async () => {
+    let seenUrl = "";
+    const fetchFn = ((url: string) => {
+      seenUrl = url;
+      return Promise.resolve(okResponse(acceptPayload()));
+    }) as unknown as MetaFetch;
+    await requestCriticDecision({
+      env: { MODEL_API_KEY: "k", MODEL_BASE_URL: "https://models.example.test/v1/" },
+      fetchFn,
+      input: INPUT,
+    });
+    assert.equal(seenUrl, "https://models.example.test/v1/chat/completions");
+  });
+
+  it("fails before any request when MODEL_BASE_URL is unsafe", async () => {
+    let calls = 0;
+    const fetchFn = ((() => {
+      calls += 1;
+      return Promise.resolve(okResponse(acceptPayload()));
+    }) as unknown) as MetaFetch;
+    await assert.rejects(
+      () =>
+        requestCriticDecision({
+          env: { MODEL_API_KEY: "k", MODEL_BASE_URL: "http://models.example.test/v1" },
+          fetchFn,
+          input: INPUT,
+        }),
+      /MODEL_BASE_URL/,
+    );
+    assert.equal(calls, 0);
+  });
+
   it("rejects a critic verdict citing unknown evidence", async () => {
     const payload = acceptPayload();
     const content = JSON.parse(

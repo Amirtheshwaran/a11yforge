@@ -35,7 +35,7 @@ In one real recorded run against a controlled target:
 
 ## Meta's role
 
-**Meta reasons. Tools verify.** Every call goes to `https://api.meta.ai/v1/chat/completions` from [`packages/meta`](packages/meta), the only model-calling package. The default and recorded model is `muse-spark-1.3-contributor`.
+**Meta reasons. Tools verify.** Every call is made from [`packages/meta`](packages/meta), the only model-calling package. The default provider configuration is `https://api.meta.ai/v1` with `muse-spark-1.3-contributor`. A11yForge also supports a configurable OpenAI-compatible model base URL through `MODEL_BASE_URL`.
 
 | Call | Purpose | Input evidence | Structured output |
 | --- | --- | --- | --- |
@@ -59,7 +59,21 @@ The recorded run's real usage:
 
 These numbers come from the run's committed [usage artifacts](demo/accepted-run/2026-10-26T19-04-29-541Z-27affb/model-usage-summary.json).
 
-**Baseten:** not part of the runtime. The product calls Meta directly, this repository has no Baseten configuration, and no Baseten or open-weight inference is claimed.
+### Two separate pieces of model evidence
+
+| | Recorded full repair run | Fresh live verification |
+| --- | --- | --- |
+| Date | 26 October 2026 | 1 November 2026 |
+| Model | `muse-spark-1.3-contributor` | `meta-models/muse-spark-open-1026`, Baseten-hosted Meta Muse Spark Open |
+| What it covers | Diagnosis, proposal, bounded revision and critic, as recorded artifacts | **Diagnosis only**, through A11yForge's real diagnosis path with fresh real-browser evidence |
+| Result | Repair accepted after the deterministic gates passed | Valid structured diagnosis, with the provider request ID captured |
+| Artifacts | [Recorded run](demo/accepted-run/2026-10-26T19-04-29-541Z-27affb) | [Verification run](submission-assets/live-verification-2026-11-01) |
+
+Limits of the 1 November verification:
+
+- Proposal, revision and critic were not freshly verified through Baseten. No repair loop ran through Baseten, on the controlled target or on any other site.
+- Schema validation checks structure, not correctness. The diagnosis described the focus escape correctly, but its `issueType` field said `contrast` instead of `focus-containment`.
+- The default `api.meta.ai` endpoint was not re-verified that day, because the available key is not valid there.
 
 ## What is deterministic
 
@@ -97,7 +111,7 @@ pnpm start
 
 Open [localhost:3000](http://localhost:3000). The API listens on port 3001. Scans and the recorded demo need no key.
 
-For a live repair of the controlled target, set `MODEL_API_KEY` in a local `.env` using [the template](.env.example). A full run makes up to four paid calls. The fixture commands are in the root `package.json`.
+For a live repair of the controlled target, set `MODEL_API_KEY` in a local `.env` using [the template](.env.example). A full run makes up to four paid calls. For another OpenAI-compatible host, also set `MODEL_BASE_URL` and `A11YFORGE_META_MODEL`. The fixture commands are in the root `package.json`.
 
 Other commands: `pnpm explore -- --url https://example.com --max-pages 3` scans from the CLI, and `pnpm --filter @a11yforge/engine repair -- --run <run-id> --finding <finding-id> --source <dir>` traces a finding into source. Despite its name, that last command inspects source only and exits with code 3.
 

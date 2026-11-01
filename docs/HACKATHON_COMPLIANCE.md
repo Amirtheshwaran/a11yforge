@@ -86,24 +86,34 @@ and deterministic replay as the central story. A11yForge is not presented as a s
 | Item | Status |
 | --- | --- |
 | Roles | Diagnosis, repair proposal, one revision, critic |
-| Runtime | `https://api.meta.ai/v1`, default model `muse-spark-1.3-contributor` |
+| Default provider configuration | `https://api.meta.ai/v1` with `muse-spark-1.3-contributor`. `MODEL_BASE_URL` and `A11YFORGE_META_MODEL` select another OpenAI-compatible host and model |
 | Bound | At most 4 calls per run, enforced in code; 0 during exploration and playback |
 | Evidence of use | Four committed usage artifacts from run `2026-10-26T19-04-29-541Z-27affb`, dated 26 October 2026 |
-| Re-verified live on 1 November 2026 | **No.** See below. |
+| Fresh live verification, 1 November 2026 | **Diagnosis only**, through Baseten-hosted Meta Muse Spark Open. See below. |
 | Automated tests | Mocked transport; they do not prove a live call |
 
-**Blocker.** On this machine the key in the ignored `.env` returned `401 invalid_api_key` from both
-`api.meta.ai/v1/models` and one `chat/completions` request using the default model, which consumed no
-tokens. The same file overrides the model to `meta-models/muse-spark-open-1026`. So a local live run
-would fail at its first call until `.env` is corrected. The committed defaults and the recorded run are
-not affected. A public deployment holds no key.
+**Recorded full repair run, 26 October.** Used `muse-spark-1.3-contributor`, with diagnosis, proposal,
+bounded revision and critic as recorded artifacts. The usage artifacts agree with the README's table on
+model and token counts. They hold `requestId: null`, so they don't include a provider request ID that
+could be checked independently.
 
-The recorded usage artifacts agree with the README's table on model and token counts. They hold
-`requestId: null`, so they don't include a provider request ID that could be checked independently.
+**Fresh live verification, 1 November.** One request to `https://inference.baseten.co/v1/chat/completions`
+with `meta-models/muse-spark-open-1026`, Baseten-hosted Meta Muse Spark Open. It went through A11yForge's
+real diagnosis path (`runDiagnoseFixture`) using fresh real-browser evidence, and it returned a valid
+structured diagnosis. Provider request ID: `chatcmpl-5c36074e7b1846c99b982cda140e38d0`. Usage: 762 input and
+541 output tokens. The artifacts are in
+[`submission-assets/live-verification-2026-11-01`](../submission-assets/live-verification-2026-11-01).
 
-**Baseten.** Not part of the runtime. The repository has no Baseten code or configuration, `packages/meta`
-calls a fixed `https://api.meta.ai/v1` base URL, and no recorded run used Baseten. Baseten and
-open-weight inference are not claimed.
+**Limits of that verification.**
+
+- It verified diagnosis only. Proposal, revision and critic were not freshly verified through Baseten, and
+  no repair loop ran through Baseten, on the controlled target or on any other site.
+- Schema validation checks structure, not correctness. The diagnosis described the focus escape correctly,
+  but its `issueType` field said `contrast` instead of `focus-containment`.
+- The default `api.meta.ai` endpoint was not re-verified on 1 November. The available key returned
+  `401 invalid_api_key` there, because it is a Baseten key.
+
+A public deployment holds no key, and the base URL override accepts plain HTTPS URLs only.
 
 ## Deployment
 

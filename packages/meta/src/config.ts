@@ -15,6 +15,9 @@ export const DEFAULT_META_MODEL = "muse-spark-1.3-contributor";
 /** Environment variable carrying the Meta API key (never hard-coded). */
 export const MODEL_API_KEY_ENV = "MODEL_API_KEY";
 
+/** Environment variable overriding the Chat Completions base URL. */
+export const MODEL_BASE_URL_ENV = "MODEL_BASE_URL";
+
 /** Environment variable overriding the diagnosis model. */
 export const META_MODEL_ENV = "A11YFORGE_META_MODEL";
 
@@ -106,6 +109,34 @@ export function getMetaModel(
   return override === undefined || override === ""
     ? DEFAULT_META_MODEL
     : override;
+}
+
+/**
+ * Active base URL: override env or the Meta default. Throws on anything but
+ * a plain HTTPS URL, so a mistyped value never receives the API key. The
+ * message does not repeat the value, which could itself hold a credential.
+ */
+export function getMetaBaseUrl(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const override = env[MODEL_BASE_URL_ENV]?.trim();
+  if (override === undefined || override === "") {
+    return META_API_BASE_URL;
+  }
+  const parsed = URL.parse(override);
+  if (
+    parsed === null ||
+    parsed.protocol !== "https:" ||
+    parsed.username !== "" ||
+    parsed.password !== "" ||
+    parsed.search !== "" ||
+    parsed.hash !== ""
+  ) {
+    throw new Error(
+      `${MODEL_BASE_URL_ENV} must be an HTTPS URL with no credentials, query or fragment.`,
+    );
+  }
+  return override.replace(/\/+$/, "");
 }
 
 /**

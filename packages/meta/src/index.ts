@@ -20,11 +20,13 @@ export {
   META_API_BASE_URL,
   META_MODEL_ENV,
   MODEL_API_KEY_ENV,
+  MODEL_BASE_URL_ENV,
   REPAIR_MAX_OUTPUT_TOKENS,
   REPAIR_OPERATION,
   REPAIR_REASONING_EFFORT,
   REVISION_OPERATION,
   getMaxModelCallsPerRun,
+  getMetaBaseUrl,
   getMetaModel,
   requireApiKey,
 } from "./config.js";

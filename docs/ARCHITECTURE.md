@@ -110,8 +110,9 @@ pnpm diagnose:fixture
     screenshots, axe findings, or page dumps)
   → prints the credit notice (model, operation, evidence count, call budget)
   → meta provider makes EXACTLY ONE request to
-    https://api.meta.ai/v1/chat/completions (model muse-spark-1.3-contributor
-    unless A11YFORGE_META_MODEL overrides; key from MODEL_API_KEY only)
+    https://api.meta.ai/v1/chat/completions unless MODEL_BASE_URL overrides
+    (model muse-spark-1.3-contributor unless A11YFORGE_META_MODEL overrides;
+    key from MODEL_API_KEY only)
   → response_format.json_schema constrains decoding to the
     accessibility-diagnosis schema (never a bare "return JSON" prompt)
   → local validation: Zod parse + evidence-ID grounding (unknown IDs fail)
@@ -167,9 +168,10 @@ pnpm propose:fixture (exactly ONE paid request, manual, never in tests)
   → prints the credit notice (model, operation, diagnosis, source counts,
     call budget) and fails BEFORE any network attempt without MODEL_API_KEY
   → meta provider makes EXACTLY ONE request to
-    https://api.meta.ai/v1/chat/completions (model muse-spark-1.3-contributor
-    unless A11YFORGE_META_MODEL overrides; max_completion_tokens 4096,
-    reasoning_effort low; key from MODEL_API_KEY only)
+    https://api.meta.ai/v1/chat/completions unless MODEL_BASE_URL overrides
+    (model muse-spark-1.3-contributor unless A11YFORGE_META_MODEL overrides;
+    max_completion_tokens 4096, reasoning_effort low; key from MODEL_API_KEY
+    only)
   → response_format.json_schema constrains decoding to the
     accessibility-repair-proposal schema (exact-text anchors, never bare
     prose or line-number-only edits)

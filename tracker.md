@@ -43,7 +43,7 @@
 | Patch download | 🟡 | Phase 9 |
 | Public deployment | ⬜ | After core Phase 9 |
 | Submission/demo polish | ⬜ | After feature freeze |
-| Baseten / Muse Spark Open bonus | ⛔ | Only after core is safe |
+| Baseten / Muse Spark Open | 🟡 | Live diagnosis verified 1 Nov; proposal, revision and critic not verified |
 | GitHub write/PR automation | ⛔ | Not needed for core |
 | Private repo OAuth | ⛔ | Not core |
 | Multi-user auth | ⛔ | Not core |

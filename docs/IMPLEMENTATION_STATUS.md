@@ -70,8 +70,8 @@ physical iOS or Android device testing.
   server's model configuration; the recorded demo requires no model calls.
 - Source matching can remain ambiguous. A match alone is not verification.
 - A public deployment and physical-device testing remain outstanding.
-- Live model use was not re-verified on 1 November: the local `.env` key returned
-  401 from Meta's API. See [hackathon compliance](HACKATHON_COMPLIANCE.md#meta-model-usage).
+- The 1 November live verification covered diagnosis only, through Baseten-hosted Meta
+  Muse Spark Open. See [hackathon compliance](HACKATHON_COMPLIANCE.md#meta-model-usage).
 
 ## Final submission work, 1 November
 
@@ -93,18 +93,20 @@ table above records the state at `971aa6d`.
 
 ### Final local validation, 1 November
 
-Product code unchanged since `513704c`. Run from a production build, served on one port with no model
-key, as the container serves it. This is not a hosted test: public deployment is deferred.
+Run from a production build, served on one port with no model key, as the container serves it. This is
+not a hosted test: public deployment is deferred. Browser QA and the site scans ran before the
+`MODEL_BASE_URL` change, which only affects server-side model configuration. Tests, typecheck, lint, the
+smoke test and the secret scan were rerun after it.
 
 | Check | Result |
 | --- | --- |
 | Build, typecheck, lint, `demo:validate` | Passed |
-| Tests | Meta 46 of 46, API 33 of 33, web 84 of 84. Engine 253 passed, 0 failed, 3 skipped (they need Windows symlink permission) |
+| Tests | Meta 49 of 49, API 33 of 33, web 84 of 84. Engine 255 passed, 0 failed, 3 skipped (they need Windows symlink permission) |
 | `deploy/smoke.mjs` against the local server | All passed |
 | Browser QA | 108 of 108: keyboard, live scan, source, recorded demo, six viewports, reduced motion, WebGL off, axe on A11yForge's own pages |
 | Screenshots and video | All 10 screenshots match their manifest digests. Video is 2:45, 1920 × 1080, H.264 and AAC. Narration matches the script and transcript |
 | Secret scan, working tree and all history | No secrets. The only matches are dummy values in three test files |
-| Live Meta call | **Not verified:** `401 invalid_api_key` |
+| Live model call | One diagnosis succeeded through Baseten-hosted Meta Muse Spark Open. Proposal, revision and critic were not freshly verified through Baseten. See [compliance](HACKATHON_COMPLIANCE.md#meta-model-usage) |
 
 | Real-site scan | Pages tested | Findings | Limitations |
 | --- | --- | --- | --- |

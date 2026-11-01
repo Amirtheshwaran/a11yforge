@@ -4,7 +4,7 @@ Draft for the [portal](https://cerebralvalley.ai/e/meta-ai-developer-hackathon/h
 review is deferred: the form is behind sign-in, so its fields and character limits are unconfirmed. Text
 in `[SQUARE BRACKETS]` is a placeholder. Never submit one.
 
-Lengths in characters, to pick a block that fits each field's limit: tagline 91, one-line pitch 179, short description 480, medium description 908, long description 1883, built during the hackathon 339, Meta technology 869, architecture 337, impact 424, technical depth 522, how to try it 383, known limitations 398.
+Lengths in characters, to pick a block that fits each field's limit: tagline 91, one-line pitch 179, short description 480, medium description 908, long description 1883, built during the hackathon 339, Meta technology 1370, architecture 337, impact 424, technical depth 522, how to try it 383, known limitations 544.
 
 ## Project name
 
@@ -54,14 +54,17 @@ Built during the Meta Global AI Developer Hackathon: real-browser accessibility 
 
 ## Meta technology used
 
-Meta Model API with `muse-spark-1.3-contributor`, called only from `packages/meta` through strict JSON-schema Chat Completions.
+Meta models are called only from `packages/meta` through strict JSON-schema Chat Completions. The default provider configuration is the Meta Model API with `muse-spark-1.3-contributor`, and `MODEL_BASE_URL` supports another OpenAI-compatible host.
 
 - **Diagnosis:** receives browser evidence and returns the cause, repair strategy, evidence IDs and WCAG criteria.
 - **Repair proposal:** receives the diagnosis and traced source and returns exact edits, with rationale and risks.
 - **Revision:** at most one. Receives the compiler or verifier failure and returns corrected edits.
 - **Critic:** runs only after the deterministic gates pass, and may reject but cannot override a failed gate.
 
-Replies are validated locally and fail closed with no automatic retries. The run is capped at four calls. Exploration and recorded playback make none. The recorded run's real usage is in its committed artifacts. The runtime calls Meta directly, and Baseten and open-weight inference are not claimed.
+Replies are validated locally and fail closed with no automatic retries. The run is capped at four calls. Exploration and recorded playback make none.
+
+- **Recorded full repair run, 26 October:** `muse-spark-1.3-contributor`, with diagnosis, proposal, bounded revision and critic as recorded artifacts.
+- **Fresh live verification, 1 November:** Baseten-hosted Meta Muse Spark Open (`meta-models/muse-spark-open-1026`), through A11yForge's real diagnosis path with fresh real-browser evidence. It returned a valid structured diagnosis, and the provider request ID was captured. This verified diagnosis only. Proposal, revision and critic were not freshly verified through Baseten.
 
 ## Architecture
 
@@ -91,7 +94,7 @@ Watch the demo video. To run it, use Node.js 22.18+ and pnpm 10.34.9: clone the 
 
 ## Known limitations
 
-Repair of arbitrary websites is not connected; the repair loop targets a controlled fixture, and the demo shows it as a recorded real run. Authentication, CAPTCHA, blocked or missing pages can limit scan coverage, and those pages are reported as untested. Source matches can remain ambiguous. A scan is not a full conformance audit. Layouts were tested in browser viewports, not on physical phones.
+Repair of arbitrary websites is not connected; the repair loop targets a controlled fixture, and the demo shows it as a recorded real run. Authentication, CAPTCHA, blocked or missing pages can limit scan coverage, and those pages are reported as untested. Source matches can remain ambiguous. A scan is not a full conformance audit. Layouts were tested in browser viewports, not on physical phones. The 1 November live verification covered diagnosis only, and its issue-type label was wrong even though its description of the failure was right.
 
 ## Human team members
 

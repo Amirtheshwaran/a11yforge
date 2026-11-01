@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 import {
   DEFAULT_MAX_MODEL_CALLS_PER_RUN,
   DEFAULT_META_MODEL,
+  META_API_BASE_URL,
   getMaxModelCallsPerRun,
+  getMetaBaseUrl,
   getMetaModel,
   requireApiKey,
 } from "./config.js";
@@ -26,6 +28,36 @@ describe("meta config", () => {
       getMetaModel({ A11YFORGE_META_MODEL: "   " }),
       DEFAULT_META_MODEL,
     );
+  });
+
+  it("defaults to the Meta base URL", () => {
+    assert.equal(getMetaBaseUrl({}), META_API_BASE_URL);
+    assert.equal(META_API_BASE_URL, "https://api.meta.ai/v1");
+    assert.equal(getMetaBaseUrl({ MODEL_BASE_URL: "   " }), META_API_BASE_URL);
+  });
+
+  it("allows an HTTPS base URL override and drops trailing slashes", () => {
+    assert.equal(
+      getMetaBaseUrl({ MODEL_BASE_URL: "https://models.example.test/v1/" }),
+      "https://models.example.test/v1",
+    );
+  });
+
+  it("rejects an unsafe base URL without repeating its value", () => {
+    for (const value of [
+      "not a url",
+      "http://models.example.test/v1",
+      "https://user:hidden-value@models.example.test/v1",
+      "https://models.example.test/v1?token=hidden-value",
+      "https://models.example.test/v1#hidden-value",
+    ]) {
+      assert.throws(
+        () => getMetaBaseUrl({ MODEL_BASE_URL: value }),
+        (error: Error) =>
+          error.message.includes("MODEL_BASE_URL") &&
+          !error.message.includes("hidden-value"),
+      );
+    }
   });
 
   it("defaults the per-run call budget to 1", () => {
