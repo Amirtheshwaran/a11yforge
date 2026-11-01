@@ -87,7 +87,7 @@ Repair of arbitrary websites is not connected; the repair loop targets a control
 
 Team size: 1. Entrant: Amirtheshwaran Navaneethakrishnan. Other team members: none.
 
-Do not enter AI tools or friends who gave informal help as team members. If the form asks about tools or outside help, use the breakdown in [People and tools](HACKATHON_NEW_WORK.md#people-and-tools).
+Do not enter development tools or anyone who gave informal help as team members. If the form asks directly about AI-assisted development, third-party tools or technical assistance, answer accurately and completely.
 
 ## Before submitting
 

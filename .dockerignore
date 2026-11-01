@@ -29,3 +29,5 @@ pnpm-debug.log*
 stitch_a11yforge_autonomous_accessibility_platform
 stitch_remix_of_a11yforge_autonomous_accessibility_platform
 submission-assets
+.private
+form-screenshots

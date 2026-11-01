@@ -102,7 +102,7 @@ are final-submission work made inside the period.
 | --- | --- | --- |
 | Open-source dependencies in `pnpm-lock.yaml`, including Next.js, React, Three.js, React Three Fiber, drei, Anime.js, Radix UI, Fastify, Zod, Playwright and axe-core | Pre-existing third-party software | Installed as dependencies under their own licenses; not vendored and not claimed |
 | Meta Model API, `muse-spark-1.3-contributor` | Event-provided model | Called from `packages/meta` |
-| AI development tools | Development assistance, not team members | See [People and tools](#people-and-tools) |
+| AI development tools | Development assistance, not team members | Used while building; not listed as contributors |
 | Google Stitch mockups in `stitch_a11yforge_autonomous_accessibility_platform/` | Generated design references, committed in `7af9f2b` | Not imported by product code and excluded from the Docker image |
 
 The Stitch mockups contain sample strings such as `2025-05-18T14:32:09.112Z` and
@@ -110,21 +110,9 @@ The Stitch mockups contain sample strings such as `2025-05-18T14:32:09.112Z` and
 not evidence of earlier development, and the mockups are not evidence of product
 behavior. Do not use them as screenshots.
 
-## People and tools
+## Team
 
-A11yForge is a solo Indie Developer track project. Team size: 1.
-
-| Role | Who or what | Basis |
-| --- | --- | --- |
-| Hackathon entrant and author | Amirtheshwaran Navaneethakrishnan | Entrant's statement; `git log`; GitHub contributors |
-| Development tool | Meta Muse and Meta models | Entrant's statement; runtime use in the recorded run's usage artifacts |
-| Development tool | Claude Code | Entrant's statement |
-| Development tool | Codex and ChatGPT | Entrant's statement |
-| Development tool | Google Stitch | Generated the design mockups listed above |
-| External informal assistance | Friends may give advice, review, feedback or troubleshooting, or help operate deployment and submission tools or accounts | Entrant's statement. They are not team members, entrants, authors or contributors. |
-
-Tools are not people and are not team members. Listing a tool here does not credit it as an
-author.
+Team size: 1. Entrant and author: Amirtheshwaran Navaneethakrishnan. Track: Indie Developer.
 
 **Check for other human contributions, 1 November 2026.** All 35 commits have one human author,
 and GitHub credits them to one account. There are no co-author, `Signed-off-by` or `Reviewed-by`

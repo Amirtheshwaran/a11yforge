@@ -56,14 +56,10 @@ unconfirmed, and choosing one is the owner's decision.
 stated this on 1 November 2026, and the repository agrees: one human Git author under two email
 addresses, one GitHub contributor, and no co-author trailers.
 
-AI tools are development tools, not team members. Friends may give advice, review, feedback or
-troubleshooting, or help operate deployment and submission tools or accounts. That help does not make
-them team members, and the Official Rules allow third-party technical assistance on the conditions
-above. The full breakdown is in [People and tools](HACKATHON_NEW_WORK.md#people-and-tools).
-
-If another human directly authors substantive code or assets, or makes a contribution that could
-affect the required disclosure, nobody is added silently. It is flagged to the entrant as
-`HUMAN CONTRIBUTION DISCLOSURE NEEDS REVIEW`. No such contribution has been found in the repository.
+Development tools and informal outside help do not make anyone a team member. The repository shows no
+other human contribution; see the [audit](HACKATHON_NEW_WORK.md#team). If the form or rules ask directly
+about AI-assisted development, third-party tools or technical assistance, the answer must be accurate
+and complete.
 
 ```text
 [x] Entrant confirmed a one-person team, 1 November 2026
