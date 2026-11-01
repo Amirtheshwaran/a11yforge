@@ -72,6 +72,7 @@ function ConnectSourceContent(): React.JSX.Element {
   const search = useSearchParams();
   const runId = search.get("run") ?? "";
   const findingId = search.get("finding") ?? "";
+  const findingHref = runId === "" ? "/" : `/explore/${encodeURIComponent(runId)}${findingId === "" ? "" : `?finding=${encodeURIComponent(findingId)}`}`;
 
   const [exploration, setExploration] = useState<ExplorationRun | null>(null);
   const [gitUrl, setGitUrl] = useState("");
@@ -190,7 +191,7 @@ function ConnectSourceContent(): React.JSX.Element {
       {/* Top Header & Breadcrumb Bar */}
       <nav aria-label="Breadcrumb" className="w-full flex flex-wrap items-center justify-between gap-y-3 pb-6 border-b border-white/[0.08]">
         <div className="flex items-center gap-2 font-mono text-xs tracking-wider uppercase text-inkdim">
-          <Link href={runId !== "" ? `/explore/${encodeURIComponent(runId)}` : "/"} className="hover:text-ink transition-colors">
+          <Link href={findingHref} className="hover:text-ink transition-colors">
             Results
           </Link>
           <span className="text-white/20">/</span>
@@ -464,7 +465,7 @@ function ConnectSourceContent(): React.JSX.Element {
                       asChild
                       className="bg-[#111113] border border-white/10 text-inkdim hover:text-white hover:bg-white/5 font-mono text-xs h-11"
                     >
-                      <Link href={runId !== "" ? `/explore/${encodeURIComponent(runId)}` : "/"}>
+                      <Link href={findingHref}>
                         Back to finding
                       </Link>
                     </Button>

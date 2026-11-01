@@ -30,6 +30,11 @@ view the demo, record spatial evidence, or explore a website.
 - One time-based progress filter controls camera and object poses directly.
   Screenshot fitting uses the actual field of view and scene aspect ratio.
   Blur filters and a second camera smoothing pass were removed.
+- Copy fades overlap the half-chapter handoff. A user who stops scrolling
+  between chapters retains readable text instead of a blank editorial lane.
+- Source inspection links return to the same measured finding using its real
+  ID. Initial issue restoration runs once and does not override subsequent
+  chapter navigation or reduced-motion changes.
 - High-frequency progress lives in refs. React updates only chapter selection
   and other coarse state. The renderer runs on demand, caps DPR at 1.5, reuses
   vectors, and adds no post-processing or dynamic shadows.
@@ -103,9 +108,15 @@ submit button. Safe-area insets and reduced-motion controls are respected.
 - `pnpm typecheck`: passed across workspaces.
 - `pnpm lint`: passed repository-wide.
 - `pnpm build`: passed across workspaces.
-- Web tests: 76 passed, including timeline reversal, evidence isolation,
+- Web tests: 77 passed, including timeline reversal, evidence isolation,
   verification gates, screenshot validity, replay provenance, and website
   address normalization.
+- The actual Anime.js timeline is sampled forward and backward across chapter
+  handoffs to verify that paused copy retains readable opacity.
+- Production browser checks verified finding → source → finding returns on
+  desktop and at 390 × 844, plus subsequent chapter navigation and motion-toggle
+  changes without reapplying the initial selection. Paused mobile chapter copy
+  was also inspected directly during a screenshot crossfade.
 - Targeted engine tests: 20 passed across page capture, finding projection,
   and anti-fixture-coupling suites. Capture tests include CSP-blocked scanning,
   tight multi-page budgets, HTTP errors, sign-in walls, and partial navigation.

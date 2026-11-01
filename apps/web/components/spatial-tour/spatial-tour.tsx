@@ -8,11 +8,12 @@ import type { TourMotion } from "./SpatialScene";
 import { usePrefersReducedMotion } from "../scene/use-reduced-motion";
 import { groupOf, PROBLEM_GROUPS } from "../../lib/human-copy";
 import { CaptureScene } from "./CaptureScene";
+import { copyTransitionTiming } from "../../lib/tour-motion";
 
 const Scene = dynamic(() => import("./SpatialScene").then((module) => module.SpatialScene), { ssr: false });
 
 /** One persistent renderer and one scroll timeline for both recorded and live evidence. */
-export function SpatialTour({ model, id = "spatial-tour" }: { model: TourModel; id?: string }): React.JSX.Element {
+export function SpatialTour({ model, id = "spatial-tour", initialFindingId }: { model: TourModel; id?: string; initialFindingId?: string | null }): React.JSX.Element {
   const root = useRef<HTMLElement>(null);
   const sticky = useRef<HTMLDivElement>(null);
   const chapterNav = useRef<HTMLElement>(null);
@@ -32,22 +33,32 @@ export function SpatialTour({ model, id = "spatial-tour" }: { model: TourModel; 
   const presented = hasCapture && (ready || useCaptureScene);
   const lastActive = useRef(0);
   const seek = useRef<((progress: number) => void) | null>(null);
+  const restoredFinding = useRef<string | null>(null);
   const onReady = useCallback(() => setReady(true), []);
   const onFail = useCallback(() => setFailed(true), []);
   const count = model.chapters.length;
   const chapter = model.chapters[active] ?? model.chapters[0];
-  const goTo = useCallback((index: number) => {
+  const goTo = useCallback((index: number, instant = false) => {
     const element = root.current;
     if (element === null) return;
     const rect = element.getBoundingClientRect();
     const distance = Math.max(1, rect.height - (sticky.current?.offsetHeight ?? window.innerHeight - 58));
     const bounded = Math.max(0, Math.min(count - 1, index));
-    window.scrollTo({ top: window.scrollY + rect.top - 58 + distance * bounded / Math.max(1, count - 1), behavior: reduced ? "instant" : "smooth" });
+    window.scrollTo({ top: window.scrollY + rect.top - 58 + distance * bounded / Math.max(1, count - 1), behavior: reduced || instant ? "instant" : "smooth" });
   }, [count, reduced]);
   const selectFinding = useCallback((findingId: string) => {
     const index = model.chapters.findIndex((item) => item.finding?.findingId === findingId);
     if (index >= 0) goTo(index);
   }, [model, goTo]);
+
+  useEffect(() => {
+    if (initialFindingId == null) { restoredFinding.current = null; return; }
+    if (restoredFinding.current === initialFindingId) return;
+    const index = model.chapters.findIndex((item) => item.finding?.findingId === initialFindingId);
+    if (index < 0) { restoredFinding.current = initialFindingId; return; }
+    const frame = requestAnimationFrame(() => { goTo(index, true); restoredFinding.current = initialFindingId; });
+    return () => cancelAnimationFrame(frame);
+  }, [initialFindingId, model, goTo]);
 
   useEffect(() => { motion.current.reduced = reduced; motion.current.wake?.(); }, [reduced]);
   useEffect(() => {
@@ -60,8 +71,9 @@ export function SpatialTour({ model, id = "spatial-tour" }: { model: TourModel; 
         if (panel === null) return;
         const children = Array.from(panel.querySelectorAll<HTMLElement>("[data-tour-copy]"));
         children.forEach((child, order) => {
-          if (index > 0) timeline?.add(child, { opacity: [0, 1], y: [12, 0], duration: 320, ease: "outCubic" }, index * 1000 - 420 + Math.min(order, 3) * 16);
-          if (index < count - 1) timeline?.add(child, { opacity: [1, 0], y: [0, -10], duration: 240, ease: "inOutQuad" }, index * 1000 + 320 + Math.min(order, 3) * 12);
+          const timing = copyTransitionTiming(index, order);
+          if (index > 0) timeline?.add(child, { opacity: [0, 1], y: [12, 0], duration: timing.duration, ease: "outCubic" }, timing.enterAt);
+          if (index < count - 1) timeline?.add(child, { opacity: [1, 0], y: [0, -10], duration: timing.duration, ease: "inOutQuad" }, timing.exitAt);
         });
       });
       seek.current = (progress) => timeline?.seek(progress * 1000);

@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { fitCaptureDistance, followProgress } from "./lib/tour-motion.ts";
+import { fitCaptureDistance, followProgress, copyTransitionTiming } from "./lib/tour-motion.ts";
+import { createTimeline } from "animejs";
 
 describe("spatial framing and motion", () => {
   it("fits the full capture at phone, tablet, desktop, and landscape aspects", () => {
@@ -27,5 +28,25 @@ describe("spatial framing and motion", () => {
     assert.ok(followProgress(5, 1, 1 / 60, false) < 5);
     assert.equal(followProgress(5, 1, 1 / 60, true), 1);
     assert.ok(followProgress(1, 5, 10, false) < 5, "background pauses do not teleport the scene");
+  });
+  it("keeps paused chapter copy readable across the camera handoff in both directions", () => {
+    const count = 4;
+    for (const order of [0, 1, 2, 3]) {
+      const copy = Array.from({ length: count }, () => ({ opacity: 1 }));
+      const timeline = createTimeline({ autoplay: false });
+      copy.forEach((item, index) => {
+        const timing = copyTransitionTiming(index, order);
+        if (index > 0) timeline.add(item, { opacity: [0, 1], duration: timing.duration, ease: "outCubic" }, timing.enterAt);
+        if (index < count - 1) timeline.add(item, { opacity: [1, 0], duration: timing.duration, ease: "inOutQuad" }, timing.exitAt);
+      });
+      try {
+        const positions = Array.from({ length: 601 }, (_, index) => index / 200);
+        for (const position of [...positions, ...positions.toReversed()]) {
+          timeline.seek(position * 1000);
+          const selected = Math.min(count - 1, Math.round(position));
+          assert.ok(copy[selected].opacity >= 0.49, `copy ${order} at progress ${position}: ${copy[selected].opacity}`);
+        }
+      } finally { timeline.revert(); }
+    }
   });
 });
