@@ -13,7 +13,8 @@ public pages above and may be in the sign-in-only portal. They are treated as bi
 
 | Rule | Status | Source |
 | --- | --- | --- |
-| Up to 4 people on an Indie team; one Representative submits and identifies the others | Met if solo is confirmed | Official rules |
+| Up to 4 people on an Indie team; one Representative submits and identifies the others | Met: team of 1, no others to identify | Official rules |
+| Third-party technical assistance is allowed if the submission stays the participant's own work and they own all rights to it | See [Team](#team) | Official rules |
 | One track per project | Indie Developer | Official rules |
 | Judging: Impact 30%, Meta AI tooling 25%, Technical depth and execution 20%, Demo 25% | Applied throughout | Official rules |
 | Original work; open-source software allowed under its licenses | See [new-work audit](HACKATHON_NEW_WORK.md) | Official rules |
@@ -51,11 +52,21 @@ unconfirmed, and choosing one is the owner's decision.
 
 ## Team
 
-One human Git author: Amirtheshwaran Navaneethakrishnan, under two email addresses. GitHub lists one
-contributor. There are no co-author trailers. AI tools are development assistance, not team members.
+**Team size: 1. Track: Indie Developer. Entrant: Amirtheshwaran Navaneethakrishnan.** The entrant
+stated this on 1 November 2026, and the repository agrees: one human Git author under two email
+addresses, one GitHub contributor, and no co-author trailers.
+
+AI tools are development tools, not team members. Friends may give advice, review, feedback or
+troubleshooting, or help operate deployment and submission tools or accounts. That help does not make
+them team members, and the Official Rules allow third-party technical assistance on the conditions
+above. The full breakdown is in [People and tools](HACKATHON_NEW_WORK.md#people-and-tools).
+
+If another human directly authors substantive code or assets, or makes a contribution that could
+affect the required disclosure, nobody is added silently. It is flagged to the entrant as
+`HUMAN CONTRIBUTION DISCLOSURE NEEDS REVIEW`. No such contribution has been found in the repository.
 
 ```text
-[ ] Entrant confirmed no other human materially contributed
+[x] Entrant confirmed a one-person team, 1 November 2026
 ```
 
 ## Demo requirement
@@ -122,8 +133,12 @@ not be in an excluded location. They also exclude employees, contractors and int
 Cerebral Valley, government-affiliated individuals, their immediate family, and members of their
 households. The repository cannot establish any of this.
 
+By submitting, the entrant also warrants that the project is their original work, is solely owned by
+them, and infringes no one else's rights. The audit cannot establish that either.
+
 ```text
-[ ] Entrant personally confirmed waiver eligibility
+[ ] Waiver eligibility: NEEDS MY CONFIRMATION
+[ ] Original work and sole ownership: NEEDS MY CONFIRMATION
 ```
 
 ## Unconfirmed portal details

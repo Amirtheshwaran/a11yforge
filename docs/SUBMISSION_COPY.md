@@ -85,13 +85,16 @@ Repair of arbitrary websites is not connected; the repair loop targets a control
 
 ## Human team members
 
-Amirtheshwaran Navaneethakrishnan (solo, per the Git history). **The entrant must confirm this.** AI tools are not team members.
+Team size: 1. Entrant: Amirtheshwaran Navaneethakrishnan. Other team members: none.
+
+Do not enter AI tools or friends who gave informal help as team members. If the form asks about tools or outside help, use the breakdown in [People and tools](HACKATHON_NEW_WORK.md#people-and-tools).
 
 ## Before submitting
 
 ```text
-[ ] Entrant personally confirmed waiver eligibility
-[ ] Entrant confirmed no other human materially contributed
+[ ] Waiver eligibility: NEEDS MY CONFIRMATION
+[ ] Original work and sole ownership: NEEDS MY CONFIRMATION
+[x] Entrant confirmed a one-person team, 1 November 2026
 [ ] Fields and character limits checked against the signed-in portal
 [ ] Public deployment URL tested and filled in, or confirmed not required by the form
 [x] Video link plays while signed out (recheck it if the form requires another host)

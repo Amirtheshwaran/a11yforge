@@ -113,7 +113,7 @@ Everything below was built during the Meta Global AI Developer Hackathon, from 2
 - Source inspection
 - The recorded verification workflow
 
-Open-source dependencies are reused under their licenses and not claimed as new work. AI coding assistants were used as development assistance. Details are in the audit.
+A11yForge is a solo Indie Developer track project by Amirtheshwaran Navaneethakrishnan. Open-source dependencies are reused under their licenses and not claimed as new work. AI tools were used for development assistance and are not team members. The audit [lists them](docs/HACKATHON_NEW_WORK.md#people-and-tools).
 
 ## Architecture
 
