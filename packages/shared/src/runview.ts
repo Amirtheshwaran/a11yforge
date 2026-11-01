@@ -39,6 +39,8 @@ export const AttemptViewSchema = z.object({
   outcomeNote: z.string().min(1),
   /** Exact compiler diagnostic codes when typecheck failed (e.g. TS18048). */
   diagnosticCodes: z.array(z.string().min(1)),
+  /** The compiler's own diagnostic lines, verbatim, when typecheck failed. */
+  diagnosticMessages: z.array(z.string().min(1)).default([]),
 });
 export type AttemptView = z.infer<typeof AttemptViewSchema>;
 

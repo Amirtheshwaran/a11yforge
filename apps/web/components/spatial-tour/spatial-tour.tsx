@@ -132,7 +132,7 @@ export function SpatialTour({ model, id = "spatial-tour", initialFindingId }: { 
     <a className="skip-link" href={`#${id}-end`}>Skip spatial tour</a>
     <div ref={sticky} className="tour-sticky">
       <div className="tour-topline"><span><i aria-hidden="true" />{model.label}</span><span title={model.target}>{model.target}</span></div>
-      <div className="tour-stage" aria-label="Captured website in 3D">
+      <div className="tour-stage" role="group" aria-label="Captured website in 3D">
         {!presented && <div className="tour-capture-fallback">
           {chapter.imageUrl !== null ? <img src={chapter.imageUrl} alt="Recorded website capture" /> : <p>No page capture is available for this run.</p>}
           <span role="status">{!hasCapture ? "The browser could not capture this site. Review the access limitation and try a public page." : "Preparing the website for inspection…"}</span>

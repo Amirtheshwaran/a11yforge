@@ -101,6 +101,12 @@ function diagnosticCodesOf(decisionBasis: string): string[] {
   return [...new Set(codes)];
 }
 
+/** Verbatim compiler lines. Paths stay relative: anything absolute is left out. */
+function diagnosticMessagesOf(decisionBasis: string): string[] {
+  const lines = decisionBasis.match(/(?<![^\s])[^\s:/\\]+[^\s:]*\(\d+,\d+\): error TS\d+: [^\n]+/g) ?? [];
+  return lines.slice(0, 3).map((line) => line.slice(0, 200));
+}
+
 async function artifactUrlIfPresent(
   runDir: string,
   runId: string,
@@ -129,6 +135,7 @@ function buildAttempt(args: {
   runId: string;
   outcomeNote: string;
   diagnosticCodes: string[];
+  diagnosticMessages: string[];
   urlFor: ArtifactUrlFor;
 }): AttemptView {
   return {
@@ -145,6 +152,7 @@ function buildAttempt(args: {
       args.diffArtifact === null ? null : args.urlFor(args.runId, args.diffArtifact),
     outcomeNote: args.outcomeNote,
     diagnosticCodes: args.diagnosticCodes,
+    diagnosticMessages: args.diagnosticMessages,
   };
 }
 
@@ -225,6 +233,7 @@ export async function buildRunViewModel(
       outcomeNote:
         "Behavior fixed, strict TypeScript failed — deterministically REJECTED, critic never called.",
       diagnosticCodes: diagnosticCodesOf(verification.decisionBasis),
+      diagnosticMessages: diagnosticMessagesOf(verification.decisionBasis),
       urlFor,
     }),
   ];
@@ -270,6 +279,7 @@ export async function buildRunViewModel(
         outcomeNote:
           "Verifier feedback incorporated: strict-safety guard added — typecheck, build, replay, and axe regression all pass.",
         diagnosticCodes: diagnosticCodesOf(revisionVerification.decisionBasis),
+        diagnosticMessages: diagnosticMessagesOf(revisionVerification.decisionBasis),
         urlFor,
       }),
     );

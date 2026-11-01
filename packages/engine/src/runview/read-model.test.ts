@@ -229,6 +229,9 @@ describe("read-model view construction", () => {
       assert.equal(view.attempts.length, 1);
       assert.equal(view.attempts[0]?.state, "REGRESSION_FAILED");
       assert.deepEqual(view.attempts[0]?.diagnosticCodes, ["TS18048"]);
+      for (const message of view.attempts[0]?.diagnosticMessages ?? []) {
+        assert.match(message, /^[^\s/\\]+\S*\(\d+,\d+\): error TS\d+: /);
+      }
       assert.equal(view.critic, null);
       assert.ok(view.focusTrace.some((s) => s.selector === "#background-control" && !s.insideModal));
       assert.ok(!JSON.stringify(view).includes("/home/user"));

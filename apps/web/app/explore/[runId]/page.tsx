@@ -635,6 +635,11 @@ function ExploreRunContent(): React.JSX.Element {
             <span className="mono-label">
               Scan complete — {shortPageOf(run.target.entryUrl)}
             </span>
+            {tourModel !== null && (
+              <button type="button" className="issue-nav-btn" onClick={() => setShowDetailedEvidence(false)}>
+                Back to the tour
+              </button>
+            )}
             <h1 id="run-title" className="display-2">
               {issueCount > 0 ? (
                 <>

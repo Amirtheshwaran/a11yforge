@@ -165,7 +165,7 @@ function SourceInspection({ runId, findingId }: { runId: string; findingId: stri
     <main className="xp w-full min-h-screen bg-[#0B0B0C] text-[#F5F4F0] px-4 sm:px-6 lg:px-12 py-6" ref={layerRef}>
       <nav aria-label="Breadcrumb" className="w-full flex flex-wrap items-center justify-between gap-y-3 pb-6 border-b border-white/[0.08]">
         <div className="flex items-center gap-2 font-mono text-xs tracking-wider uppercase text-inkdim">
-          <Link href={findingHref} className="hover:text-ink transition-colors">
+          <Link href={findingHref} className="inline-flex min-h-6 items-center hover:text-ink transition-colors">
             Results
           </Link>
           <span className="text-white/20">/</span>

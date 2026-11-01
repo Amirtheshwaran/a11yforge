@@ -146,7 +146,7 @@ export function recordedTourModel(
     chapter({ id: "overview", kind: "overview", title: home ? "See where your website is hard to use." : "A real repair. From failure to proof.",
       eyebrow: "RECORDED REAL REPAIR / CONTROLLED TEST WEBSITE", body: "One website. One real failure. Follow the evidence from the first broken interaction to the verified repair.", imageUrl: shot(before) }),
     chapter({ id: "problem", kind: "finding", title: "The surface is only the beginning.", eyebrow: "01 / THE PROBLEM", body: "The dialog stays open, but keyboard focus can escape to the page behind it. The browser reproduced the failure before a repair was attempted.",
-      facts: [run.finding.passedBefore ? "Original assertion passed" : "Original assertion failed"], imageUrl: shot(failure) }),
+      facts: [run.finding.passedBefore ? "Original assertion passed" : "Original assertion failed", `Diagnosed from that evidence by Meta model ${run.model}`], imageUrl: shot(failure) }),
     chapter({ id: "interaction", kind: "interaction", title: "Keyboard users can lose track of where they are.", eyebrow: "02 / SEE THE FAILURE",
       body: "Follow the recorded Tab sequence. Focus leaves the active dialog and reaches the page behind it.",
       facts: ["Recorded focus order below. This older run did not retain spatial coordinates."], imageUrl: shot(failure), focusSteps }),
@@ -154,18 +154,19 @@ export function recordedTourModel(
       facts: [run.sourceTrace.topFile, `Recorded source lines ${run.sourceTrace.startLine}–${run.sourceTrace.endLine}`], imageUrl: shot(failure), source: sourceFor(first?.attempt ?? 1) }),
   ];
   if (first !== undefined) {
-    chapters.push(chapter({ id: "repair", kind: "repair", title: "A first fix was created.", eyebrow: "04 / THE FIRST ATTEMPT", body: "A bounded change was proposed to keep keyboard focus inside the active dialog. It still had to pass the deterministic checks.",
-      facts: [`Attempt ${first.attempt}`], source: sourceFor(first.attempt), imageUrl: shot(failure) }));
+    chapters.push(chapter({ id: "repair", kind: "repair", title: "A first fix was created.", eyebrow: "04 / THE FIRST ATTEMPT", body: "A Meta model proposed a bounded change to keep keyboard focus inside the active dialog. It still had to pass the deterministic checks.",
+      facts: [`Attempt ${first.attempt}`, `Proposed by ${run.model}`, ...(first.behaviorFixed ? ["Browser replay: focus now stayed in the dialog"] : [])], source: sourceFor(first.attempt), imageUrl: shot(failure) }));
     if (!first.typecheckPassed || !first.buildPassed || !first.scenarioPassed) chapters.push(chapter({ id: "rejection", kind: "rejection", title: "That fix wasn’t good enough.",
-      eyebrow: "05 / DETERMINISTIC REJECTION", body: !first.typecheckPassed ? "The compiler rejected the first patch. A failed deterministic check stopped the repair from being accepted." : !first.buildPassed ? "The build failed. The repair could not be accepted, even if the change looked promising." : "The original interaction still failed its check. The repair was rejected.", facts: [first.state, ...first.diagnosticCodes],
+      eyebrow: "05 / DETERMINISTIC REJECTION", body: !first.typecheckPassed ? first.behaviorFixed ? "The browser behavior improved, but strict TypeScript failed. A11yForge rejected its own AI repair, and the model could not overrule the compiler." : "The compiler rejected the first patch. A failed deterministic check stopped the repair from being accepted." : !first.buildPassed ? "The build failed. The repair could not be accepted, even if the change looked promising." : "The original interaction still failed its check. The repair was rejected.", facts: [first.state, ...(first.diagnosticMessages.length > 0 ? first.diagnosticMessages : first.diagnosticCodes)],
       source: sourceFor(first.attempt), imageUrl: shot(failure), outcome: "rejected" }));
   }
   if (last !== undefined && last !== first) chapters.push(chapter({ id: "revision", kind: "revision", title: "The failed check became feedback.", eyebrow: "06 / THE REVISION",
-    body: last.outcomeNote, facts: [`Attempt ${last.attempt}`, last.state], imageUrl: shot(failure), source: sourceFor(last.attempt) }));
+    body: last.outcomeNote, facts: [`Attempt ${last.attempt}`, last.state, `One bounded revision by ${run.model}, given the compiler output`], imageUrl: shot(failure), source: sourceFor(last.attempt) }));
   chapters.push(chapter({ id: "verification", kind: "verification", title: verified ? "Fixed. Checked. Proven." : "The evidence decides.", eyebrow: "07 / VERIFICATION",
     body: verified ? "The original interaction was replayed after the repair. The compiler, build, reverse replay, and accessibility regression checks all passed." : "The required checks did not all pass. Review the recorded verification evidence before accepting a repair.", facts: [
       `Typecheck ${run.verification.typecheckPassed ? "passed" : "failed"}`, `Build ${run.verification.buildPassed ? "passed" : "failed"}`,
       `Original replay ${run.verification.primaryReplayPassed ? "passed" : "failed"}`, `Reverse replay ${run.verification.reverseReplayPassed ? "passed" : "failed"}`,
+      ...(run.critic === null ? [] : [`Meta critic, shown the gate results: ${run.critic.decision}. It cannot override a failed gate.`]),
     ], imageUrl: shot(after ?? failure), outcome: verified ? "verified" : "unresolved" }));
   // Supplemental measured replay is explicit demo evidence, never assigned to a live run.
   if (replay?.sourceRunId === run.runId && replay.before.steps.some((step) => !step.insideExpectedRegion)) {

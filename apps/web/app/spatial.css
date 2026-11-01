@@ -71,7 +71,7 @@
 .inspection-empty { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 14px; padding: 32px; box-sizing: border-box; text-align: center; }
 .inspection-empty h2 { font-size: 22px; font-weight: 400; color: #f5f4f0; }
 .inspection-empty p { max-width: 34ch; color: #a2ac9b; font-size: 14px; line-height: 1.7; }
-.inspection-empty a { color: #ffc53d; text-underline-offset: 4px; text-decoration: underline; }
+.inspection-empty a { display: inline-flex; align-items: center; min-height: 44px; color: #ffc53d; text-underline-offset: 4px; text-decoration: underline; }
 .source-inspection-stage { height: 460px; border-bottom: 1px solid #303930; }
 .source-evidence-disclosure > summary { cursor: pointer; padding: 14px 20px; color: #b0baa8; font-size: 12px; border-bottom: 1px solid #303930; }
 .demo-theatre.demo-theatre-spatial { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); background: radial-gradient(ellipse at 75% 45%, #28332d88, transparent 60%), #111713; border-color: #384637; }

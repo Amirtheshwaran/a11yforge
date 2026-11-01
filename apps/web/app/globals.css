@@ -805,6 +805,7 @@ footer.footnote {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  min-height: 44px;
 }
 
 .forge-wordmark-mark {

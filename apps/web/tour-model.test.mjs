@@ -109,14 +109,26 @@ describe("reversible tour timeline", () => {
 });
 
 describe("recorded repair truth", () => {
-  const attempt = { attempt: 1, summary: "Create a bounded patch", state: "TYPECHECK_FAILED", typecheckPassed: false, buildPassed: false, scenarioPassed: false, outcomeNote: "The compiler rejected the patch.", diagnosticCodes: ["TS18048"] };
-  const recorded = { runId: "recorded-run", targetLabel: "Controlled test website", artifacts: { beforeModalUrl: "/before.png", modalOpenUrl: "/modal.png", focusEscapedUrl: "/failure.png", afterUrl: "/after.png" }, focusTrace: [{ role: "button", accessibleName: "Continue", insideModal: true }, { role: "link", accessibleName: "Help", insideModal: false }], finding: { passedBefore: false }, sourceTrace: { topFile: "src/App.tsx", startLine: 10, endLine: 30 }, attempts: [attempt, { ...attempt, attempt: 2, state: "ACCEPTED", typecheckPassed: true, buildPassed: true, scenarioPassed: true }], finalStatus: "ACCEPTED", verification: { typecheckPassed: true, buildPassed: true, primaryReplayPassed: true, reverseReplayPassed: true, axeBaselinePreserved: true, decisionBasis: "Measured gates passed." } };
+  const attempt = { attempt: 1, summary: "Create a bounded patch", state: "TYPECHECK_FAILED", behaviorFixed: true, typecheckPassed: false, buildPassed: false, scenarioPassed: false, outcomeNote: "The compiler rejected the patch.", diagnosticCodes: ["TS18048"], diagnosticMessages: ["src/App.tsx(152,21): error TS18048: 'last' is possibly 'undefined'."] };
+  const recorded = { runId: "recorded-run", model: "test-meta-model", critic: { decision: "ACCEPT" }, targetLabel: "Controlled test website", artifacts: { beforeModalUrl: "/before.png", modalOpenUrl: "/modal.png", focusEscapedUrl: "/failure.png", afterUrl: "/after.png" }, focusTrace: [{ role: "button", accessibleName: "Continue", insideModal: true }, { role: "link", accessibleName: "Help", insideModal: false }], finding: { passedBefore: false }, sourceTrace: { topFile: "src/App.tsx", startLine: 10, endLine: 30 }, attempts: [attempt, { ...attempt, attempt: 2, state: "ACCEPTED", typecheckPassed: true, buildPassed: true, scenarioPassed: true }], finalStatus: "ACCEPTED", verification: { typecheckPassed: true, buildPassed: true, primaryReplayPassed: true, reverseReplayPassed: true, axeBaselinePreserved: true, decisionBasis: "Measured gates passed." } };
   it("preserves rejection, revision, and proof and never manufactures legacy coordinates", () => {
     const model = recordedTourModel(recorded, (url) => url, { 1: "+ first", 2: "+ revised" });
     assert.deepEqual(model.chapters.map((chapter) => chapter.kind), ["overview", "finding", "interaction", "source", "repair", "rejection", "revision", "verification"]);
     assert.equal(model.chapters.find((chapter) => chapter.kind === "source").source.text, "+ first");
     assert.equal(model.chapters.at(-1).outcome, "verified");
     assert.ok(model.chapters.every((chapter) => chapter.highlight === null && chapter.focusSteps.every((step) => step.box === null)));
+  });
+  it("shows the compiler's own words and credits the model only with reasoning", () => {
+    const model = recordedTourModel(recorded, (url) => url, {});
+    const byKind = (kind) => model.chapters.find((chapter) => chapter.kind === kind);
+    assert.ok(byKind("rejection").facts.some((fact) => fact.includes("'last' is possibly 'undefined'")));
+    assert.match(byKind("rejection").body, /rejected its own AI repair/);
+    assert.ok(byKind("repair").facts.includes("Proposed by test-meta-model"));
+    assert.ok(byKind("revision").facts.some((fact) => fact.includes("test-meta-model")));
+    assert.doesNotMatch(byKind("verification").body, /meta|model/i);
+    assert.ok(byKind("verification").facts.at(-1).includes("cannot override a failed gate"));
+    const withoutCritic = recordedTourModel({ ...recorded, critic: null }, (url) => url, {});
+    assert.ok(withoutCritic.chapters.at(-1).facts.every((fact) => !fact.includes("critic")));
   });
   it("cannot show a verified payoff if any deterministic gate failed", () => {
     const model = recordedTourModel({ ...recorded, verification: { ...recorded.verification, primaryReplayPassed: false } }, (url) => url, {});
