@@ -93,7 +93,7 @@ table above records the state at `971aa6d`.
 
 ### Final local validation, 1 November
 
-Product code unchanged since `dbb541b`. Run from a production build, served on one port with no model
+Product code unchanged since `513704c`. Run from a production build, served on one port with no model
 key, as the container serves it. This is not a hosted test: public deployment is deferred.
 
 | Check | Result |
