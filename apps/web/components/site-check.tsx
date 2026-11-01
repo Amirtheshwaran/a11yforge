@@ -30,8 +30,8 @@ export function SiteCheck({ context = "demo" }: { context?: "landing" | "demo" }
     <p>A real browser records the evidence. Explore your site’s actual accessibility issues in a guided spatial tour.</p>
     <form className="spatial-url-form" onSubmit={submit} noValidate aria-busy={starting}>
       <label htmlFor="site-url">Start with your website</label>
-      <div className="spatial-url-input"><span aria-hidden="true">↗</span><input id="site-url" type="url" inputMode="url" autoComplete="url" autoCapitalize="none" spellCheck={false} placeholder="https://yourwebsite.com" required value={url} onChange={(event) => { setUrl(event.target.value); setError(null); }} aria-invalid={error !== null} aria-describedby={error !== null ? "site-check-help site-check-error" : "site-check-help"} /><button type="submit" disabled={starting} aria-label="Check my website">{starting ? "Opening…" : "Check my website"}<span aria-hidden="true">→</span></button></div>
-      <p id="site-check-help">Real browser testing · No model calls for exploration</p>
+      <div className="spatial-url-input"><span aria-hidden="true">↗</span><input id="site-url" type="url" inputMode="url" autoComplete="url" autoCapitalize="none" spellCheck={false} required value={url} onChange={(event) => { setUrl(event.target.value); setError(null); }} aria-invalid={error !== null} aria-describedby={error !== null ? "site-check-help site-check-error" : "site-check-help"} /><button type="submit" disabled={starting} aria-label="Check my website">{starting ? "Opening…" : "Check my website"}<span aria-hidden="true">→</span></button></div>
+      <p id="site-check-help">Enter a website address or domain.</p>
     </form>
     {error !== null && <p id="site-check-error" role="alert">{error}</p>}
     {!available && <p role="status">The check service is unavailable. The recorded evidence remains available in the <Link href="/console">demo</Link>.</p>}

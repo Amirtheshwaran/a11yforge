@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { InspectionStage } from "@/components/inspection-stage";
 import { EvidenceViewer } from "@/components/evidence-viewer";
 import { humanFindingOf } from "../../lib/human-copy";
+import { sourceEvidenceOf } from "../../lib/overlay";
 import {
   connectSourceRepo,
   explorationShotSrc,
@@ -30,20 +31,6 @@ import {
 } from "../../lib/api";
 import { drawLines } from "../../lib/motion";
 
-/**
- * Phase 9 source-connection screen aligned to the Stitch spatial showroom.
- *
- * Left: Physical Website Plane (shifted left -140px on desktop)
- * Right: Source Code Chamber (Git connection form, local CLI runner, and code view)
- *
- * One-sentence product rule:
- * "Give me a website. I'll show you exactly where people may have trouble using it,
- * explain why, and help fix it."
- *
- * Plain-language rule:
- * All technical compiler jargon is strictly relegated
- * to the collapsible "Developer details" drawer. Normal copy is understandable to a child.
- */
 export default function ConnectSource(): React.JSX.Element {
   return (
     <Suspense fallback={<main className="xp"><p className="text-inkdim font-mono text-sm p-8">Loading source connection…</p></main>}>
@@ -51,9 +38,6 @@ export default function ConnectSource(): React.JSX.Element {
     </Suspense>
   );
 }
-
-/** Stages backed by real connection/trace state — plain English. */
-const STEPS = ["Connecting code", "Finding the problem area"];
 
 /** Human-readable byte count computed from real inventory data. */
 function formatBytes(totalBytes: number): string {
@@ -72,6 +56,10 @@ function ConnectSourceContent(): React.JSX.Element {
   const search = useSearchParams();
   const runId = search.get("run") ?? "";
   const findingId = search.get("finding") ?? "";
+  return <SourceInspection key={`${runId}:${findingId}`} runId={runId} findingId={findingId} />;
+}
+
+function SourceInspection({ runId, findingId }: { runId: string; findingId: string }): React.JSX.Element {
   const findingHref = runId === "" ? "/" : `/explore/${encodeURIComponent(runId)}${findingId === "" ? "" : `?finding=${encodeURIComponent(findingId)}`}`;
 
   const [exploration, setExploration] = useState<ExplorationRun | null>(null);
@@ -91,7 +79,7 @@ function ConnectSourceContent(): React.JSX.Element {
     let active = true;
     void fetchExploration(runId).then((res) => {
       if (active && res !== null) setExploration(res);
-    });
+    }).catch((err: unknown) => { if (active) setError(err instanceof Error ? err.message : "The website check could not be loaded."); });
     return () => {
       active = false;
     };
@@ -108,7 +96,7 @@ function ConnectSourceContent(): React.JSX.Element {
     [],
   );
 
-  async function poll(id: string): Promise<void> {
+  async function poll(id: string): Promise<boolean> {
     try {
       const next = await fetchSourceConnection(id);
       setState(next);
@@ -116,14 +104,18 @@ function ConnectSourceContent(): React.JSX.Element {
         if (pollRef.current !== null) clearInterval(pollRef.current);
         const view = await fetchSourceTrace(id);
         setTrace(view);
+        return false;
       } else if (next.state === "FAILED") {
         if (pollRef.current !== null) clearInterval(pollRef.current);
         setError(next.error ?? "Source connection failed.");
+        return false;
       }
     } catch (err) {
       if (pollRef.current !== null) clearInterval(pollRef.current);
       setError(err instanceof Error ? err.message : "Source connection failed.");
+      return false;
     }
+    return true;
   }
 
   async function onConnect(event: React.FormEvent): Promise<void> {
@@ -138,8 +130,7 @@ function ConnectSourceContent(): React.JSX.Element {
       });
       setSourceId(id);
       setState(null);
-      await poll(id);
-      pollRef.current = setInterval(() => void poll(id), 2500);
+      if (await poll(id)) pollRef.current = setInterval(() => void poll(id), 2500);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not connect source.");
       setConnecting(false);
@@ -148,16 +139,7 @@ function ConnectSourceContent(): React.JSX.Element {
     setConnecting(false);
   }
 
-  const stageIndex =
-    state === null
-      ? 0
-      : state.state === "FAILED"
-        ? 0
-        : trace !== null
-          ? 2
-          : 1;
-
-  const cliCommand = `pnpm --filter @a11yforge/engine repair -- --run ${runId !== "" ? runId : "<run-id>"} --finding ${findingId !== "" ? findingId : "<finding-id>"} --source .`;
+  const cliCommand = `pnpm --filter @a11yforge/engine repair -- --run ${runId} --finding ${findingId} --source .`;
 
   function onCopyCli(): void {
     if (typeof navigator === "undefined" || navigator.clipboard === undefined) return;
@@ -168,27 +150,19 @@ function ConnectSourceContent(): React.JSX.Element {
   }
 
   // Derive target finding information from exploration or query params
-  const matchedFinding = exploration?.findings.find((f) => f.findingId === findingId) ?? null;
+  const { finding: matchedFinding, screenshot, highlight } = sourceEvidenceOf(exploration, findingId);
   const targetSelector =
-    matchedFinding?.highlights[0]?.selector || "No measured selector available";
-  const targetLabel = matchedFinding?.highlights[0]?.label || "Selected problem";
+    highlight?.selector || "No measured selector available";
+  const targetLabel = highlight?.label || "Location not recorded";
   const targetTitle = matchedFinding === null ? "Choose a finding from a website check" : humanFindingOf(matchedFinding).title;
   const siteUrl = exploration?.target.normalizedUrl || exploration?.target.entryUrl || "No website selected";
-  const screenshot = matchedFinding?.screenshots[0] ?? exploration?.screenshots[0] ?? null;
 
   const traceCandidate =
     trace !== null && trace.status === "FOUND" ? trace.candidates[0] ?? null : null;
   const traceSnippet = traceCandidate?.snippets[0] ?? null;
 
-  // Rule: Heading: "We found the code behind this problem." or "This is the most likely code behind this problem."
-  const isHighConfidence = traceCandidate !== null && (traceCandidate.score ?? 0) >= 0.7;
-  const codeFoundHeading = isHighConfidence
-    ? "We found the code behind this problem."
-    : "This is the most likely code behind this problem.";
-
   return (
     <main className="xp w-full min-h-screen bg-[#0B0B0C] text-[#F5F4F0] px-4 sm:px-6 lg:px-12 py-6" ref={layerRef}>
-      {/* Top Header & Breadcrumb Bar */}
       <nav aria-label="Breadcrumb" className="w-full flex flex-wrap items-center justify-between gap-y-3 pb-6 border-b border-white/[0.08]">
         <div className="flex items-center gap-2 font-mono text-xs tracking-wider uppercase text-inkdim">
           <Link href={findingHref} className="hover:text-ink transition-colors">
@@ -214,11 +188,7 @@ function ConnectSourceContent(): React.JSX.Element {
           </span>
         </div>
       </nav>
-
-      {/* Main Spatial Grid: Left Website Plane + Right Code Chamber */}
       <div className="source-layout w-full py-8 grid gap-8 lg:gap-12 items-start">
-        
-        {/* LEFT COLUMN: Physical Website Plane */}
         <section aria-label="Website preview" className="flex flex-col gap-4">
           <div className="flex items-center justify-between font-mono text-[11px] text-inkdim">
             <span className="flex items-center gap-1.5 text-[#ffc53d]">
@@ -231,10 +201,7 @@ function ConnectSourceContent(): React.JSX.Element {
             </span>
             <span className="hidden sm:inline text-inkfaint">Problem location</span>
           </div>
-
-          {/* Physical Website Chassis */}
           <div className="relative rounded-xl border border-white/[0.12] bg-[#141417] shadow-2xl overflow-hidden transition-transform duration-500 hover:[transform:rotateY(-2deg)_scale(0.99)] [perspective:1200px]">
-            {/* Top Browser Lip */}
             <div className="flex items-center justify-between px-3.5 py-2.5 bg-[#18181B] border-b border-white/[0.08]">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#ff4b2e]" />
@@ -256,7 +223,7 @@ function ConnectSourceContent(): React.JSX.Element {
               className="source-inspection-stage"
               phase={traceCandidate !== null ? "source" : "inspect"}
               imageUrl={screenshot !== null ? explorationShotSrc(runId, screenshot) : null}
-              label={screenshot !== null ? "Captured website · source inspection" : "Illustrative website · connect a finding"}
+              label="Captured website · source inspection"
               sourceLabel={traceCandidate?.filePath ?? null}
             />
             {screenshot !== null && <details className="source-evidence-disclosure">
@@ -264,30 +231,23 @@ function ConnectSourceContent(): React.JSX.Element {
               <EvidenceViewer
                 src={explorationShotSrc(runId, screenshot)}
                 alt="Recorded browser screenshot for the source inspection"
-                highlights={matchedFinding?.highlights.filter((highlight) => highlight.screenshot === screenshot).slice(0, 1) ?? []}
+                highlights={highlight === null ? [] : [highlight]}
                 selectedIndex={0}
                 onSelect={() => undefined}
                 caption="Evidence from the selected website check."
               />
             </details>}
-            {/* Selected finding summary */}
-            <div className="p-5 bg-[#0e0e10] flex flex-col gap-4 relative">
-              {/* Subtle grid */}
+            {matchedFinding !== null && <div className="p-5 bg-[#0e0e10] flex flex-col gap-4 relative">
               <div className="absolute inset-0 bg-[radial-gradient(#2a2a30_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
 
               <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
                 <span className="font-mono text-xs text-ink uppercase tracking-widest font-semibold">
                   Your website
                 </span>
-                <span className="font-mono text-[10px] text-inkfaint uppercase">Highlighted problem</span>
+                <span className="font-mono text-[10px] text-inkfaint uppercase">{highlight === null ? "Location unavailable" : "Measured location available"}</span>
               </div>
-
-              {/* Target Problem Highlight Card */}
               <div className="relative p-3.5 rounded-lg bg-[#18181B] border border-white/[0.08] shadow-lg">
-                {/* Amber Bounding Ring */}
                 <div className="absolute -inset-1 rounded-lg border-2 border-[#ffc53d] pointer-events-none shadow-[0_0_18px_rgba(255,197,61,0.3)] animate-pulse" />
-
-                {/* Reticle Pill */}
                 <div className="absolute -top-3 left-3 px-2 py-0.5 rounded bg-[#ffc53d] text-[#0B0B0C] font-sans text-[11px] font-semibold tracking-tight">
                   Selected problem: {targetLabel}
                 </div>
@@ -314,19 +274,15 @@ function ConnectSourceContent(): React.JSX.Element {
                   </div>
                 </div>
               </div>
-
-              {/* Telemetry Footer */}
               <div className="pt-2 flex items-center justify-between text-[11px] font-mono text-inkfaint">
                 <span className="flex items-center gap-1.5 text-[#c6ff4d]">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#c6ff4d]" />
-                  {screenshot !== null ? "Browser evidence loaded" : "Select a website check first"}
+                  {screenshot !== null ? "Recorded page capture" : "No page capture for this finding"}
                 </span>
                 <span>Website view</span>
               </div>
-            </div>
-
-            {/* Connecting Vector Overlay (Desktop) */}
-            <div className="hidden lg:block absolute -right-10 top-1/2 -translate-y-4 w-20 h-10 pointer-events-none z-30">
+            </div>}
+            {traceCandidate !== null && <div className="hidden lg:block absolute -right-10 top-1/2 -translate-y-4 w-20 h-10 pointer-events-none z-30">
               <svg className="w-full h-full overflow-visible" fill="none" viewBox="0 0 80 40">
                 <path
                   d="M 0 20 C 40 20, 40 20, 80 20"
@@ -338,48 +294,39 @@ function ConnectSourceContent(): React.JSX.Element {
                 <circle cx="0" cy="20" r="3.5" fill="#ffc53d" />
                 <circle cx="80" cy="20" r="3" fill="#ffc53d" />
               </svg>
-            </div>
+            </div>}
           </div>
 
           <p className="font-mono text-xs text-inkfaint leading-relaxed">
             {screenshot !== null ? "This screenshot comes from the selected browser check. A highlight appears only when its location was measured." : "Open a problem from your website results to see its browser evidence here."}
           </p>
         </section>
-
-        {/* RIGHT COLUMN: Code Chamber */}
         <section aria-labelledby="connect-title" className="flex flex-col gap-6">
           <div className="relative rounded-xl border border-white/[0.12] bg-[#18181B] shadow-2xl p-6 sm:p-8 overflow-hidden">
-            {/* Top Specular Lip */}
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-
-            {/* Status Bar */}
             <div className="flex items-center justify-between pb-4 border-b border-white/[0.08] mb-6">
               <div className="flex items-center gap-2">
                 <span className={`w-2 h-2 rounded-full ${traceCandidate !== null ? "bg-[#c6ff4d]" : "bg-[#ffc53d]"} shadow-[0_0_8px_rgba(255,197,61,0.8)]`} />
                 <span className="font-mono text-xs text-ink uppercase tracking-widest font-medium">
-                  {traceCandidate !== null ? "Code located" : "Ready to inspect code"}
+                  {traceCandidate !== null ? "Source candidate available" : state?.state === "CONNECTED" ? "Repository connected" : "Source not connected"}
                 </span>
               </div>
               <span className="font-mono text-[10px] text-inkfaint px-2 py-0.5 rounded bg-[#111113] border border-white/[0.08]">
                 Read-only
               </span>
             </div>
-
-            {/* Main Title & Lede - Plain English Per Specification */}
             <div className="mb-6">
               <h1 id="connect-title" className="text-2xl sm:text-3xl font-normal tracking-tight text-ink">
                 {traceCandidate !== null
-                  ? codeFoundHeading
+                  ? "Review the source match."
                   : "Connect the code behind this website."}
               </h1>
               <p className="mt-2 text-sm sm:text-base text-inkdim leading-relaxed">
                 {traceCandidate !== null
-                  ? "This part of the code creates the element we highlighted on your website."
+                  ? trace?.reason
                   : matchedFinding !== null ? "We already found the problem. Connect your source code so A11yForge can look for the part that caused it." : "Choose a problem from a website check, then connect its source code."}
               </p>
             </div>
-
-            {/* Problem Element Context Card */}
             <div className="mb-6 p-3.5 rounded-lg bg-[#111113] border border-white/[0.08] flex items-start gap-3">
               <svg className="w-5 h-5 text-[#ffc53d] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="8" />
@@ -397,8 +344,6 @@ function ConnectSourceContent(): React.JSX.Element {
                 </span>
               </div>
             </div>
-
-            {/* STATE A: Source Not Yet Connected (Git Form + Local CLI) */}
             {sourceId === null && (
               <div className="flex flex-col gap-6">
                 <form className="flex flex-col gap-4" onSubmit={(event) => void onConnect(event)}>
@@ -429,7 +374,6 @@ function ConnectSourceContent(): React.JSX.Element {
                         type="url"
                         inputMode="url"
                         autoComplete="url"
-                        placeholder="https://github.com/org/repository"
                         value={gitUrl}
                         onChange={(event) => setGitUrl(event.target.value)}
                         required
@@ -477,7 +421,7 @@ function ConnectSourceContent(): React.JSX.Element {
                       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                     </svg>
                     <p id="git-help" className="leading-relaxed">
-                      Read-only access to find the code. We do not change your code without verification.
+                      Read-only access to inspect the repository. Connecting does not apply changes.
                     </p>
                   </div>
 
@@ -487,9 +431,7 @@ function ConnectSourceContent(): React.JSX.Element {
                     </Alert>
                   )}
                 </form>
-
-                {/* Local CLI Option - Labeled "Fix locally instead" per specification */}
-                <section aria-labelledby="local-title" className="pt-4 border-t border-white/[0.08]">
+                {matchedFinding !== null && <section aria-labelledby="local-title" className="pt-4 border-t border-white/[0.08]">
                   <p className="font-mono text-xs text-ink uppercase tracking-wider font-semibold" id="local-title">
                     Inspect source locally
                   </p>
@@ -520,38 +462,15 @@ function ConnectSourceContent(): React.JSX.Element {
                       </div>
                     </CardContent>
                   </Card>
-                </section>
+                </section>}
               </div>
             )}
-
-            {/* STATE B: Connecting Progress Bar */}
             {sourceId !== null && (
-              <div className="mb-6 flex flex-col gap-2" aria-label="Source progress">
-                <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[#ffc53d] transition-all duration-700"
-                    style={{ width: `${(stageIndex / STEPS.length) * 100}%` }}
-                  />
-                </div>
-                <div className="flex justify-between font-mono text-[11px] text-inkfaint">
-                  {STEPS.map((step, index) => (
-                    <span
-                      key={step}
-                      className={index <= stageIndex ? "text-[#ffc53d] font-medium" : "text-inkfaint"}
-                    >
-                      {step}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              <p className="mb-6 text-sm text-inkdim" role="status">{state?.state === "FAILED" ? state.error ?? "Source connection failed." : state?.state === "CONNECTED" ? trace?.reason ?? "Repository connected. No source trace is available yet." : "Connecting repository…"}</p>
             )}
-
-            {/* STATE C: Source Connected & Code Found */}
             {traceCandidate !== null && (
               <div className="flex flex-col gap-6">
-                {/* Code Slab - Showing only real file path, short real snippet, and highlighted affected area */}
                 <div className="rounded-xl border border-white/10 bg-[#0e0e10] overflow-hidden shadow-xl">
-                  {/* File Header */}
                   <div className="px-4 py-2.5 bg-[#141417] border-b border-white/10 flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <svg className="w-4 h-4 text-[#ffc53d]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -572,39 +491,24 @@ function ConnectSourceContent(): React.JSX.Element {
                       Source match
                     </span>
                   </div>
-
-                  {/* Code Lines with Highlight */}
                   <div className="p-4 font-mono text-xs bg-[#0a0a0c] overflow-x-auto text-inkdim leading-relaxed">
                     {traceSnippet !== null ? (
                       <pre className="m-0 p-0 whitespace-pre">
                         <code>{traceSnippet.content}</code>
                       </pre>
                     ) : (
-                      <p className="text-inkfaint">Code found in your repository.</p>
+                      <p className="text-inkfaint">No source snippet was recorded for this candidate.</p>
                     )}
                   </div>
-
-                  {/* Code Slab Footer */}
                   <div className="px-4 py-2 bg-[#141417] border-t border-white/[0.06] flex items-center justify-between text-[11px] font-mono text-inkfaint">
                     <span className="text-[#ffc53d] flex items-center gap-1">
                       <span>←</span> {targetTitle}
                     </span>
-                    <span>Responsible source code</span>
+                    <span>Candidate source</span>
                   </div>
                 </div>
-
-                {/* Primary Fix CTA with Honest UX Guarantee */}
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-wrap items-center gap-3">
-                    <Button
-                      type="button"
-                      disabled
-                      className="bg-white text-black opacity-80 cursor-not-allowed font-medium font-sans text-sm h-11 px-6 shadow-lg"
-                      aria-describedby="fix-note"
-                    >
-                      Fix this problem
-                    </Button>
-
                     <Button
                       type="button"
                       variant="secondary"
@@ -618,12 +522,9 @@ function ConnectSourceContent(): React.JSX.Element {
                   </div>
 
                   <p id="fix-note" className="text-xs text-inkfaint leading-relaxed">
-                    Online repair execution is locked on this deployment to protect code.
-                    Use the local command above to inspect source on your machine, or watch the recorded verified repair.
+                    Source inspection does not create or apply repairs. The recorded demo shows a verified repair on the controlled fixture.
                   </p>
                 </div>
-
-                {/* Secondary: Developer details (Collapsible Drawer with technical evidence) */}
                 <Accordion type="single" collapsible className="w-full border-t border-white/[0.08] pt-2">
                   <AccordionItem value="trace-evidence" className="border-none">
                     <AccordionTrigger className="text-xs font-mono text-inkdim hover:text-ink">
@@ -636,7 +537,7 @@ function ConnectSourceContent(): React.JSX.Element {
                       </div>
 
                       <div>
-                        <p className="font-semibold text-ink">Confidence Score:</p>
+                        <p className="font-semibold text-ink">Match ranking score:</p>
                         <p className="mt-1 font-mono">{traceCandidate.score}</p>
                       </div>
 
@@ -653,7 +554,7 @@ function ConnectSourceContent(): React.JSX.Element {
 
                       {(trace?.searchTerms.length ?? 0) > 0 && (
                         <div>
-                          <p className="font-semibold text-ink">AST Search Terms:</p>
+                          <p className="font-semibold text-ink">Evidence search terms:</p>
                           <div className="flex flex-wrap gap-1.5 mt-1.5">
                             {trace?.searchTerms.map((term) => (
                               <Badge variant="faint" key={term} className="font-mono text-[10px]">
@@ -682,8 +583,6 @@ function ConnectSourceContent(): React.JSX.Element {
                 </Accordion>
               </div>
             )}
-
-            {/* STATE D: Ambiguous or Failed */}
             {trace !== null && trace.status === "AMBIGUOUS" && (
               <Alert className="bg-[#ffc53d]/10 border-[#ffc53d]/30 text-ink">
                 <AlertTitle className="text-[#ffc53d] font-mono text-xs uppercase">
@@ -735,8 +634,6 @@ function ConnectSourceContent(): React.JSX.Element {
           </div>
         </section>
       </div>
-
-      {/* Sequential Footer */}
       <footer className="w-full mt-12 pt-4 pb-8 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-y-3 text-xs font-mono text-inkfaint">
         <div className="flex items-center gap-4">
           <Link href="/console" className="text-inkdim hover:text-white transition-colors underline">

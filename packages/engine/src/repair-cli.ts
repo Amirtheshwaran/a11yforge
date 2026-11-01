@@ -1,5 +1,5 @@
 /**
- * Phase 9 — developer CLI for source-connected repair.
+ * Developer CLI for source inspection.
  *
  * Calls the SAME underlying engine as the web product:
  *
@@ -7,10 +7,10 @@
  *   a11yforge repair --run <run-id> --finding <finding-id> --git https://github.com/owner/repo
  *
  * Connects source, builds the deterministic inventory + execution
- * profile, traces the finding into source, and reports whether an
- * automatic repair is authorized. Model-backed proposal/verify steps
- * run only with MODEL_API_KEY; without it the CLI stops honestly
- * after the deterministic trace (exit 3 = UNVERIFIABLE path).
+ * profile, traces the finding into source, and reports whether
+ * the trace meets the source-matching threshold. This entry point does
+ * not propose, apply, or verify repairs, even when a model key is set.
+ * It stops after the deterministic trace (exit 3 = inspection only).
  */
 
 import { randomUUID } from "node:crypto";
@@ -90,7 +90,7 @@ async function main(): Promise<void> {
     );
   }
 
-  console.log("Finding responsible code…");
+  console.log("Finding source candidates…");
   const trace = await traceFindingToSource({
     runDir,
     findingId,
@@ -100,7 +100,7 @@ async function main(): Promise<void> {
   await writeSourceArtifacts({ runDir, connected, trace });
 
   if (trace.status === "FOUND" && trace.candidates[0] !== undefined) {
-    console.log(`Responsible code located: ${trace.candidates[0].filePath}`);
+    console.log(`Source candidate located: ${trace.candidates[0].filePath}`);
     for (const reason of trace.candidates[0].matchReasons.slice(0, 5)) {
       console.log(`  Matched: ${reason}`);
     }
@@ -119,15 +119,8 @@ async function main(): Promise<void> {
     process.exitCode = 3;
     return;
   }
-  if (process.env["MODEL_API_KEY"] === undefined || process.env["MODEL_API_KEY"] === "") {
-    console.log(
-      "Trace sufficient, but MODEL_API_KEY is not configured — stopping before any model call. " +
-        "The trace artifacts above are ready for `Repair this issue`.",
-    );
-    process.exitCode = 3;
-    return;
-  }
-  console.log("Trace sufficient. Model-backed proposal and isolated verification are available via the API flow.");
+  console.log("STATUS: source inspection complete — no repair proposed or verified. Generic repair execution is not connected to this CLI or the public API.");
+  process.exitCode = 3;
 }
 
 await main();

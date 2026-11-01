@@ -1,4 +1,5 @@
 import type { ExplorationFinding, ExplorationStage } from "@a11yforge/shared";
+import type { ProgressState } from "./exploration-stages";
 
 /**
  * Human-copy mapping layer (single owner for plain-language UI).
@@ -407,15 +408,15 @@ export const HUMAN_PROGRESS: HumanStep[] = [
 
 /** Human progress state from the underlying backend stage states. */
 export function humanProgressOf(
-  states: Record<ExplorationStage, "pending" | "running" | "done">,
-): { id: string; label: string; state: "pending" | "running" | "done" }[] {
+  states: Record<ExplorationStage, ProgressState>,
+): { id: string; label: string; state: ProgressState }[] {
   return HUMAN_PROGRESS.map((step) => {
     const member = step.from.map((stage) => states[stage]);
-    let state: "pending" | "running" | "done" = "pending";
-    if (member.includes("running") || (member.includes("done") && !member.every((value) => value === "done"))) {
+    let state: ProgressState = "pending";
+    if (member.includes("failed")) state = "failed";
+    else if (member.every((value) => value === "done" || value === "skipped")) state = member.includes("skipped") ? "skipped" : "done";
+    else if (member.includes("running") || member.includes("done")) {
       state = "running";
-    } else if (member.every((value) => value === "done")) {
-      state = "done";
     }
     return { id: step.id, label: step.label, state };
   });

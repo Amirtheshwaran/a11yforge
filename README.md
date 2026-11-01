@@ -186,6 +186,8 @@ The browser, compiler, build, replay and regression gates establish evidence. Th
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Spatial tour, motion, and evidence provenance](docs/spatial-tour.md)
+- [Evidence integrity audit](docs/evidence-integrity.md)
+- [Compiled implementation status](docs/IMPLEMENTATION_STATUS.md)
 - [Deployment and operator setup](docs/DEPLOYMENT.md)
 - [Project specification](docs/PROJECT_SPEC.md) and [roadmap](docs/ROADMAP.md)
 - [Recorded validation report](docs/FINAL_VALIDATION.md)

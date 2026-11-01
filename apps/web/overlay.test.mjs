@@ -1,12 +1,35 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { dimCutoutClip, isDrawableHighlight, toPercentBox } from "./lib/overlay.ts";
+import { dimCutoutClip, isDrawableHighlight, sourceEvidenceOf, toPercentBox } from "./lib/overlay.ts";
 
 /**
  * Overlay geometry: percentages keep boxes aligned at any display size;
  * validity rules keep degenerate, offscreen, and page-level boxes out of
  * the viewer (those findings use the honest unlocatable fallback).
  */
+
+describe("selected source evidence", () => {
+  const box = { screenshot: "measured.png", x: 20, y: 30, width: 100, height: 40, viewportWidth: 1280, viewportHeight: 720 };
+  const finding = { findingId: "selected", pageUrl: "https://example.com/about", screenshots: ["other.png"], highlights: [box] };
+  const run = { findings: [finding], screenshots: ["other.png", "measured.png"], pageCaptures: [{ pageUrl: "https://example.com/", screenshot: "other.png" }] };
+  it("shows no unrelated capture for a missing or invalid finding", () => {
+    const empty = { finding: null, screenshot: null, highlight: null };
+    assert.deepEqual(sourceEvidenceOf(null, "selected"), empty);
+    assert.deepEqual(sourceEvidenceOf(run, "missing"), empty);
+  });
+  it("selects the registered capture belonging to the measured location", () => {
+    assert.deepEqual(sourceEvidenceOf(run, "selected"), { finding, screenshot: "measured.png", highlight: box });
+  });
+  it("ignores unregistered images and does not borrow an unrelated page capture", () => {
+    const absent = { ...finding, screenshots: ["missing.png"], highlights: [{ ...box, screenshot: "missing.png" }] };
+    assert.deepEqual(sourceEvidenceOf({ ...run, findings: [absent] }, "selected"), { finding: absent, screenshot: null, highlight: null });
+    assert.equal(sourceEvidenceOf({ ...run, findings: [absent], pageCaptures: [{ pageUrl: finding.pageUrl, screenshot: "other.png" }] }, "selected").screenshot, "other.png");
+  });
+  it("retains a real screenshot without inventing geometry", () => {
+    const unlocated = { ...finding, highlights: [{ ...box, width: 0 }] };
+    assert.deepEqual(sourceEvidenceOf({ ...run, findings: [unlocated] }, "selected"), { finding: unlocated, screenshot: "other.png", highlight: null });
+  });
+});
 
 describe("overlay geometry", () => {
   it("converts boxes to percentages of the native shot", () => {

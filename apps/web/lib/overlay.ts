@@ -1,4 +1,17 @@
-import type { ElementHighlight } from "@a11yforge/shared";
+import type { ElementHighlight, ExplorationFinding, ExplorationRun } from "@a11yforge/shared";
+
+/** Only captures registered to a selected finding or its page belong in source inspection. */
+export function sourceEvidenceOf(run: ExplorationRun | null, findingId: string): {
+  finding: ExplorationFinding | null; screenshot: string | null; highlight: ElementHighlight | null;
+} {
+  const finding = run?.findings.find((item) => item.findingId === findingId) ?? null;
+  if (run === null || finding === null) return { finding: null, screenshot: null, highlight: null };
+  const known = new Set(run.screenshots);
+  const measured = finding.highlights.find((box) => known.has(box.screenshot) && isDrawableHighlight(box)) ?? null;
+  const screenshot = measured?.screenshot ?? finding.screenshots.find((name) => known.has(name))
+    ?? run.pageCaptures?.find((capture) => capture.pageUrl === finding.pageUrl && known.has(capture.screenshot))?.screenshot ?? null;
+  return { finding, screenshot, highlight: measured };
+}
 
 /**
  * Overlay geometry helpers (single owner for highlight positioning).

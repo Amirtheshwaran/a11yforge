@@ -5,7 +5,7 @@ import { isDrawableHighlight } from "./lib/overlay.ts";
 
 const box = { x: 320, y: 240, width: 120, height: 40, viewportWidth: 1280, viewportHeight: 720, screenshot: "capture.png", label: "Search button", selector: "button" };
 const finding = { findingId: "live-control", category: "automated-finding", title: "Unnamed control", whatHappened: "A control has no name.", whyItMatters: "Users need a name.", howReproduced: [], pageUrl: "https://example.com/", severity: "serious", probeId: "page-axe-scan", screenshots: ["capture.png"], standardReferences: [], highlights: [box] };
-const live = { runId: "real-scan", target: { entryUrl: finding.pageUrl }, findings: [finding], screenshots: ["capture.png"], pagesVisited: [finding.pageUrl], limitations: [] };
+const live = { runId: "real-scan", target: { entryUrl: finding.pageUrl }, findings: [finding], screenshots: ["capture.png"], pagesVisited: [finding.pageUrl], limitations: [], probeResults: [{ pageUrl: finding.pageUrl, status: "failed", screenshots: ["capture.png"] }] };
 const render = (run) => liveTourModel(run, (name) => `/live/${name}`, (item) => ({ title: item.title, why: item.whyItMatters }));
 
 describe("shared spatial tour evidence", () => {
@@ -48,6 +48,16 @@ describe("shared spatial tour evidence", () => {
     assert.equal(model.chapters[0].body, "Could not load the website.");
     assert.ok(model.chapters.every((chapter) => chapter.imageUrl === null));
     assert.match(model.chapters.at(-1).title, /untested/);
+  });
+  it("does not treat inconclusive probes as completed accessibility checks", () => {
+    const model = render({ ...live, findings: [], probeResults: [{ status: "not-tested", pageUrl: finding.pageUrl, screenshots: [] }] });
+    assert.match(model.chapters.at(-1).title, /untested/);
+  });
+  it("does not show a different page as an unlocated finding's evidence", () => {
+    const model = render({ ...live, findings: [{ ...finding, pageUrl: "https://example.com/elsewhere", highlights: [], screenshots: [] }] });
+    const issue = model.chapters.find((chapter) => chapter.kind === "finding");
+    assert.equal(issue.imageUrl, null);
+    assert.deepEqual(issue.markers, []);
   });
   it("agrees with the existing 2D highlight validity rules", () => {
     for (const candidate of [box, { ...box, width: 0 }, { ...box, x: 2000 }, { ...box, y: -15, height: 40 }, { ...box, x: 0, y: 0, width: 1280, height: 720 }]) {

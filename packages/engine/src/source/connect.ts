@@ -125,13 +125,11 @@ export async function loadFindingEvidence(
   if (finding === undefined) {
     throw new Error(`Finding ${findingId} is not in this exploration run.`);
   }
-  // The finding names its probe; fall back to the first failed probe on
-  // the same page when the probe id is unknown (never invent evidence).
-  const probe =
-    run.probeResults.find((p) => p.probeId === finding.probeId) ??
-    run.probeResults.find(
-      (p) => p.pageUrl === finding.pageUrl && p.status === "failed",
-    );
+  // Probe ids repeat across crawled pages. Both fields must match; a different
+  // page or a different failed check is not evidence for this finding.
+  const probe = run.probeResults.find(
+    (p) => p.probeId === finding.probeId && p.pageUrl === finding.pageUrl,
+  );
   if (probe === undefined) {
     throw new Error(
       `No probe evidence for finding ${findingId}; tracing requires browser evidence.`,

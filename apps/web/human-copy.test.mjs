@@ -177,6 +177,11 @@ describe("human copy mapping", () => {
     assert.equal(humanLimitationOf("other-code", 3), "We couldn't check part of the site");
   });
 
+  it("preserves skipped and failed stages in grouped progress", () => {
+    const progress = humanProgressOf({ opening: "done", exploring: "done", scanning: "skipped", interacting: "failed", reviewing: "done", done: "skipped" });
+    assert.deepEqual(progress.map((step) => step.state), ["done", "skipped", "failed", "skipped"]);
+  });
+
   it("words severity without technical names", () => {
     assert.equal(severityWordOf("critical"), "Needs attention first");
     assert.equal(severityWordOf("serious"), "Important");

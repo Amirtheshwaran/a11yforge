@@ -32,19 +32,17 @@ import {
 import { EvidenceViewer } from "@/components/evidence-viewer";
 import { IssueWalkthrough } from "@/components/issue-walkthrough";
 import { SpatialTour } from "@/components/spatial-tour/spatial-tour";
-import { liveTourModel } from "../../../lib/tour-model";
+import { hasCompletedChecks, liveTourModel } from "../../../lib/tour-model";
 import {
   EvidenceFallback,
   FindingListFallback,
 } from "@/components/finding-list-fallback";
-import { STAGE_ORDER, stageState } from "../../../lib/exploration-stages";
+import { STAGE_ORDER, stageState, type ProgressState } from "../../../lib/exploration-stages";
 import {
   GROUP_ORDER,
   groupOf,
   humanFindingOf,
-  humanLimitationOf,
   humanProgressOf,
-  LIMITATION_SUPPORTING,
   PROBLEM_GROUPS,
   shortPageOf,
   storyboardOf,
@@ -292,9 +290,8 @@ function ExploreRunContent(): React.JSX.Element {
 
   const backendStates = Object.fromEntries(
     STAGE_ORDER.map((stage) => [stage, stageState(stage, events, run)]),
-  ) as Record<(typeof STAGE_ORDER)[number], "pending" | "running" | "done">;
+  ) as Record<(typeof STAGE_ORDER)[number], ProgressState>;
   const progress = humanProgressOf(backendStates);
-  const doneSteps = progress.filter((step) => step.state === "done").length;
 
   const tier0 = problems.filter((finding) => tierOfSeverity(finding.severity) === 0);
   const tier1 = problems.filter((finding) => tierOfSeverity(finding.severity) === 1);
@@ -530,7 +527,6 @@ function ExploreRunContent(): React.JSX.Element {
       ? drawableHighlights(walkFinding.highlights).filter((highlight) => highlight.screenshot === activeShot).length
       : 0;
 
-  const scanPct = progress.length > 0 ? Math.round((doneSteps / progress.length) * 100) : 0;
 
   if (run?.state === "COMPLETED" && tourModel !== null && !showDetailedEvidence) return <main>
     <SpatialTour model={tourModel} initialFindingId={search.get("finding")} />
@@ -573,30 +569,24 @@ function ExploreRunContent(): React.JSX.Element {
             <div className="xp-float xp-float-tl">
               <span className="mono-label">Scanning your site</span>
               <p className="xp-float-strong" role="status">
-                <span className="n">{issueCount}</span> {issueCount === 1 ? "problem" : "problems"} found
+                Waiting for results
               </p>
             </div>
             <div className="xp-float xp-float-tr">
-              <span className="mono-label">Progress</span>
+              <span className="mono-label">Browser stage</span>
               <p className="xp-float-strong">
-                <span className="n">{scanPct}</span>%
+                {latest?.stage ?? "Waiting"}
               </p>
             </div>
             <div className="scan-line" aria-hidden="false">
-              <div className="scan-line-track">
-                <div
-                  className="scan-line-fill"
-                  style={{ width: `${scanPct}%`, transition: "width 0.9s ease" }}
-                />
-              </div>
               <div className="scan-line-stages">
                 {progress.map((step) => (
                   <span
                     key={step.id}
                     data-on={step.state === "done" || step.state === "running" ? "true" : "false"}
                   >
-                    {step.state === "done" ? "✓ " : step.state === "running" ? "● " : "○ "}
-                    {step.label}
+                    {step.state === "done" ? "✓ " : step.state === "running" ? "● " : step.state === "failed" ? "✕ " : "○ "}
+                    {step.label}{step.state === "skipped" ? " — skipped" : step.state === "failed" ? " — failed" : ""}
                   </span>
                 ))}
               </div>
@@ -625,9 +615,8 @@ function ExploreRunContent(): React.JSX.Element {
             We couldn&apos;t find this check.
           </h1>
           <p className="lede-xl">
-            This check may have run on a server that has since restarted, so
-            its progress is no longer available. Nothing was backfilled — we
-            show this honestly instead of inventing results.
+            The check could not be loaded from this server. Confirm the API is
+            reachable or start another website check.
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 12 }}>
             <Button asChild>
@@ -652,7 +641,7 @@ function ExploreRunContent(): React.JSX.Element {
                   We found <span className="n">{issueCount}</span> {issueCount === 1 ? "problem" : "problems"}.
                 </>
               ) : (
-                <>No major barriers found.</>
+                <>{!hasCompletedChecks(run) ? "No accessibility checks completed." : "No failures reported by the completed checks."}</>
               )}
             </h1>
             {issueCount > 0 && (
@@ -863,12 +852,9 @@ function ExploreRunContent(): React.JSX.Element {
             </div>
           ) : (
             <div className="verify-hero">
-              <span className="verify-mark" aria-hidden="true">✓</span>
-              <h2 className="display-2">No major barriers found.</h2>
+              <h2 className="display-2">{!hasCompletedChecks(run) ? "This website remains untested." : "No failures reported by the completed checks."}</h2>
               <p className="lede-xl">
-                We didn’t find any major accessibility problems in the parts of
-                the site we tested. This does not guarantee the entire website
-                is accessible.
+                {!hasCompletedChecks(run) ? "Review the access limitations below. No accessibility result is available for this check." : "This result covers only the checks that completed. It is not a complete accessibility certification."}
               </p>
             </div>
           )}
@@ -894,22 +880,11 @@ function ExploreRunContent(): React.JSX.Element {
                 <h2 id="coverage-title">What we couldn&apos;t check</h2>
               </CardTitle>
               <CardDescription>
-                {(() => {
-                  const unavailable = run.limitations.filter((item) => item.code === "page-unavailable").length;
-                  if (unavailable > 0) {
-                    return (
-                      <>
-                        {humanLimitationOf("page-unavailable", unavailable)}.{" "}
-                        {LIMITATION_SUPPORTING["page-unavailable"]}
-                      </>
-                    );
-                  }
-                  return "Some parts of the site could not be checked safely in this run.";
-                })()}
+                {run.limitations.length > 0 ? run.limitations.map((item) => item.message).join(" ") : notTestedFindings.map((finding) => finding.whatHappened).join(" ")}
               </CardDescription>
               {developer && run.probeResults.length > 0 && (
                 <>
-                  <h2 className="mt-4 text-base font-semibold">Verified checks</h2>
+                  <h2 className="mt-4 text-base font-semibold">Recorded checks</h2>
                   <Table>
                     <TableCaption>Interaction checks run in this test</TableCaption>
                     <TableHeader>
@@ -946,9 +921,6 @@ function ExploreRunContent(): React.JSX.Element {
             <Button asChild>
               <Link href="/">Check another website</Link>
             </Button>
-            <Button variant="secondary" asChild>
-              <Link href="/console">Developer details</Link>
-            </Button>
           </section>
         </section>
       )}
@@ -963,7 +935,7 @@ function ExploreRunContent(): React.JSX.Element {
           </h1>
           <p className="lede-xl">
             {run.state === "CANCELLED"
-              ? "The check was cancelled. Partial results are shown honestly — nothing was backfilled."
+              ? "The check was cancelled before it finished."
               : (run.error ?? "The check could not finish.")}
           </p>
           {run.limitations.map((limitation, index) => (

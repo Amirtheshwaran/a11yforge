@@ -269,8 +269,7 @@ function RecordedConsole() {
         </h1>
         <p className="lede-xl">
           A real historical A11yForge repair run, steppable start to finish.
-          Every claim below is backed by recorded artifacts — nothing executes
-          here, nothing is faked.
+          Inspect the recorded browser artifacts, patch attempts, and verification results.
         </p>
         <p style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", margin: 0 }}>
           {state.kind === "ready" && <RunStatusBadge status={state.view.finalStatus} />}
@@ -301,8 +300,7 @@ function RecordedConsole() {
         <p>
           Target: <strong>Broken Shop</strong> — the controlled fixture. Starting a run executes
           the real backend pipeline (scan → keyboard test → diagnosis → source trace → proposal →
-          verify → critic) and streams its events here. Nothing is faked; instant stages display
-          honestly.
+          verify → critic) and streams its events here.
         </p>
         {health !== null && !health.modelConfigured && (
           <Alert className="mt-3">
@@ -621,8 +619,7 @@ function RecordedConsole() {
           <Alert variant="destructive">
             <AlertTitle>No run data to show</AlertTitle>
             <AlertDescription>
-              The console shows only real artifacts — nothing was faked. ({state.message})
-              Produce a run locally, then refresh.
+              {state.message} Produce a run locally, then refresh.
             </AlertDescription>
           </Alert>
       )}
@@ -823,7 +820,7 @@ function RecordedConsole() {
 
             <Card aria-labelledby="h-diagnosis">
               <CardTitle asChild>
-                <h2 id="h-diagnosis">Diagnosis (Phase 3)</h2>
+                <h2 id="h-diagnosis">Diagnosis</h2>
               </CardTitle>
               <p>
                 <strong>{state.view.diagnosis.title}</strong>

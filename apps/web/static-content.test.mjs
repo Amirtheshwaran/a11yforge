@@ -30,6 +30,10 @@ const FORBIDDEN = [
   /\b\d+ (issues found|pages tested)\b/,
   /\bTODO\b/,
   /\bFIXME\b/,
+  /ATELIER NOIR|FORM & FIELD|Precision Forms & Monoliths/,
+  /createPreview\s*\(/,
+  /illustrative website|simulated webpage/i,
+  /Confidence Score:|AST Search Terms:/,
 ];
 
 async function collect(path, out) {

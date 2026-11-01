@@ -1,62 +1,38 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { STAGE_ORDER, stageState } from "./lib/exploration-stages.ts";
-
-/**
- * Exploration stage mapping: human stages derive from the real backend
- * event stream plus the authoritative finished run — never from timers.
- * Events here are minimal `{ stage }` frames; the production mapper only
- * reads `stage`, and the shared Zod schemas validate full frames at the
- * API boundary (lib/api.ts).
- */
-
-function frame(stage) {
-  return { stage };
-}
-
+const frame = (stage, status = "running") => ({ stage, status });
 describe("exploration stage mapping", () => {
-  it("all stages pending before any event", () => {
-    for (const stage of STAGE_ORDER) {
-      assert.equal(stageState(stage, [], null), "pending");
-    }
+  it("keeps unobserved stages pending", () => {
+    for (const stage of STAGE_ORDER) assert.equal(stageState(stage, [], null), "pending");
+    assert.equal(stageState("opening", [frame("opening")], null), "running");
+    assert.equal(stageState("exploring", [frame("opening")], null), "pending");
   });
-
-  it("observed stage and frontier show as running", () => {
-    // Frontier optimism is verbatim production behavior: the first stage
-    // without events yet reads as running once earlier events exist.
-    const events = [frame("opening")];
-    assert.equal(stageState("opening", events, null), "running");
-    assert.equal(stageState("exploring", events, null), "running");
-    assert.equal(stageState("done", events, null), "pending");
-  });
-
-  it("a later stage marks earlier stages done", () => {
-    const events = [frame("opening"), frame("exploring"), frame("scanning")];
+  it("distinguishes stages that ended from stages never observed", () => {
+    const events = [frame("opening", "passed"), frame("scanning")];
     assert.equal(stageState("opening", events, null), "done");
-    assert.equal(stageState("exploring", events, null), "done");
+    assert.equal(stageState("exploring", events, null), "skipped");
     assert.equal(stageState("scanning", events, null), "running");
-    assert.equal(stageState("interacting", events, null), "running");
-    assert.equal(stageState("reviewing", events, null), "pending");
+    assert.equal(stageState("interacting", events, null), "pending");
   });
-
-  it("done event completes the run progression", () => {
-    const events = [frame("opening"), frame("done")];
-    assert.equal(stageState("opening", events, null), "done");
-    assert.equal(stageState("done", events, null), "running");
+  it("retains failures and skips when later events arrive", () => {
+    const events = [frame("exploring", "skipped"), frame("scanning", "failed"), frame("done", "passed")];
+    assert.equal(stageState("exploring", events, null), "skipped");
+    assert.equal(stageState("scanning", events, null), "failed");
+    assert.equal(stageState("done", events, null), "done");
   });
-
-  it("persisted run marks every stage done regardless of events", () => {
-    const run = { state: "COMPLETED" };
-    for (const stage of STAGE_ORDER) {
-      assert.equal(stageState(stage, [], run), "done");
-    }
+  it("uses recorded outcomes instead of treating a finished run as all passed", () => {
+    const run = { state: "COMPLETED", stages: [{ stage: "opening", state: "passed" }, { stage: "exploring", state: "skipped" }, { stage: "scanning", state: "failed" }] };
+    assert.equal(stageState("opening", [], run), "done");
+    assert.equal(stageState("exploring", [], run), "skipped");
+    assert.equal(stageState("scanning", [], run), "failed");
+    assert.equal(stageState("interacting", [], run), "skipped");
   });
-
-  it("cancelled or failed runs still read as done (authoritative state)", () => {
+  it("does not promote interrupted checks to passes", () => {
     for (const state of ["CANCELLED", "FAILED"]) {
-      for (const stage of STAGE_ORDER) {
-        assert.equal(stageState(stage, [frame("opening")], { state }), "done");
-      }
+      const run = { state, stages: [{ stage: "opening", state: "running" }] };
+      for (const stage of STAGE_ORDER) assert.equal(stageState(stage, [frame("opening")], run), "skipped");
+      assert.equal(stageState("opening", [frame("opening", "failed")], run), "failed");
     }
   });
 });

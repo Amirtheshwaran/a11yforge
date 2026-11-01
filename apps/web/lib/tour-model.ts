@@ -46,6 +46,11 @@ function chapter(input: Pick<TourChapter, "id" | "kind" | "title" | "eyebrow" | 
   return { facts: [], highlight: null, finding: null, markers: [], focusSteps: [], source: null, outcome: "unresolved", pageUrl: null, ...input };
 }
 
+/** Capturing a page or recording an inconclusive probe is not a completed check. */
+export function hasCompletedChecks(run: ExplorationRun): boolean {
+  return run.probeResults.some((probe) => probe.status === "passed" || probe.status === "failed");
+}
+
 /** Live projection accepts the real run only; recorded evidence is never a fallback. */
 export function liveTourModel(
   run: ExplorationRun,
@@ -67,7 +72,7 @@ export function liveTourModel(
   const measuredOverview = (run.probeResults ?? []).find((probe) => probe.probeId === "page-axe-scan" && probe.pageUrl === firstPage?.pageUrl)?.screenshots.find((name) => knownShots.has(name));
   const overviewShot = measuredOverview ?? firstPage?.screenshot ?? run.screenshots[0] ?? null;
   const overviewUrl = overviewShot === null ? null : imageUrl(overviewShot);
-  const untested = run.probeResults?.length === 0;
+  const untested = !hasCompletedChecks(run);
   const accessMessage = run.limitations.map((item) => item.message).join(" ");
   const markers: TourMarker[] = problems.flatMap((finding, index) => finding.highlights
     .filter((box) => knownShots.has(box.screenshot) && canFrameHighlight(box))
@@ -76,7 +81,7 @@ export function liveTourModel(
   const issueChapters = problems.map((finding, index) => {
     const boxes = markers.filter((marker) => marker.finding.findingId === finding.findingId);
     const box = boxes[0]?.box ?? null;
-    const shot = box?.screenshot ?? finding.screenshots.find((name) => knownShots.has(name)) ?? overviewShot;
+    const shot = box?.screenshot ?? finding.screenshots.find((name) => knownShots.has(name)) ?? capturedPages.get(finding.pageUrl)?.screenshot ?? null;
     const copy = human(finding);
     // Only keyboard traces have temporal ordering. Other boxes are affected elements.
     const focusSteps: TourFocusStep[] = finding.probeId === "keyboard-traversal"

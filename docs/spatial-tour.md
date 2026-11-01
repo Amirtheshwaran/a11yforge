@@ -108,9 +108,13 @@ submit button. Safe-area insets and reduced-motion controls are respected.
 - `pnpm typecheck`: passed across workspaces.
 - `pnpm lint`: passed repository-wide.
 - `pnpm build`: passed across workspaces.
-- Web tests: 77 passed, including timeline reversal, evidence isolation,
+- Web tests: 83 passed, including timeline reversal, evidence isolation,
   verification gates, screenshot validity, replay provenance, and website
   address normalization.
+- Source inspection renders only recorded captures. Missing or invalid
+  findings have no illustrative webpage, guessed geometry, or borrowed image.
+  See the [evidence integrity audit](evidence-integrity.md) for the associated
+  status, source-provenance, and CLI corrections.
 - The actual Anime.js timeline is sampled forward and backward across chapter
   handoffs to verify that paused copy retains readable opacity.
 - Production browser checks verified finding → source → finding returns on
