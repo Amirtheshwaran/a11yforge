@@ -81,16 +81,17 @@ Browser automation with SSRF-guarded targets. Evidence provenance, in which ever
 ## Links
 
 - Repository: https://github.com/Amirtheshwaran/a11yforge
-- Public deployment: `[PUBLIC DEPLOYMENT URL]`. Deferred; not deployed yet. Enter a URL only after `deploy/smoke.mjs` has passed against it. If the form requires one, deploy first.
+- Public deployment: <https://unelected-unearned-average.ngrok-free.dev>. Deployed 2 November 2026 on the entrant's own machine, key-less. `deploy/smoke.mjs` passed all 19 checks against it, including live scan SSE streaming. First-time browser visitors see ngrok's one-time "Visit Site" warning page (a cookie suppresses it for 7 days); programmatic clients bypass it.
 - Demo video: https://cdn.jsdelivr.net/gh/Amirtheshwaran/a11yforge@513704cecfe59f075cdd52f5429354c8f3bc7011/submission-assets/video/a11yforge-demo.mp4
 
 The video link was checked on 1 November 2026 without signing in: it plays and seeks in a browser (2:45, 1920 × 1080), and the downloaded bytes match the committed file's SHA-256. It is a direct file link, not a video platform. If the form accepts only hosts such as YouTube, Vimeo or Loom, upload `submission-assets/video/a11yforge-demo.mp4` there and use that link instead. GitHub's own file view does not play this video, so do not use a `github.com` link for it.
 
 ## How to try it
 
-For use only while no public deployment exists:
+Live: <https://unelected-unearned-average.ngrok-free.dev> (first-time browser visitors get
+ngrok's one-time "Visit Site" warning page; a cookie suppresses it for 7 days).
 
-Watch the demo video. To run it, use Node.js 22.18+ and pnpm 10.34.9: clone the repository, run `pnpm install --frozen-lockfile`, `pnpm --filter @a11yforge/engine exec playwright install chromium`, `pnpm build` and `pnpm start`, then open http://localhost:3000. Website scans, the spatial tour and the recorded repair need no API key.
+To run it locally, use Node.js 22.18+ and pnpm 10.34.9: clone the repository, run `pnpm install --frozen-lockfile`, `pnpm --filter @a11yforge/engine exec playwright install chromium`, `pnpm build` and `pnpm start`, then open http://localhost:3000. Website scans, the spatial tour and the recorded repair need no API key.
 
 ## Known limitations
 

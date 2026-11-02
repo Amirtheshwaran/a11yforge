@@ -8,7 +8,7 @@ A11yForge observes accessibility failures in a real browser, uses Meta models to
 
 ![The recorded repair: the first Meta repair rejected on the compiler's own output](submission-assets/screenshots/06-first-fix-rejected.png)
 
-**Public deployment:** not available yet. See [deployment status](docs/DEPLOYMENT.md).
+**Public deployment:** https://unelected-unearned-average.ngrok-free.dev — key-less, smoke-tested 2 November 2026. See [deployment status](docs/DEPLOYMENT.md).
 
 ## Why it matters
 

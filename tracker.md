@@ -41,7 +41,7 @@
 | Untrusted source sandbox | 🟡 | Phase 9 |
 | Generic repair replay | 🟡 | Phase 9 |
 | Patch download | 🟡 | Phase 9 |
-| Public deployment | ⬜ | After core Phase 9 |
+| Public deployment | ✅ | Live at https://unelected-unearned-average.ngrok-free.dev since 2 Nov 2026 |
 | Submission/demo polish | ⬜ | After feature freeze |
 | Baseten / Muse Spark Open | 🟡 | Live diagnosis verified 1 Nov; proposal, revision and critic not verified |
 | GitHub write/PR automation | ⛔ | Not needed for core |
@@ -266,8 +266,8 @@ Before Phase 9 commit:
 
 # 7. Submission phase — after core freeze
 
-- [ ] Public deployment.
-- [ ] Production smoke test.
+- [x] Public deployment.
+- [x] Production smoke test (19/19 against the public URL, 2 November 2026).
 - [ ] README screenshots.
 - [ ] Architecture visual.
 - [ ] 3-minute demo script.

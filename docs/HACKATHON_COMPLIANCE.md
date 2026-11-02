@@ -117,13 +117,16 @@ A public deployment holds no key, and the base URL override accepts plain HTTPS 
 
 ## Deployment
 
-**Deferred.** No public deployment exists yet; the entrant deferred it on 1 November 2026. Images build and pass the
-smoke test in [CI](../.github/workflows/ci.yml), and [`deploy/huggingface`](../deploy/huggingface) is
-ready. Hosting needs the entrant's account. See [deployment](DEPLOYMENT.md). **Public URL:** none yet.
+**Deployed 2 November 2026.** Hosting is the entrant's own machine (Docker container plus a
+tunnel on the entrant's account; no keys on the host). Images build and pass the smoke test in
+[CI](../.github/workflows/ci.yml). See [deployment](DEPLOYMENT.md).
+**Public URL:** <https://unelected-unearned-average.ngrok-free.dev> — `deploy/smoke.mjs`
+passed all 19 checks against it on 2 November 2026, including live scan SSE streaming.
 
 ## Physical device testing
 
-**Needs manual action.** Only browser viewports were tested. Once a public URL exists, on one iPhone
+**Needs manual action.** Only browser viewports were tested. A public URL now exists
+(<https://unelected-unearned-average.ngrok-free.dev>); on one iPhone
 and one Android phone:
 
 ```text

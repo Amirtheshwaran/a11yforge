@@ -1,9 +1,28 @@
 # Deployment
 
-**Status:** deferred. No public deployment exists yet, and hosting needs an account.
-Both images are built and smoke-tested by [CI](../.github/workflows/ci.yml) on every push
-to `main`, but that is not a hosted test. Record the public URL here only after
-`deploy/smoke.mjs` passes against it.
+**Status: deployed.** Public URL: <https://unelected-unearned-average.ngrok-free.dev>
+(recorded 2 November 2026). `deploy/smoke.mjs` passed all 19 checks against it, including
+live scan SSE streaming. Both images are also built and smoke-tested by
+[CI](../.github/workflows/ci.yml) on every push to `main`.
+
+## Live deployment (2 November 2026)
+
+- **Host:** the entrant's own Linux machine, Docker container `a11yforge`
+  (image `a11yforge:submission`, port 3000, volume `a11yforge-data`,
+  `--restart unless-stopped`).
+- **Tunnel:** ngrok free plan with a fixed dev domain (the URL survives restarts and
+  reboots), running as the systemd user service `a11yforge-ngrok.service`
+  (`systemctl --user status|restart a11yforge-ngrok.service`; user linger is enabled).
+- **Key-less:** no `MODEL_API_KEY` on the host. `POST /runs` answers 503, the bundled
+  recorded demo and website scans work (see [Security](#security-on-a-public-host)).
+- **First-visit interstitial:** browsers see ngrok's one-time "Visit Site" warning page;
+  a cookie suppresses it for 7 days. Programmatic clients (curl, `deploy/smoke.mjs`)
+  bypass it automatically.
+- **Verify after any restart:**
+
+  ```sh
+  node deploy/smoke.mjs https://unelected-unearned-average.ngrok-free.dev
+  ```
 
 ## Shape
 
@@ -15,12 +34,13 @@ It needs a Linux container host with HTTPS, enough memory for Chromium (plan on 
 and long-lived responses for the scan progress stream. Serverless platforms that cannot
 run Chromium and a long-lived process are not compatible.
 
-## Recommended: Hugging Face Docker Space
+## Hugging Face Docker Space (needs the paid PRO plan)
 
-This fits a key-less public demo: free, Docker-based, enough memory for Chromium, and no
-credit card. Spaces can sleep after long inactivity and wake on the next visit, so
-open the URL before a demo. Their disk is not persistent: saved scan results disappear
-when the Space restarts, while the recorded repair ships in the image.
+This used to be the free default. As verified on 2 November 2026, creating a Docker Space
+without PRO returns a 402 payment error, so the live deployment uses the Docker host
+below with an ngrok tunnel instead. The steps remain valid for a PRO account: Spaces sleep
+after long inactivity and wake on the next visit, and their disk is not persistent (saved
+scan results disappear when the Space restarts, while the recorded repair ships in the image).
 
 1. Create a **public** Space with the **Docker** SDK.
 2. Add two files from [`deploy/huggingface/`](../deploy/huggingface):
