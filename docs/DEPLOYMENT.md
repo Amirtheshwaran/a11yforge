@@ -47,9 +47,25 @@ disable response buffering for `/backend/explorations/*/events` and
 
 ## Security on a public host
 
-- **Leave `MODEL_API_KEY` unset.** `POST /runs` has no user authentication and starts a
-  paid fixture run. With no key it answers 503. Exploration and the recorded demo make no
-  model calls, so they lose nothing.
+- **Without `MODEL_API_KEY`**, `POST /runs` answers 503. Exploration and the recorded demo
+  make no model calls, so they lose nothing. This remains the safest public setup.
+- **To allow live runs on a public host**, set `MODEL_API_KEY` *and* `A11YFORGE_RUN_PASSCODE`
+  as runtime secrets. The console then asks for the passcode, and `POST /runs` answers 401
+  without it. Independently of the passcode, every run counts against a per-client hourly
+  limit (`A11YFORGE_RUNS_PER_HOUR_PER_CLIENT`, default 2) and a global daily cap
+  (`A11YFORGE_MAX_RUNS_PER_DAY`, default 20, at most four model calls per run). Refusals
+  answer 429 with `Retry-After`. `GET /health` reports `runPasscodeRequired` and
+  `runsRemainingToday`. Counters live in memory and reset when the server restarts.
+- **Scans and repository connections** are also limited per client per hour (defaults 10
+  and 10), on top of the existing cap of 3 running at once.
+- **Client addresses** for those per-client limits come from the last `X-Forwarded-For`
+  entry (`A11YFORGE_TRUST_PROXY_HOPS`, default 1). The built-in Next.js proxy passes that
+  header through without adding to it, so the entry must come from a front proxy that
+  appends the real client address, such as the Hugging Face Spaces proxy, Cloudflare or
+  nginx. Without one, a client can forge its own address and evade the per-client limits;
+  the passcode and the daily cap still apply. To check, start a scan and confirm the API
+  log's `remoteAddress` shows your public address rather than a proxy's. Raise the value
+  only when several proxies each append an entry.
 - **Leave `A11YFORGE_ALLOW_PRIVATE_TARGETS` unset.** Website and Git targets are then
   checked by DNS against private, loopback, link-local and reserved addresses. The smoke
   test confirms refusal.

@@ -23,6 +23,13 @@ import {
 } from "@a11yforge/shared";
 import { MODEL_API_KEY_ENV } from "@a11yforge/meta";
 import { resolveLiveRunsDir } from "./runs.js";
+import {
+  RUN_PASSCODE_HEADER,
+  createApiLimits,
+  passcodeMatches,
+  runPasscode,
+  type ApiLimits,
+} from "./rate-limit.js";
 
 /**
  * Phase 6.5 live-run orchestration API.
@@ -270,13 +277,29 @@ async function launchRun(record: LiveRunRecord): Promise<void> {
 
 export function registerLiveRunRoutes(
   app: FastifyInstance,
-  deps: { runner?: PipelineRunner } = {},
+  deps: { runner?: PipelineRunner; limits?: ApiLimits } = {},
 ): void {
   if (deps.runner !== undefined) {
     setPipelineRunnerForTests(deps.runner);
   }
+  const limits = deps.limits ?? createApiLimits();
 
-  app.post("/runs", async (_request, reply) => {
+  app.post("/runs", async (request, reply) => {
+    // Each run can spend up to four paid model calls, so starting one is
+    // guarded in order: operator passcode (when configured), the
+    // single-active-run rule, model configuration, a per-client hourly
+    // limit, and a global daily cap. Refusals before the limits never
+    // consume a client's allowance.
+    const expected = runPasscode();
+    if (expected !== null) {
+      const supplied = request.headers[RUN_PASSCODE_HEADER];
+      if (typeof supplied !== "string" || !passcodeMatches(supplied, expected)) {
+        return reply.status(401).send({
+          error: "This server requires a passcode to start a live repair run.",
+          passcodeRequired: true,
+        });
+      }
+    }
     const active = activeLiveRun();
     if (active !== null) {
       return reply.status(409).send({
@@ -292,6 +315,19 @@ export function registerLiveRunRoutes(
       return reply.status(503).send({
         error:
           "Meta Model API key is not configured. Export MODEL_API_KEY on the API server, then start a run.",
+      });
+    }
+    const clientLimit = limits.runsPerClient.hit(request.ip);
+    if (!clientLimit.allowed) {
+      reply.header("retry-after", String(clientLimit.retryAfterSeconds));
+      return reply.status(429).send({
+        error: "You have started too many live repair runs this hour. Try again later.",
+      });
+    }
+    if (!limits.runsPerDay.take()) {
+      reply.header("retry-after", String(limits.runsPerDay.secondsUntilReset()));
+      return reply.status(429).send({
+        error: "Today's live repair budget for this server is spent. The recorded run remains available.",
       });
     }
     // Live runs always write to the writable runtime directory — never

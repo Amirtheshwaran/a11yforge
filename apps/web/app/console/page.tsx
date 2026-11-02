@@ -26,6 +26,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -80,6 +81,7 @@ function RecordedConsole() {
   const [liveStatus, setLiveStatus] = useState<LiveRunStatus | null>(null);
   const [liveEvents, setLiveEvents] = useState<LiveRunEvent[]>([]);
   const [liveError, setLiveError] = useState<string | null>(null);
+  const [livePasscode, setLivePasscode] = useState("");
   const streamRef = useRef<(() => void) | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const finishedRef = useRef<boolean>(false);
@@ -195,7 +197,9 @@ function RecordedConsole() {
     setLivePhase("starting");
     let runId: string;
     try {
-      const started = await startRun();
+      const started = await startRun(
+        health?.runPasscodeRequired === true ? livePasscode : undefined,
+      );
       runId = started.runId;
     } catch (error) {
       setLiveError(error instanceof Error ? error.message : "Could not start run.");
@@ -204,6 +208,12 @@ function RecordedConsole() {
     }
     setLiveRunId(runId);
     setLivePhase("running");
+    // Refresh the server's remaining daily run budget (best-effort).
+    fetchHealth()
+      .then((h) => {
+        if (h !== null) setHealth(h);
+      })
+      .catch(() => undefined);
     void refreshStatus(runId);
     streamRef.current = subscribeRunEvents(
       runId,
@@ -222,7 +232,15 @@ function RecordedConsole() {
         startLivePollFallback(runId);
       },
     );
-  }, [livePhase, refreshStatus, settleLiveRun, startLivePollFallback, stopLiveStream]);
+  }, [
+    health,
+    livePasscode,
+    livePhase,
+    refreshStatus,
+    settleLiveRun,
+    startLivePollFallback,
+    stopLiveStream,
+  ]);
 
   const liveEvidence = foldLiveEvidence(liveEvents);
   const liveRunningStage =
@@ -310,6 +328,28 @@ function RecordedConsole() {
             </AlertDescription>
           </Alert>
         )}
+        {health?.modelConfigured === true && typeof health.runsRemainingToday === "number" && (
+          <p className="mono-label" style={{ margin: "8px 0" }}>
+            Live runs left on this server today: {health.runsRemainingToday}
+          </p>
+        )}
+        {health?.runPasscodeRequired === true &&
+          (livePhase === "idle" || livePhase === "done" || livePhase === "failed") && (
+            <div style={{ display: "grid", gap: 6, maxWidth: 320, margin: "8px 0 12px" }}>
+              <Label htmlFor="live-passcode">Run passcode</Label>
+              <Input
+                id="live-passcode"
+                type="password"
+                autoComplete="off"
+                value={livePasscode}
+                onChange={(event) => setLivePasscode(event.target.value)}
+                aria-describedby="live-passcode-help"
+              />
+              <p id="live-passcode-help" style={{ margin: 0 }}>
+                Live runs make paid model calls, so this server asks for its operator&apos;s passcode.
+              </p>
+            </div>
+          )}
         {(livePhase === "idle" || livePhase === "done" || livePhase === "failed") && (
           <Button
             type="button"

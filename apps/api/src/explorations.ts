@@ -17,6 +17,7 @@ import {
 } from "@a11yforge/engine";
 import { isPrivateTargetsAllowed } from "@a11yforge/engine";
 import { resolveLiveRunsDir } from "./runs.js";
+import type { ApiLimits } from "./rate-limit.js";
 
 /**
  * Phase 8 — universal exploration API.
@@ -133,7 +134,7 @@ function publicRun(record: ExplorationRecord): ExplorationRun | { runId: string;
   return { runId: record.runId, state: record.state };
 }
 
-export function registerExplorationRoutes(app: FastifyInstance): void {
+export function registerExplorationRoutes(app: FastifyInstance, limits: ApiLimits): void {
   app.post<{ Body: { url?: unknown; maxPages?: unknown } }>("/explorations", async (request, reply) => {
     const { url, maxPages } = request.body ?? {};
     if (typeof url !== "string" || url.trim() === "") {
@@ -148,6 +149,13 @@ export function registerExplorationRoutes(app: FastifyInstance): void {
     }
     if (runningCount() >= MAX_CONCURRENT_EXPLORATIONS) {
       return reply.status(429).send({ error: "Too many accessibility tests are running. Try again shortly." });
+    }
+    const clientLimit = limits.scansPerClient.hit(request.ip);
+    if (!clientLimit.allowed) {
+      reply.header("retry-after", String(clientLimit.retryAfterSeconds));
+      return reply.status(429).send({
+        error: "You have started too many accessibility tests this hour. Try again later.",
+      });
     }
     const allowPrivate = isPrivateTargetsAllowed();
     try {

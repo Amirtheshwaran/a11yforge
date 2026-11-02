@@ -63,10 +63,12 @@ export type {
   ProposeRevisionResult,
 } from "./revision.js";
 export {
+  IssueTypeMismatchError,
   MetaApiError,
   MetaMalformedResultError,
   UnknownEvidenceReferenceError,
   assertEvidenceReferencesKnown,
+  assertIssueTypeMatchesEvidence,
   diagnoseWithMeta,
 } from "./provider.js";
 export type {

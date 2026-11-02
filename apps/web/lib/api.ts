@@ -109,9 +109,17 @@ export interface StartRunResult {
   alreadyRunning: boolean;
 }
 
-/** Start one autonomous repair run. 409 means a run is already active. */
-export async function startRun(): Promise<StartRunResult> {
-  const res = await fetch(`${apiBase()}/runs`, { method: "POST" });
+/**
+ * Start one autonomous repair run. 409 means a run is already active.
+ * `passcode` is sent only when the server requires one (see `/health`).
+ */
+export async function startRun(passcode?: string): Promise<StartRunResult> {
+  const res = await fetch(`${apiBase()}/runs`, {
+    method: "POST",
+    ...(passcode !== undefined && passcode !== ""
+      ? { headers: { "x-a11yforge-passcode": passcode } }
+      : {}),
+  });
   const body = (await res.json().catch(() => ({}))) as {
     runId?: string;
     error?: string;

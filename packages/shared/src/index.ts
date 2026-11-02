@@ -23,6 +23,10 @@ export interface ApiHealth {
   demoMode: "bundled-recorded" | "local";
   /** True when the runtime data directory is present and writable. */
   dataDirWritable: boolean;
+  /** True when starting a live run needs the operator's passcode. */
+  runPasscodeRequired: boolean;
+  /** Paid live runs still available today (UTC) under the server's daily cap. */
+  runsRemainingToday: number;
 }
 
 export {
@@ -36,6 +40,7 @@ export type {
   Impact,
 } from "./evidence.js";
 export {
+  ASSERTION_ISSUE_TYPES,
   AccessibilityDiagnosisSchema,
   DiagnosisSeveritySchema,
   EvidenceBundleSchema,
@@ -44,6 +49,7 @@ export {
   IssueTypeSchema,
   ModelUsageSchema,
   evidenceIdsOf,
+  expectedIssueTypesFor,
 } from "./diagnosis.js";
 export type {
   AccessibilityDiagnosis,

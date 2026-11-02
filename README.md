@@ -44,7 +44,7 @@ In one real recorded run against a controlled target:
 | Revision (at most one) | Repair the repair | The compiler or verifier output, plus the original edit and evidence | Same schema as a proposal |
 | Critic (only if the gates pass) | Challenge a passing repair | The gate results and evidence | Accept or reject, remaining risks, verification concerns |
 
-Requests use `response_format` with strict JSON schemas, and replies are validated locally with Zod and checked against the supplied evidence IDs. Invalid output fails closed with no automatic retry. The complete run is capped at **four calls**, enforced in [`pipeline.ts`](packages/engine/src/autorun/pipeline.ts), and each stage runs at most once. Exploration and recorded playback make **zero** calls.
+Requests use `response_format` with strict JSON schemas, and replies are validated locally with Zod and checked against the supplied evidence IDs. A diagnosis's `issueType` is also checked against the deterministic failed assertion, so a focus escape labelled `contrast` is rejected. Invalid output fails closed with no automatic retry. The complete run is capped at **four calls**, enforced in [`pipeline.ts`](packages/engine/src/autorun/pipeline.ts), and each stage runs at most once. Exploration and recorded playback make **zero** calls.
 
 The model may reason, diagnose, propose, revise and critique. It cannot invent browser or source facts, waive a failed gate, or certify its own repair.
 
@@ -72,7 +72,7 @@ These numbers come from the run's committed [usage artifacts](demo/accepted-run/
 Limits of the 1 November verification:
 
 - Proposal, revision and critic were not freshly verified through Baseten. No repair loop ran through Baseten, on the controlled target or on any other site.
-- Schema validation checks structure, not correctness. The diagnosis described the focus escape correctly, but its `issueType` field said `contrast` instead of `focus-containment`.
+- Schema validation checks structure, not correctness. The diagnosis described the focus escape correctly, but its `issueType` field said `contrast` instead of `focus-containment`. A11yForge now rejects that contradiction deterministically ([`provider.ts`](packages/meta/src/provider.ts)); the diagnosis prompt also defines each label. Neither change has been re-verified against a live model yet.
 - The default `api.meta.ai` endpoint was not re-verified that day, because the available key is not valid there.
 
 ## What is deterministic
@@ -155,7 +155,7 @@ A verified repair proves the tested behavior, not whole-site conformance.
 - **The repair shown in the app and the video is recorded**, not live.
 - **Coverage is bounded.** Authentication, CAPTCHA, bot protection and blocked or missing pages can prevent testing, and those pages are reported as untested. A scan is not a conformance audit.
 - **Source matches can be ambiguous or missing**, and then no cause is claimed. Measured locations can also be unavailable, and then none is drawn.
-- **A hosted deployment holds no model key**, because `POST /runs` has no user authentication.
+- **Live runs on a hosted deployment need an operator passcode.** `POST /runs` has no user accounts; with a key set, protect it with `A11YFORGE_RUN_PASSCODE`. Per-client hourly limits and a global daily run cap apply either way, and are held in memory. See [deployment](docs/DEPLOYMENT.md#security-on-a-public-host).
 - **Scan results are readable by anyone with their URL.** In-progress streams and source connections live in one server process.
 - **Testing used browser viewports and simulated conditions.** Physical iOS and Android devices have not been tested.
 
