@@ -24,6 +24,41 @@ live scan SSE streaming. Both images are also built and smoke-tested by
   node deploy/smoke.mjs https://unelected-unearned-average.ngrok-free.dev
   ```
 
+## Continuous deployment
+
+The live host updates itself and is checked from outside after every change:
+
+1. **CI** ([`ci.yml`](../.github/workflows/ci.yml)) tests every push to `main`.
+2. **Deploy on the host** ([`deploy/auto-deploy.sh`](../deploy/auto-deploy.sh)), run every
+   5 minutes by a systemd user timer. It fetches `main` into its own clone, deploys the
+   newest commit only after that commit's CI run has passed, builds the image before
+   stopping anything, swaps the `a11yforge` container (same volume, port 3000 on
+   127.0.0.1 for the ngrok service), and waits for `/backend/health` to report the new
+   commit. If it does not, it rolls back to the previous image and does not retry that
+   commit. The host only pulls from GitHub: no webhook, no self-hosted runner, so nothing
+   outside can start code on it. Optional secrets go in
+   `~/.local/share/a11yforge-deploy/runtime.env` (chmod 600); a `MODEL_API_KEY` there
+   without `A11YFORGE_RUN_PASSCODE` is refused.
+3. **Check the public URL** ([`deployment-check.yml`](../.github/workflows/deployment-check.yml)).
+   After CI passes, a GitHub-hosted runner waits until the public `/backend/health` reports
+   the new commit, then runs `deploy/smoke.mjs` (one real scan of example.com) and
+   [`deploy/browser-check.mjs`](../deploy/browser-check.mjs): the main pages on desktop, a
+   390 × 844 phone viewport and reduced motion, then one scan started through the real
+   form, its result page, a refresh, the served screenshot and the drawn 3D scene.
+   Screenshots are kept as a run artifact for 14 days. Every hour a light check (no scan)
+   catches a stopped tunnel or container. The URL is the repository variable `DEPLOY_URL`,
+   defaulting to the ngrok domain above.
+
+Install once on the host, from a checkout of `main`:
+
+```sh
+bash deploy/install-auto-deploy.sh
+systemctl --user start a11yforge-auto-deploy.service
+journalctl --user -u a11yforge-auto-deploy.service -f
+```
+
+The host must stay on, with the ngrok service running, for the public URL to answer.
+
 ## Shape
 
 The image serves everything from **one public port**. Next.js proxies `/backend/*` to
