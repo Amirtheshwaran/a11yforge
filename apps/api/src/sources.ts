@@ -10,6 +10,7 @@ import {
   type ConnectedSource,
 } from "@a11yforge/engine";
 import { resolveDataDir, resolveLiveRunsDir } from "./runs.js";
+import type { ApiLimits } from "./rate-limit.js";
 
 /**
  * Phase 9 — source-connection API.
@@ -82,7 +83,7 @@ function publicRecord(record: SourceRecord): unknown {
   };
 }
 
-export function registerSourceRoutes(app: FastifyInstance): void {
+export function registerSourceRoutes(app: FastifyInstance, limits: ApiLimits): void {
   app.post<{
     Body: {
       gitUrl?: string;
@@ -122,6 +123,13 @@ export function registerSourceRoutes(app: FastifyInstance): void {
     }
     if (connectingCount() >= MAX_CONCURRENT_SOURCE_CONNECTIONS) {
       return reply.status(429).send({ error: "Too many repositories are being connected. Try again shortly." });
+    }
+    const clientLimit = limits.sourcesPerClient.hit(request.ip);
+    if (!clientLimit.allowed) {
+      reply.header("retry-after", String(clientLimit.retryAfterSeconds));
+      return reply.status(429).send({
+        error: "You have connected too many repositories this hour. Try again later.",
+      });
     }
     const sourceId = `src-${Date.now()}-${randomUUID().slice(0, 8)}`;
     const record: SourceRecord = {

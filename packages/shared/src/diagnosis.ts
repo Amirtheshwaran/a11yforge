@@ -127,6 +127,27 @@ export const EvidenceBundleSchema = z.object({
 });
 export type EvidenceBundle = z.infer<typeof EvidenceBundleSchema>;
 
+/**
+ * Issue types consistent with each deterministic assertion.
+ *
+ * The failed assertion is a measured fact, so it bounds which coarse label
+ * a diagnosis may carry: a focus-containment failure cannot be diagnosed as
+ * a contrast problem. Adding an assertion to `EvidenceBundleSchema` forces
+ * an entry here at compile time.
+ */
+export const ASSERTION_ISSUE_TYPES: Readonly<
+  Record<EvidenceBundle["assertion"], readonly IssueType[]>
+> = {
+  "focus-contained-in-modal": ["focus-containment"],
+};
+
+/** Issue types a diagnosis of `bundle` may carry. */
+export function expectedIssueTypesFor(
+  bundle: Pick<EvidenceBundle, "assertion">,
+): readonly IssueType[] {
+  return ASSERTION_ISSUE_TYPES[bundle.assertion];
+}
+
 /** IDs citable by a diagnosis for one bundle. */
 export function evidenceIdsOf(bundle: EvidenceBundle): Set<string> {
   return new Set(bundle.items.map((item) => item.id));

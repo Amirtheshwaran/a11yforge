@@ -6,9 +6,11 @@ import {
   type EvidenceBundle,
 } from "@a11yforge/shared";
 import {
+  IssueTypeMismatchError,
   MetaApiError,
   MetaMalformedResultError,
   UnknownEvidenceReferenceError,
+  assertIssueTypeMatchesEvidence,
   diagnoseWithMeta,
   type MetaFetch,
 } from "./provider.js";
@@ -193,6 +195,46 @@ describe("diagnoseWithMeta (mocked transport)", () => {
       },
     );
     assert.equal(calls, 1);
+  });
+
+  it("rejects an issueType the failed assertion contradicts, keeping usage, without retrying", async () => {
+    // The 1 November live diagnosis described the focus escape correctly
+    // but labelled it `contrast`; that output must now fail closed.
+    const mislabelled = { ...DIAGNOSIS, issueType: "contrast" };
+    let calls = 0;
+    const fetchFn = (() => {
+      calls += 1;
+      return Promise.resolve(
+        okResponse(
+          completionWith(JSON.stringify(mislabelled), {
+            prompt_tokens: 950,
+            completion_tokens: 880,
+          }),
+        ),
+      );
+    }) as unknown as MetaFetch;
+    const error = await diagnoseWithMeta(BUNDLE, {
+      fetchFn,
+      model: "m",
+      apiKey: "k",
+    }).catch((e: unknown) => e);
+    assert.ok(error instanceof IssueTypeMismatchError);
+    assert.ok(error instanceof MetaMalformedResultError, "callers that preserve usage still catch it");
+    const mismatch = error as IssueTypeMismatchError;
+    assert.equal(mismatch.actual, "contrast");
+    assert.deepEqual(mismatch.expected, ["focus-containment"]);
+    assert.equal(mismatch.assertion, "focus-contained-in-modal");
+    assert.equal(mismatch.usage?.inputTokens, 950);
+    assert.equal(mismatch.usage?.requestId, "req-test-1");
+    assert.equal(calls, 1);
+  });
+
+  it("checks every issue type against the focus-containment assertion", () => {
+    for (const issueType of AccessibilityDiagnosisSchema.shape.issueType.options) {
+      const check = () => assertIssueTypeMatchesEvidence({ issueType }, BUNDLE);
+      if (issueType === "focus-containment") assert.doesNotThrow(check);
+      else assert.throws(check, IssueTypeMismatchError, issueType);
+    }
   });
 
   it("fails on non-JSON content without retrying", async () => {

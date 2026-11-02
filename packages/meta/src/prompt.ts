@@ -51,5 +51,6 @@ Grounding rules — violate none of them:
 - Never invent filenames, components, line numbers, source implementation details, or browser observations not contained in the evidence. You are given NO source code.
 - Recommend a repair STRATEGY (what should change behaviorally), never a code patch.
 - Express uncertainty through the confidence score (0 = guessing, 1 = certain).
+- issueType names the class of the FAILED ASSERTION, not a secondary observation: focus-containment = keyboard focus leaves (or is not kept inside) an active dialog or region; accessible-name = a control has no usable accessible name; missing-alt = an image lacks a text alternative; missing-label = a form field lacks a label; contrast = text or UI colors lack sufficient contrast; unknown = none of these fit. A11yForge checks this label against the deterministic assertion and rejects a contradiction.
 - Confirming implementation details requires repository inspection, which belongs to a later phase: set needsSourceContext to true when that is the case.
 - Automated strategies describe interaction barriers; they are not claims of perfectly reproducing disabled users' lived experiences.`.trim();

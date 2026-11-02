@@ -1,6 +1,7 @@
 import {
   AccessibilityDiagnosisSchema,
   evidenceIdsOf,
+  expectedIssueTypesFor,
   type AccessibilityDiagnosis,
   type EvidenceBundle,
   type ModelUsage,
@@ -65,6 +66,43 @@ export class UnknownEvidenceReferenceError extends Error {
       `Diagnosis cites unknown evidence IDs: ${unknownIds.join(", ")}`,
     );
     this.name = "UnknownEvidenceReferenceError";
+  }
+}
+
+/**
+ * The diagnosis labels the failure with an issue type the deterministic
+ * assertion rules out (e.g. `contrast` for a focus escape). Schema-valid
+ * but contradicted by measured evidence, so it is rejected like any other
+ * unusable model output; `usage` keeps the spent request's telemetry.
+ */
+export class IssueTypeMismatchError extends MetaMalformedResultError {
+  constructor(
+    readonly assertion: string,
+    readonly actual: string,
+    readonly expected: readonly string[],
+    usage: ModelUsage | null = null,
+  ) {
+    super(
+      `Diagnosis issueType "${actual}" contradicts the failed assertion ` +
+        `"${assertion}" (expected ${expected.map((t) => `"${t}"`).join(" or ")}).`,
+      usage,
+    );
+    this.name = "IssueTypeMismatchError";
+  }
+}
+
+/**
+ * Reject a diagnosis whose issue type contradicts the failed assertion.
+ * Exported so the engine and tests apply the same rule.
+ */
+export function assertIssueTypeMatchesEvidence(
+  diagnosis: Pick<AccessibilityDiagnosis, "issueType">,
+  bundle: Pick<EvidenceBundle, "assertion">,
+  usage: ModelUsage | null = null,
+): void {
+  const expected = expectedIssueTypesFor(bundle);
+  if (!expected.includes(diagnosis.issueType)) {
+    throw new IssueTypeMismatchError(bundle.assertion, diagnosis.issueType, expected, usage);
   }
 }
 
@@ -322,14 +360,15 @@ export async function diagnoseWithMeta(
     );
   }
   assertEvidenceReferencesKnown(validated.data, bundle);
+  const usage = extractUsage(
+    bodyRecord as ChatCompletionsResponse,
+    model,
+    latencyMs,
+    new Date().toISOString(),
+  );
+  // Deterministic cross-check: the measured assertion bounds the label.
+  // Fails closed without another request, like every other invalid output.
+  assertIssueTypeMatchesEvidence(validated.data, bundle, usage);
 
-  return {
-    diagnosis: validated.data,
-    usage: extractUsage(
-      bodyRecord as ChatCompletionsResponse,
-      model,
-      latencyMs,
-      new Date().toISOString(),
-    ),
-  };
+  return { diagnosis: validated.data, usage };
 }
