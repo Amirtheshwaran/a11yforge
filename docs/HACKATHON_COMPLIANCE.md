@@ -109,7 +109,8 @@ structured diagnosis. Provider request ID: `chatcmpl-5c36074e7b1846c99b982cda140
 - It verified diagnosis only. Proposal, revision and critic were not freshly verified through Baseten, and
   no repair loop ran through Baseten, on the controlled target or on any other site.
 - Schema validation checks structure, not correctness. The diagnosis described the focus escape correctly,
-  but its `issueType` field said `contrast` instead of `focus-containment`.
+  but its `issueType` field said `contrast` instead of `focus-containment`. A deterministic check added on
+  2 November now rejects that contradiction. It has not been re-verified against a live model.
 - The default `api.meta.ai` endpoint was not re-verified on 1 November. The available key returned
   `401 invalid_api_key` there, because it is a Baseten key.
 

@@ -102,7 +102,7 @@ still shows the earlier focus outline.
 | Check | Result |
 | --- | --- |
 | Build, typecheck, lint, `demo:validate` | Passed |
-| Tests | Meta 49 of 49, API 33 of 33, web 84 of 84. Engine 255 passed, 0 failed, 3 skipped (they need Windows symlink permission) |
+| Tests | Meta 51 of 51, API 43 of 43, web 84 of 84. Engine 255 passed, 0 failed, 3 skipped (they need Windows symlink permission) |
 | `deploy/smoke.mjs` against the local server | All passed |
 | Browser QA | 108 of 108: keyboard, live scan, source, recorded demo, six viewports, reduced motion, WebGL off, axe on A11yForge's own pages |
 | Screenshots and video | All 10 screenshots match their manifest digests. Video is 2:45, 1920 × 1080, H.264 and AAC. Narration matches the script and transcript |
