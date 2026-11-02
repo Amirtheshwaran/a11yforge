@@ -21,7 +21,7 @@ public pages above and may be in the sign-in-only portal. They are treated as bi
 | New work only, 26 October to 4 November | See below | Entrant's materials |
 | Judges must be able to identify hackathon contributions | See below | Entrant's materials |
 | Public repository | Met | Entrant's materials |
-| Demo video, maximum 3 minutes | Video is 2:45, with a public link; accepted hosts unconfirmed | Entrant's materials |
+| Demo video, maximum 3 minutes | Video is 2:28, with a public link; accepted hosts unconfirmed | Entrant's materials |
 | Not a medical, RAG, image-analysis, education, job-screening, nutrition, personality or sports project | Met: software engineering accessibility | Entrant's materials |
 
 ## New-work period
@@ -68,11 +68,11 @@ and complete.
 ## Demo requirement
 
 [`submission-assets/video/a11yforge-demo.mp4`](../submission-assets/video/a11yforge-demo.mp4) runs
-2:45 at 1080p. It uses real app footage and a Windows text-to-speech voice, and labels the repair as
+2:28 at 1080p. It uses real app footage inside motion graphics, an AI-generated voice and burned-in captions, and labels the repair as
 recorded.
 
-[Public link](https://cdn.jsdelivr.net/gh/Amirtheshwaran/a11yforge@513704cecfe59f075cdd52f5429354c8f3bc7011/submission-assets/video/a11yforge-demo.mp4):
-checked on 1 November 2026 without signing in. It plays and seeks in a browser, and its bytes match
+[Public link](https://cdn.jsdelivr.net/gh/Amirtheshwaran/a11yforge@0b3fc25a0f02d2c4b63cff94f7ffef5f43d29224/submission-assets/video/a11yforge-demo.mp4):
+checked on 3 November 2026 without signing in. It plays and seeks in a browser, and its bytes match
 the committed file's SHA-256. Whether the portal accepts a direct file link is unconfirmed. Uploading
 to a video platform would need the entrant's account.
 

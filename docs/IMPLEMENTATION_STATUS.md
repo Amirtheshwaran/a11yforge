@@ -96,8 +96,7 @@ table above records the state at `971aa6d`.
 Run from a production build, served on one port with no model key, as the container serves it. This is
 not a hosted test: public deployment is deferred. The site scans ran before the
 `MODEL_BASE_URL` change, which only affects server-side model configuration. Browser QA was rerun after the
-later focus-style fix for text fields. The demo video was recorded before that fix, so its address field
-still shows the earlier focus outline.
+later focus-style fix for text fields, and the demo video was recorded after it.
 
 | Check | Result |
 | --- | --- |
@@ -105,7 +104,7 @@ still shows the earlier focus outline.
 | Tests | Meta 51 of 51, API 43 of 43, web 84 of 84. Engine 255 passed, 0 failed, 3 skipped (they need Windows symlink permission) |
 | `deploy/smoke.mjs` against the local server | All passed |
 | Browser QA | 108 of 108: keyboard, live scan, source, recorded demo, six viewports, reduced motion, WebGL off, axe on A11yForge's own pages |
-| Screenshots and video | All 10 screenshots match their manifest digests. Video is 2:45, 1920 × 1080, H.264 and AAC. Narration matches the script and transcript |
+| Screenshots and video | All 10 screenshots match their manifest digests. Video is 2:28, 1920 × 1080, H.264 and AAC, with burned-in captions. Narration matches the script and transcript |
 | Secret scan, working tree and all history | No secrets. The only matches are dummy values in three test files |
 | Live model call | One diagnosis succeeded through Baseten-hosted Meta Muse Spark Open. Proposal, revision and critic were not freshly verified through Baseten. See [compliance](HACKATHON_COMPLIANCE.md#meta-model-usage) |
 
