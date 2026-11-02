@@ -1,0 +1,9 @@
+[Unit]
+Description=A11yForge: deploy the newest CI-passing commit of main
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/share/a11yforge-deploy/auto-deploy.sh
+TimeoutStartSec=30min

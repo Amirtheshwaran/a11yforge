@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Smoke test of a running deployment through its one public port.
 // Usage: node deploy/smoke.mjs <base-url> [scan-target-url]
+// Set SMOKE_SKIP_SCAN=1 for a light check that skips the real website scan.
 //
 // Makes real requests, including one real website scan. It makes no model calls:
 // POST /backend/runs is only exercised when the server reports no model key, so
@@ -98,6 +99,11 @@ if (health.modelConfigured === false) {
   check("paid live run refused without a model key", live.status === 503, String(live.status));
 } else {
   check("server holds no model key", false, "public hosting must leave MODEL_API_KEY unset");
+}
+
+if (process.env["SMOKE_SKIP_SCAN"] === "1") {
+  console.log(failures === 0 ? "\nAll smoke checks passed (scan skipped)." : `\n${failures} smoke check(s) failed.`);
+  process.exit(failures === 0 ? 0 : 1);
 }
 
 const started = await postJson(`${api}/explorations`, { url: scanTarget, maxPages: 1 });

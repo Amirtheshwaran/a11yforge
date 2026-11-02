@@ -1,0 +1,131 @@
+name: Deployment check
+
+# Verifies the PUBLIC deployment from outside the host.
+#
+# - After CI passes on main: waits until the host's auto-deploy
+#   (deploy/auto-deploy.sh) reports the new commit at /backend/health, then runs
+#   the full smoke test (one real website scan) and the real-browser check.
+# - Every hour: a light smoke test with no website scan, so a dead tunnel or
+#   container shows up as a failed run.
+# - On demand: Actions → Deployment check → Run workflow.
+#
+# The public URL comes from the repository variable DEPLOY_URL, falling back to
+# the current ngrok domain. No secrets are used and no model calls are made.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: "23 * * * *"
+  workflow_dispatch:
+    inputs:
+      full:
+        description: "Full check: includes one real website scan and the browser check"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deployment-check
+  cancel-in-progress: false
+
+env:
+  DEPLOY_URL: ${{ vars.DEPLOY_URL || 'https://unelected-unearned-average.ngrok-free.dev' }}
+
+jobs:
+  check:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Choose the check
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "full=false" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.full }}" != "true" ]; then
+            echo "full=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "full=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Wait for the host to deploy this commit
+        id: wait
+        if: github.event_name == 'workflow_run'
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          want="${SHA:0:7}"
+          for attempt in $(seq 1 100); do
+            got="$(curl -fsS "$DEPLOY_URL/backend/health" | node -pe 'JSON.parse(require("fs").readFileSync(0, "utf8")).version' 2>/dev/null || true)"
+            if [ "$got" = "$want" ]; then
+              echo "Deployment reports $want."
+              exit 0
+            fi
+            # auto-deploy labels each deploy with its commit; any other version
+            # means the host is not running it, so check what is live now.
+            if [ -n "$got" ] && ! echo "$got" | grep -Eq '^[0-9a-f]{7}$'; then
+              echo "::notice::The host reports version '$got', not a commit: auto-deploy is not installed there. Checking the current deployment as it is."
+              exit 0
+            fi
+            head="$(git ls-remote origin refs/heads/main | cut -c1-7)"
+            if [ "$head" != "$want" ]; then
+              echo "A newer commit ($head) is on main; its own run will check the deployment."
+              echo "superseded=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Waiting for $want (deployment reports: ${got:-no answer})"
+            sleep 15
+          done
+          echo "::error::The deployment did not report $want within 25 minutes. Check the host: journalctl --user -u a11yforge-auto-deploy.service"
+          exit 1
+
+      - name: Install browser-check dependencies
+        if: steps.mode.outputs.full == 'true' && steps.wait.outputs.superseded != 'true'
+        run: |
+          corepack enable && corepack prepare pnpm@10.34.9 --activate
+          pnpm install --frozen-lockfile --filter @a11yforge/engine...
+          pnpm --filter @a11yforge/engine exec playwright install --with-deps chromium
+
+      - name: Smoke test the public URL
+        if: steps.wait.outputs.superseded != 'true'
+        env:
+          SMOKE_SKIP_SCAN: ${{ steps.mode.outputs.full == 'true' && '0' || '1' }}
+        run: node deploy/smoke.mjs "$DEPLOY_URL" https://example.com/
+
+      - name: Real-browser check of the public URL
+        if: steps.mode.outputs.full == 'true' && steps.wait.outputs.superseded != 'true'
+        run: node deploy/browser-check.mjs "$DEPLOY_URL" https://example.com/
+
+      - name: Upload browser screenshots
+        if: always() && steps.mode.outputs.full == 'true' && steps.wait.outputs.superseded != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-screenshots
+          path: browser-check-output/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Deployment check"
+            echo ""
+            echo "- Public URL: $DEPLOY_URL"
+            echo "- Commit: \`${{ github.event.workflow_run.head_sha || github.sha }}\`"
+            echo "- Mode: ${{ steps.mode.outputs.full == 'true' && 'full (scan + browser)' || 'light (no scan)' }}"
+            echo "- Deployed version: $(curl -fsS "$DEPLOY_URL/backend/health" | node -pe 'JSON.parse(require("fs").readFileSync(0, "utf8")).version' 2>/dev/null || echo 'no answer')"
+          } >> "$GITHUB_STEP_SUMMARY"
