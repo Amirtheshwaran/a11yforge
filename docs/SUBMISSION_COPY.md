@@ -4,7 +4,7 @@ Draft for the [portal](https://cerebralvalley.ai/e/meta-ai-developer-hackathon/h
 review is deferred: the form is behind sign-in, so its fields and character limits are unconfirmed. Text
 in `[SQUARE BRACKETS]` is a placeholder. Never submit one.
 
-Lengths in characters, to pick a block that fits each field's limit: tagline 91, one-line pitch 179, short description 480, medium description 908, long description 1883, built during the hackathon 339, Meta technology 1370, architecture 337, impact 424, technical depth 522, how to try it 383, known limitations 544.
+Lengths in characters, to pick a block that fits each field's limit: tagline 91, one-line pitch 179, short description 480, medium description 908, long description 1883, built during the hackathon 339, Meta technology 1370, architecture 337, impact 424, technical depth 522, how to try it 492, known limitations 544.
 
 ## Project name
 
