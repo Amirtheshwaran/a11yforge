@@ -1,5 +1,7 @@
 # A11yForge 3D Scene Model & Coordinate Mapping
 
+> **Design notes from 30 October 2026.** The interface has changed since. For how the site works today, see the [site guide](../SITE_GUIDE.md).
+
 ## 1. Plane Geometry
 
 The tested website is rendered onto a 3D rectangular plane matching the exact pixel aspect ratio of the captured browser screenshot:

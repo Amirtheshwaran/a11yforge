@@ -161,6 +161,6 @@ A verified repair proves the tested behavior, not whole-site conformance.
 
 ## Further reading
 
-[Hackathon compliance](docs/HACKATHON_COMPLIANCE.md) · [New-work audit](docs/HACKATHON_NEW_WORK.md) · [Implementation status](docs/IMPLEMENTATION_STATUS.md) · [Evidence integrity](docs/evidence-integrity.md) · [Architecture](docs/ARCHITECTURE.md) · [Spatial tour](docs/spatial-tour.md) · [Deployment](docs/DEPLOYMENT.md) · [Demo script](docs/DEMO_SCRIPT.md) · [Asset provenance](submission-assets/README.md)
+[Site guide](docs/SITE_GUIDE.md) · [All documentation](docs/README.md) · [Hackathon compliance](docs/HACKATHON_COMPLIANCE.md) · [New-work audit](docs/HACKATHON_NEW_WORK.md) · [Implementation status](docs/IMPLEMENTATION_STATUS.md) · [Evidence integrity](docs/evidence-integrity.md) · [Architecture](docs/ARCHITECTURE.md) · [Spatial tour](docs/spatial-tour.md) · [Deployment](docs/DEPLOYMENT.md) · [Demo script](docs/DEMO_SCRIPT.md) · [Asset provenance](submission-assets/README.md)
 
 **Meta Global AI Developer Hackathon · Indie Developer track · Push the Frontier**

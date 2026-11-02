@@ -1,5 +1,7 @@
 # A11yForge Motion System
 
+> **Design notes from 30 October 2026.** The interface has changed since. For how the site works today, see the [site guide](../SITE_GUIDE.md).
+
 ## 1. Single Motion Owner Paradigm
 
 To prevent chaotic independent animations, all interface motion follows a single, coordinated hierarchy:

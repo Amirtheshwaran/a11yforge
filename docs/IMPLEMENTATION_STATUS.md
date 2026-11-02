@@ -18,7 +18,7 @@ spatial tour, using evidence collected for that run.
 | Source inspection | A selected finding can be traced into a public repository or trusted local source. Candidate files, snippets, ranking reasons, and ambiguity are displayed. Returning to results preserves the selected finding. |
 | Responsive layout | Phone, tablet, landscape, and desktop viewport layouts; touch-sized controls, wrapping navigation, safe-area handling, and readable copy during chapter handoffs. |
 | Rendering and motion | On-demand rendering, bounded pixel density, time-based smoothing, screenshot fitting, reduced motion, and full/lightweight spatial rendering. |
-| Documentation | README with authentic app screenshots, setup commands, architecture, model configuration, deployment instructions, and explicit limitations. |
+| Documentation | README, a [site guide](SITE_GUIDE.md) covering every page, a [documentation index](README.md), deployment instructions, and explicit limitations. |
 
 ## Evidence-integrity cleanup
 
@@ -69,7 +69,7 @@ physical iOS or Android device testing.
   The working live repair loop targets the controlled fixture and requires the
   server's model configuration; the recorded demo requires no model calls.
 - Source matching can remain ambiguous. A match alone is not verification.
-- A public deployment and physical-device testing remain outstanding.
+- Physical-device testing remains outstanding.
 - The 1 November live verification covered diagnosis only, through Baseten-hosted Meta
   Muse Spark Open. See [hackathon compliance](HACKATHON_COMPLIANCE.md#meta-model-usage).
 
@@ -83,6 +83,7 @@ physical iOS or Android device testing.
   step, and that the first repair improved behavior before TypeScript rejected it.
 - Developer details gained a way back to the tour. Axe findings on A11yForge's own tour
   and undersized touch targets were fixed.
+- Later additions: a configurable model base URL, abuse limits and an optional run passcode, a deterministic check on diagnosis labels, automatic deployment for the self-hosted setup, one focus outline on text fields, and a narrated motion graphics demo video.
 - Generic repair decision: **high risk, not built.** `source/repair-run.ts` exists but is
   not connected. Executing untrusted repositories requires the Docker sandbox, which
   could not be tested here and which a public container host cannot provide.

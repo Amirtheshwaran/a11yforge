@@ -1,5 +1,7 @@
 # A11yForge Route Transitions & Continuous Continuity
 
+> **Design notes from 30 October 2026.** The interface has changed since. For how the site works today, see the [site guide](../SITE_GUIDE.md).
+
 ## 1. Single Product Feel
 
 A11yForge is not a collection of disconnected web pages (`/` → `/explore` → `/connect` → `/console`). It is one continuous hardware inspection experience.

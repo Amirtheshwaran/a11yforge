@@ -1,5 +1,7 @@
 # A11yForge Experience Architecture
 
+> **Design notes from 30 October 2026.** The interface has changed since. For how the site works today, see the [site guide](../SITE_GUIDE.md).
+
 ## 1. Product Principle
 
 A user must understand A11yForge as:

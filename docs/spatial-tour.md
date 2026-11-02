@@ -144,7 +144,6 @@ submit button. Safe-area insets and reduced-motion controls are respected.
 - WebGL fallback was inspected after context loss during development. A forced
   hardware/WebGL outage was not separately emulated in the production build.
 
-This is local implementation and validation, not a deployment. The current
-preview serves the web app on port 3005 and its keyless API on port 3006. Live
+Live
 website exploration works without a model key; live autonomous repair requires
 the existing model configuration. No Meta credits were used for motion work.

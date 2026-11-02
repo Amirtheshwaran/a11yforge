@@ -122,7 +122,7 @@ pnpm diagnose:fixture
 Three validation layers: Meta constrained decoding, local Zod validation,
 A11yForge evidence-reference validation. Budget: `ModelCallBudget` capped by
 `A11YFORGE_MAX_MODEL_CALLS_PER_RUN` (default 1); no retry loop — transport
-errors report, malformed results fail. Output budget: `max_tokens: 1500`
+errors report, malformed results fail. Output budget: `max_completion_tokens: 4096`
 (documented in `packages/meta/src/config.ts`). Usage telemetry records only
 fields the API exposes (absent token counts stay null, never fabricated).
 Shared shapes (`AccessibilityDiagnosis`, `EvidenceBundle`, `ModelUsage`) live

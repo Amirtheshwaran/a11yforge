@@ -1,5 +1,7 @@
 # A11yForge Plain Language Copy Dictionary
 
+> **Design notes from 30 October 2026.** The interface has changed since. For how the site works today, see the [site guide](../SITE_GUIDE.md).
+
 A11yForge enforces the Eight-Year-Old Rule: every primary user-facing string must be directly explainable without technical jargon. Technical terms (rules, ASTs, CDP traces, WCAG criteria) are strictly relegated to the collapsible **Developer details** drawer.
 
 ---

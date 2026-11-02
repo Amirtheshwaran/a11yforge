@@ -1,5 +1,7 @@
 # A11yForge Camera System
 
+> **Design notes from 30 October 2026.** The interface has changed since. For how the site works today, see the [site guide](../SITE_GUIDE.md).
+
 ## 1. Core Principle: Website As The Physical Product
 
 The user's website is visualized as a physical hardware object inside a dark luxury studio showroom (`#0B0B0C`).
