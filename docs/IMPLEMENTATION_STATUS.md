@@ -94,9 +94,10 @@ table above records the state at `971aa6d`.
 ### Final local validation, 1 November
 
 Run from a production build, served on one port with no model key, as the container serves it. This is
-not a hosted test: public deployment is deferred. Browser QA and the site scans ran before the
-`MODEL_BASE_URL` change, which only affects server-side model configuration. Tests, typecheck, lint, the
-smoke test and the secret scan were rerun after it.
+not a hosted test: public deployment is deferred. The site scans ran before the
+`MODEL_BASE_URL` change, which only affects server-side model configuration. Browser QA was rerun after the
+later focus-style fix for text fields. The demo video was recorded before that fix, so its address field
+still shows the earlier focus outline.
 
 | Check | Result |
 | --- | --- |

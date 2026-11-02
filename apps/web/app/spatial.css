@@ -12,10 +12,11 @@
 .spatial-url-form { width: min(100%, 440px); margin-top: 34px; }
 .spatial-url-form > label { color: #dbded6; font-size: 11px; letter-spacing: .02em; }
 .spatial-url-input { display: flex; align-items: center; gap: 8px; border: 1px solid #454b48; border-radius: 8px; background: #151a18; padding: 6px 6px 6px 14px; margin-top: 10px; box-shadow: 0 12px 48px #0003; }
-.spatial-url-input:focus-within { border-color: #f2b099; box-shadow: 0 0 0 3px #f2b09912; }
+.spatial-url-input:focus-within { border-color: #f2b099; box-shadow: 0 0 0 1px #f2b099; }
 .spatial-url-input > span { color: #829087; font-size: 20px; }
 .spatial-url-input input { background: transparent; border: 0; padding-left: 0; font: 12px var(--mono); height: 40px; min-width: 0; color: #e9eade; }
-.spatial-url-input input:focus-visible { outline: 1px solid #efc1ae; outline-offset: 2px; }
+/* The field's outer box shows focus. Transparent, so forced-colors mode can still draw it. */
+.spatial-url-input input:focus-visible { outline: 2px solid transparent; }
 .spatial-url-input button { display: flex; align-items: center; justify-content: center; gap: 18px; white-space: nowrap; min-height: 42px; border: 0; border-radius: 5px; padding: 0 18px; background: #f47858; color: #181e19; font-size: 12px; font-weight: 700; cursor: pointer; }
 .spatial-url-input button:hover { background: #ff9575; }
 .spatial-url-input button:disabled { opacity: .6; }

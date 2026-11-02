@@ -98,8 +98,9 @@ to 4 November period.
 
 | Configurable model base URL, live diagnosis verification | The commit adding `MODEL_BASE_URL` | 2026-11-01 | `packages/meta/src/config.ts`, `submission-assets/live-verification-2026-11-01` | No |
 
-Later commits are listed by `git log 513704c..HEAD`. Apart from `MODEL_BASE_URL`, they change
-documentation, ignore files and evidence files only, and all of them were made inside the period.
+Later commits are listed by `git log 513704c..HEAD`. Apart from `MODEL_BASE_URL` and a focus-style
+fix for text fields, they change documentation, ignore files and evidence files only, and all of them
+were made inside the period.
 
 ## Reused, not claimed as new
 

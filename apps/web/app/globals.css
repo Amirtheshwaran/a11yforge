@@ -125,6 +125,13 @@ a:where(:not([data-slot="button"])):hover {
   border-radius: var(--radius-control);
 }
 
+/* Bordered fields: the ring sits on the border, so it reads as one line. */
+input:not([type="range"]):focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline-offset: 0;
+}
+
 .skip-link {
   position: absolute;
   left: -9999px;
