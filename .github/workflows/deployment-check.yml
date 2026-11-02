@@ -74,6 +74,12 @@ jobs:
               echo "Deployment reports $want."
               exit 0
             fi
+            # auto-deploy labels each deploy with its commit; any other version
+            # means the host is not running it, so check what is live now.
+            if [ -n "$got" ] && ! echo "$got" | grep -Eq '^[0-9a-f]{7}$'; then
+              echo "::notice::The host reports version '$got', not a commit: auto-deploy is not installed there. Checking the current deployment as it is."
+              exit 0
+            fi
             head="$(git ls-remote origin refs/heads/main | cut -c1-7)"
             if [ "$head" != "$want" ]; then
               echo "A newer commit ($head) is on main; its own run will check the deployment."
