@@ -6,9 +6,9 @@ A11yForge observes accessibility failures in a real browser, uses Meta models to
 
 [Demo video](https://cdn.jsdelivr.net/gh/Amirtheshwaran/a11yforge@0b3fc25a0f02d2c4b63cff94f7ffef5f43d29224/submission-assets/video/a11yforge-demo.mp4) · [Run locally](#run-locally) · [What is live and what is recorded](#what-is-live-and-what-is-recorded) · [Built during the hackathon](#built-during-the-hackathon) · [Limitations](#limitations)
 
-![The recorded repair: the first Meta repair rejected on the compiler's own output](submission-assets/screenshots/06-first-fix-rejected.png)
+![The recorded repair: the first Meta repair rejected on the compiler's own output](https://raw.githubusercontent.com/Amirtheshwaran/a11yforge/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/submission-assets/screenshots/06-first-fix-rejected.png)
 
-**Public deployment:** https://unelected-unearned-average.ngrok-free.dev — key-less, smoke-tested 3 November 2026. See [deployment status](docs/DEPLOYMENT.md).
+**Public deployment:** https://unelected-unearned-average.ngrok-free.dev — key-less, smoke-tested 3 November 2026. See [deployment status](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/docs/DEPLOYMENT.md).
 
 ## Why it matters
 
@@ -67,7 +67,7 @@ These numbers come from the run's committed [usage artifacts](demo/accepted-run/
 | Model | `muse-spark-1.3-contributor` | `meta-models/muse-spark-open-1026`, Baseten-hosted Meta Muse Spark Open |
 | What it covers | Diagnosis, proposal, bounded revision and critic, as recorded artifacts | **Diagnosis only**, through A11yForge's real diagnosis path with fresh real-browser evidence |
 | Result | Repair accepted after the deterministic gates passed | Valid structured diagnosis, with the provider request ID captured |
-| Artifacts | [Recorded run](demo/accepted-run/2026-10-26T19-04-29-541Z-27affb) | [Verification run](submission-assets/live-verification-2026-11-01) |
+| Artifacts | [Recorded run](demo/accepted-run/2026-10-26T19-04-29-541Z-27affb) | [Verification run](https://github.com/Amirtheshwaran/a11yforge/tree/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/submission-assets/live-verification-2026-11-01) |
 
 Limits of the 1 November verification:
 
@@ -79,7 +79,7 @@ Limits of the 1 November verification:
 
 These establish the facts, and no model can overrule them: Playwright, axe-core, keyboard and form probes, source tracing, the TypeScript compiler, the build, interaction replay and accessibility regression gates.
 
-![Evidence-driven repair architecture](submission-assets/architecture.svg)
+![Evidence-driven repair architecture](https://raw.githubusercontent.com/Amirtheshwaran/a11yforge/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/submission-assets/architecture.svg)
 
 ## What is live and what is recorded
 
@@ -93,7 +93,7 @@ These establish the facts, and no model can overrule them: Playwright, axe-core,
 
 ## See the demo
 
-- Watch [the 2:28 video](https://cdn.jsdelivr.net/gh/Amirtheshwaran/a11yforge@0b3fc25a0f02d2c4b63cff94f7ffef5f43d29224/submission-assets/video/a11yforge-demo.mp4) ([transcript](submission-assets/video/a11yforge-demo-transcript.md)). GitHub's file view won't play it, so this link serves the committed file from a public CDN.
+- Watch [the 2:28 video](https://cdn.jsdelivr.net/gh/Amirtheshwaran/a11yforge@0b3fc25a0f02d2c4b63cff94f7ffef5f43d29224/submission-assets/video/a11yforge-demo.mp4) ([transcript](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/submission-assets/video/a11yforge-demo-transcript.md)). GitHub's file view won't play it, so this link serves the committed file from a public CDN.
 - Or run the app and open `/console` for the recorded repair, which needs no key.
 
 ## Run locally
@@ -117,7 +117,7 @@ Other commands: `pnpm explore -- --url https://example.com --max-pages 3` scans 
 
 ## Built during the hackathon
 
-Everything below was built during the Meta Global AI Developer Hackathon, from 26 October 2026. The [new-work audit](docs/HACKATHON_NEW_WORK.md) lists the commits, dates and files, and one timing caveat about the first scaffold commit.
+Everything below was built during the Meta Global AI Developer Hackathon, from 26 October 2026. The [new-work audit](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/docs/HACKATHON_NEW_WORK.md) lists the commits, dates and files, and one timing caveat about the first scaffold commit.
 
 - Real-browser accessibility exploration
 - Evidence provenance
@@ -155,12 +155,12 @@ A verified repair proves the tested behavior, not whole-site conformance.
 - **The repair shown in the app and the video is recorded**, not live.
 - **Coverage is bounded.** Authentication, CAPTCHA, bot protection and blocked or missing pages can prevent testing, and those pages are reported as untested. A scan is not a conformance audit.
 - **Source matches can be ambiguous or missing**, and then no cause is claimed. Measured locations can also be unavailable, and then none is drawn.
-- **Live runs on a hosted deployment need an operator passcode.** `POST /runs` has no user accounts; with a key set, protect it with `A11YFORGE_RUN_PASSCODE`. Per-client hourly limits and a global daily run cap apply either way, and are held in memory. See [deployment](docs/DEPLOYMENT.md#security-on-a-public-host).
+- **Live runs on a hosted deployment need an operator passcode.** `POST /runs` has no user accounts; with a key set, protect it with `A11YFORGE_RUN_PASSCODE`. Per-client hourly limits and a global daily run cap apply either way, and are held in memory. See [deployment](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/docs/DEPLOYMENT.md#security-on-a-public-host).
 - **Scan results are readable by anyone with their URL.** In-progress streams and source connections live in one server process.
 - **Testing used browser viewports and simulated conditions.** Physical iOS and Android devices have not been tested.
 
 ## Further reading
 
-[Site guide](docs/SITE_GUIDE.md) · [All documentation](docs/README.md) · [Hackathon compliance](docs/HACKATHON_COMPLIANCE.md) · [New-work audit](docs/HACKATHON_NEW_WORK.md) · [Implementation status](docs/IMPLEMENTATION_STATUS.md) · [Evidence integrity](docs/evidence-integrity.md) · [Architecture](docs/ARCHITECTURE.md) · [Spatial tour](docs/spatial-tour.md) · [Deployment](docs/DEPLOYMENT.md) · [Demo script](docs/DEMO_SCRIPT.md) · [Asset provenance](submission-assets/README.md)
+[Site guide](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/docs/SITE_GUIDE.md) · [All documentation](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/docs/README.md) · [Hackathon compliance](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/docs/HACKATHON_COMPLIANCE.md) · [New-work audit](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/docs/HACKATHON_NEW_WORK.md) · [Implementation status](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/docs/IMPLEMENTATION_STATUS.md) · [Evidence integrity](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/docs/evidence-integrity.md) · [Architecture](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/docs/ARCHITECTURE.md) · [Spatial tour](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/docs/spatial-tour.md) · [Deployment](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/docs/DEPLOYMENT.md) · [Demo script](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/docs/DEMO_SCRIPT.md) · [Asset provenance](https://github.com/Amirtheshwaran/a11yforge/blob/275e56b3d01e7e6005a7cad66d640b1f3ce45a9a/submission-assets/README.md)
 
 **Meta Global AI Developer Hackathon · Indie Developer track · Push the Frontier**
