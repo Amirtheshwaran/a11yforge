@@ -118,11 +118,12 @@ A public deployment holds no key, and the base URL override accepts plain HTTPS 
 
 ## Deployment
 
-**Deployed 2 November 2026.** Hosting is the entrant's own machine (Docker container plus a
-tunnel on the entrant's account; no keys on the host). Images build and pass the smoke test in
+**Deployed 2 November 2026, moved to its current host on 3 November 2026.** Hosting is the
+entrant's own Windows PC (production build run directly, plus a tunnel on the entrant's account;
+no keys on the host). Images build and pass the smoke test in
 [CI](../.github/workflows/ci.yml). See [deployment](DEPLOYMENT.md).
 **Public URL:** <https://unelected-unearned-average.ngrok-free.dev> — `deploy/smoke.mjs`
-passed all 19 checks against it on 2 November 2026, including live scan SSE streaming.
+passed all 19 checks against it on 3 November 2026, and `deploy/browser-check.mjs` passed too.
 
 ## Physical device testing
 

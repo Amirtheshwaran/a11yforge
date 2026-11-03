@@ -81,7 +81,7 @@ Browser automation with SSRF-guarded targets. Evidence provenance, in which ever
 ## Links
 
 - Repository: https://github.com/Amirtheshwaran/a11yforge
-- Public deployment: <https://unelected-unearned-average.ngrok-free.dev>. Deployed 2 November 2026 on the entrant's own machine, key-less. `deploy/smoke.mjs` passed all 19 checks against it, including live scan SSE streaming. First-time browser visitors see ngrok's one-time "Visit Site" warning page (a cookie suppresses it for 7 days); programmatic clients bypass it.
+- Public deployment: <https://unelected-unearned-average.ngrok-free.dev>. Running since 3 November 2026 on the entrant's own Windows PC, key-less. `deploy/smoke.mjs` passed all 19 checks against it that day, including live scan SSE streaming. First-time browser visitors see ngrok's one-time "Visit Site" warning page (a cookie suppresses it for 7 days); programmatic clients bypass it.
 - Demo video: https://cdn.jsdelivr.net/gh/Amirtheshwaran/a11yforge@0b3fc25a0f02d2c4b63cff94f7ffef5f43d29224/submission-assets/video/a11yforge-demo.mp4
 
 The video link was checked on 3 November 2026 without signing in: it plays and seeks in a browser (2:28, 1920 × 1080), and the downloaded bytes match the committed file's SHA-256. It is a direct file link, not a video platform. If the form accepts only hosts such as YouTube, Vimeo or Loom, upload `submission-assets/video/a11yforge-demo.mp4` there and use that link instead. GitHub's own file view does not play this video, so do not use a `github.com` link for it.

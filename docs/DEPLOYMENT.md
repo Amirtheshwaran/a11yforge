@@ -1,18 +1,22 @@
 # Deployment
 
 **Status: deployed.** Public URL: <https://unelected-unearned-average.ngrok-free.dev>
-(recorded 2 November 2026). `deploy/smoke.mjs` passed all 19 checks against it, including
-live scan SSE streaming. Both images are also built and smoke-tested by
+(moved to its current host on 3 November 2026). `deploy/smoke.mjs` passed all 19 checks and
+`deploy/browser-check.mjs` passed against it that day, including a real scan and the 3D scene. Both images are also built and smoke-tested by
 [CI](../.github/workflows/ci.yml) on every push to `main`.
 
-## Live deployment (2 November 2026)
+## Live deployment (3 November 2026)
 
-- **Host:** the entrant's own Linux machine, Docker container `a11yforge`
-  (image `a11yforge:submission`, port 3000, volume `a11yforge-data`,
-  `--restart unless-stopped`).
-- **Tunnel:** ngrok free plan with a fixed dev domain (the URL survives restarts and
-  reboots), running as the systemd user service `a11yforge-ngrok.service`
-  (`systemctl --user status|restart a11yforge-ngrok.service`; user linger is enabled).
+- **Host:** the entrant's own Windows PC, running the production build directly with Node.js,
+  not in Docker. The web app and API listen on 127.0.0.1 only. Scans run Chromium under the
+  entrant's Windows user, without the container isolation described below.
+- **Availability:** the site is up only while that PC is on and awake and its server window is
+  open. It doesn't restart itself after a reboot.
+- **Updates:** manual. A code change needs a rebuild and restart. The
+  [automatic deployment](#continuous-deployment) below applies to a Linux Docker host, and is
+  not running on this PC.
+- **Tunnel:** ngrok free plan with a fixed dev domain, which belongs to the ngrok account and
+  carried over from the earlier Linux host. Only one machine can use it at a time.
 - **Key-less:** no `MODEL_API_KEY` on the host. `POST /runs` answers 503, the bundled
   recorded demo and website scans work (see [Security](#security-on-a-public-host)).
 - **First-visit interstitial:** browsers see ngrok's one-time "Visit Site" warning page;
@@ -26,7 +30,8 @@ live scan SSE streaming. Both images are also built and smoke-tested by
 
 ## Continuous deployment
 
-The live host updates itself and is checked from outside after every change:
+This is the setup for a Linux Docker host, used until 3 November 2026. On it, the host updates
+itself. The outside check in step 3 still runs against the current deployment:
 
 1. **CI** ([`ci.yml`](../.github/workflows/ci.yml)) tests every push to `main`.
 2. **Deploy on the host** ([`deploy/auto-deploy.sh`](../deploy/auto-deploy.sh)), run every
