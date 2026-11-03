@@ -182,4 +182,40 @@ describe("exploration routes", () => {
       await rm(runsDir, { recursive: true, force: true });
     }
   });
+
+  it("lists only seeded examples whose saved evidence exists", async () => {
+    const dataDir = await mkdtemp(join(tmpdir(), "a11yforge-examples-"));
+    const runsDir = join(dataDir, "runs");
+    const previous = { data: process.env["A11YFORGE_DATA_DIR"], runs: process.env["A11YFORGE_RUNS_DIR"] };
+    process.env["A11YFORGE_DATA_DIR"] = dataDir;
+    process.env["A11YFORGE_RUNS_DIR"] = runsDir;
+    const app = buildServer();
+    try {
+      const empty = await app.inject({ method: "GET", url: "/examples" });
+      assert.equal(empty.statusCode, 200);
+      assert.deepEqual(empty.json(), { generatedAt: null, examples: [] });
+
+      const example = (runId: string) => ({
+        runId, name: "Example", url: "https://example.com/", scannedAt: "2026-11-04T00:00:00.000Z", problems: 2, attentionFirst: 1,
+      });
+      await mkdir(join(runsDir, "exp-present"), { recursive: true });
+      await writeFile(join(runsDir, "exp-present", "exploration.json"), JSON.stringify(finishedRun("exp-present")));
+      await writeFile(join(dataDir, "examples.json"), JSON.stringify({
+        generatedAt: "2026-11-04T00:00:00.000Z", examples: [example("exp-present"), example("exp-missing")],
+      }));
+      const listed = await app.inject({ method: "GET", url: "/examples" });
+      assert.deepEqual(listed.json(), { generatedAt: "2026-11-04T00:00:00.000Z", examples: [example("exp-present")] });
+
+      await writeFile(join(dataDir, "examples.json"), JSON.stringify({ examples: [{ ...example("../escape") }] }));
+      const malformed = await app.inject({ method: "GET", url: "/examples" });
+      assert.deepEqual(malformed.json(), { generatedAt: null, examples: [] });
+    } finally {
+      await app.close();
+      for (const [name, value] of [["A11YFORGE_DATA_DIR", previous.data], ["A11YFORGE_RUNS_DIR", previous.runs]] as const) {
+        if (value === undefined) delete process.env[name];
+        else process.env[name] = value;
+      }
+      await rm(dataDir, { recursive: true, force: true });
+    }
+  });
 });

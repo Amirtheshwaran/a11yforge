@@ -160,6 +160,8 @@ export type {
 } from "./verify.js";
 export {
   EXPLORATION_STAGE_LABELS,
+  ExampleScanListSchema,
+  ExampleScanSchema,
   ExplorationEventSchema,
   ExplorationFindingSchema,
   ExplorationLimitationSchema,
@@ -184,6 +186,8 @@ export type {
   ActionStep,
   ElementHighlight,
   ElementRef,
+  ExampleScan,
+  ExampleScanList,
   ExplorationEvent,
   ExplorationFinding,
   ExplorationLimitation,

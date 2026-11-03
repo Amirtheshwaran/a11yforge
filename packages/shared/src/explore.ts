@@ -323,6 +323,31 @@ export const ExplorationSummarySchema = z.object({
 
 export type ExplorationSummary = z.infer<typeof ExplorationSummarySchema>;
 
+/**
+ * One saved home-page scan listed in the example gallery (`GET /examples`).
+ * Written by `deploy/seed-examples.mjs` from real finished runs; the counts
+ * match the run's results page.
+ */
+export const ExampleScanSchema = z.object({
+  runId: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/),
+  name: z.string().min(1).max(80),
+  url: z.string().url(),
+  scannedAt: z.string().min(1),
+  /** Confirmed failures plus automated findings. */
+  problems: z.number().int().min(0),
+  /** Critical problems, shown as "need attention first". */
+  attentionFirst: z.number().int().min(0),
+});
+
+export type ExampleScan = z.infer<typeof ExampleScanSchema>;
+
+export const ExampleScanListSchema = z.object({
+  generatedAt: z.string().nullable().default(null),
+  examples: z.array(ExampleScanSchema).default([]),
+});
+
+export type ExampleScanList = z.infer<typeof ExampleScanListSchema>;
+
 /** Project a finished run into its human-readable summary counts. */
 export function summarizeExploration(run: ExplorationRun): ExplorationSummary {
   let confirmedFailures = 0;

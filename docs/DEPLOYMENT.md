@@ -28,6 +28,24 @@
   node deploy/smoke.mjs https://unelected-unearned-average.ngrok-free.dev
   ```
 
+## Example scans
+
+The home page lists saved scans of well-known sites from `<data dir>/examples.json`. To create
+them, run a second API on another loopback port that writes to the **same** data directory as
+the live server, with a higher scan limit (`A11YFORGE_SCANS_PER_HOUR_PER_CLIENT`), and no model
+key. Then run:
+
+```sh
+node deploy/seed-examples.mjs http://127.0.0.1:<port> <data dir>
+```
+
+It scans each home page in [`deploy/example-sites.json`](../deploy/example-sites.json), one page
+per site, three at a time, and saves progress after each, so a rerun resumes. Blocked,
+unavailable and bot-check pages are left out and listed in `<data dir>/examples-skipped.json`.
+Before publishing, check where each scan landed: drop any site that redirected to a page for
+the scanner's own location. Scan files stay in the data directory, not in the repository. The
+live server reads new examples without a restart.
+
 ## Continuous deployment
 
 This is the setup for a Linux Docker host, used until 3 November 2026. On it, the host updates

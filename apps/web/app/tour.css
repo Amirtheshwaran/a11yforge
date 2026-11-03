@@ -190,3 +190,22 @@
   .tour-copy [data-tour-copy] { transform: none !important; filter: none !important; opacity: 0; }
   .tour-copy[data-active="true"] [data-tour-copy] { opacity: 1; }
 }
+
+/* Example scans gallery on the home page */
+.example-scans { border-top: 1px solid var(--line-soft); padding: 64px 0 90px; }
+.example-scans h2 { font: 400 clamp(32px, 4vw, 56px)/1.1 Georgia, "Times New Roman", serif; margin: 0 0 22px; letter-spacing: -.035em; }
+.example-scans-note { color: var(--ink-dim); font-size: 14px; line-height: 1.7; max-width: 62ch; margin: 0; }
+.example-scans-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 28px 0 22px; }
+.example-scans-filter label { font: 11px var(--mono); color: var(--ink-dim); letter-spacing: .08em; text-transform: uppercase; }
+.example-scans-filter input { width: min(320px, 100%); min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg-raised); color: var(--ink); font-size: 14px; }
+.example-scans-filter input:focus-visible { outline: 2px solid #e5a93c; outline-offset: 2px; }
+.example-scans-filter p { margin: 0; font: 11px var(--mono); color: var(--ink-faint); }
+.example-scans-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.example-scans-list a { display: flex; flex-direction: column; gap: 6px; height: 100%; padding: 18px 20px; border: 1px solid var(--line-soft); border-radius: 6px; background: var(--bg); color: var(--ink); text-decoration: none; transition: background-color 160ms ease, border-color 160ms ease; }
+.example-scans-list a:hover { background: var(--bg-raised); border-color: var(--line); }
+.example-scans-list a:focus-visible { outline: 2px solid #e5a93c; outline-offset: 2px; }
+.example-scans-empty { color: var(--ink-dim); font-size: 14px; margin: 0; }
+.example-name { font-size: 16px; font-weight: 500; letter-spacing: -.01em; }
+.example-host { font: 11px var(--mono); color: var(--ink-faint); }
+.example-count { font-size: 13px; color: var(--ink-dim); line-height: 1.5; margin-top: 4px; }
+@media (prefers-reduced-motion: reduce) { .example-scans-list a { transition: none; } }

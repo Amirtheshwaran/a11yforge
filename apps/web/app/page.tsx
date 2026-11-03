@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ExampleScans } from "../components/example-scans";
 import { SiteCheck } from "../components/site-check";
 
 export default function Home(): React.JSX.Element {
@@ -19,5 +20,6 @@ export default function Home(): React.JSX.Element {
       </ol>
     </section>
     <SiteCheck context="landing" />
+    <ExampleScans />
   </main>;
 }

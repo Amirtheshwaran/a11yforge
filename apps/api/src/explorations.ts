@@ -1,11 +1,13 @@
 import { randomUUID } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { FastifyInstance } from "fastify";
 import {
+  ExampleScanListSchema,
   ExplorationEventSchema,
   ExplorationRunSchema,
   isAllowedExplorationArtifactName,
+  type ExampleScanList,
   type ExplorationEvent,
   type ExplorationRun,
 } from "@a11yforge/shared";
@@ -16,7 +18,7 @@ import {
   type RunExplorationOptions,
 } from "@a11yforge/engine";
 import { isPrivateTargetsAllowed } from "@a11yforge/engine";
-import { resolveLiveRunsDir } from "./runs.js";
+import { resolveDataDir, resolveLiveRunsDir } from "./runs.js";
 import type { ApiLimits } from "./rate-limit.js";
 
 /**
@@ -31,6 +33,9 @@ import type { ApiLimits } from "./rate-limit.js";
  *   artifacts only (png/json, no traversal).
  * - `POST /explorations/:runId/cancel` stops future navigation/probes and
  *   releases the browser.
+ * - `GET /examples` lists saved home-page scans from `<data dir>/examples.json`
+ *   (written by `deploy/seed-examples.mjs`), keeping only runs whose evidence
+ *   is still on disk. Empty on a host that was never seeded.
  *
  * Zero model calls on every route. Recorded repair-demo data never appears
  * here: a live failure is reported honestly, never backfilled.
@@ -87,6 +92,20 @@ async function findRecord(runId: string): Promise<ExplorationRecord | undefined>
   } catch { return undefined; }
 }
 
+/** The seeded example gallery, limited to runs whose saved evidence still exists. */
+async function readExamples(): Promise<ExampleScanList> {
+  let list: ExampleScanList;
+  try {
+    const parsed = ExampleScanListSchema.safeParse(JSON.parse(await readFile(join(resolveDataDir(), "examples.json"), "utf8")));
+    if (!parsed.success) return { generatedAt: null, examples: [] };
+    list = parsed.data;
+  } catch { return { generatedAt: null, examples: [] }; }
+  const runsDir = resolveLiveRunsDir();
+  const present = await Promise.all(list.examples.map((example) =>
+    access(join(runsDir, example.runId, "exploration.json")).then(() => true, () => false)));
+  return { generatedAt: list.generatedAt, examples: list.examples.filter((_example, index) => present[index]) };
+}
+
 function runningCount(): number {
   let count = 0;
   for (const record of records.values()) {
@@ -135,6 +154,8 @@ function publicRun(record: ExplorationRecord): ExplorationRun | { runId: string;
 }
 
 export function registerExplorationRoutes(app: FastifyInstance, limits: ApiLimits): void {
+  app.get("/examples", async (_request, reply) => reply.send(await readExamples()));
+
   app.post<{ Body: { url?: unknown; maxPages?: unknown } }>("/explorations", async (request, reply) => {
     const { url, maxPages } = request.body ?? {};
     if (typeof url !== "string" || url.trim() === "") {

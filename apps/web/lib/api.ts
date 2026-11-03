@@ -1,10 +1,13 @@
 import {
+  ExampleScanListSchema,
   ExplorationEventSchema,
   ExplorationRunSchema,
   LiveRunEventSchema,
   LiveRunStatusSchema,
   RunViewModelSchema,
   type ApiHealth,
+  type ExampleScan,
+  type ExampleScanList,
   type ExplorationEvent,
   type ExplorationRun,
   type LiveRunEvent,
@@ -13,7 +16,7 @@ import {
   type RunViewModel,
 } from "@a11yforge/shared";
 
-export type { ApiHealth, ExplorationEvent, ExplorationRun, LiveRunEvent, LiveRunStatus, RunSummary, RunViewModel };
+export type { ApiHealth, ExampleScan, ExampleScanList, ExplorationEvent, ExplorationRun, LiveRunEvent, LiveRunStatus, RunSummary, RunViewModel };
 
 export function apiBase(): string {
   const fromEnv = process.env["NEXT_PUBLIC_API_URL"];
@@ -229,6 +232,15 @@ export async function cancelExploration(runId: string): Promise<void> {
     method: "POST",
   });
   if (!res.ok) throw new Error(`Could not cancel (${res.status}).`);
+}
+
+/** Saved example scans for the home page gallery; empty when none are seeded or the API is down. */
+export async function fetchExamples(): Promise<ExampleScanList> {
+  try {
+    return ExampleScanListSchema.parse(await getJson("/examples"));
+  } catch {
+    return { generatedAt: null, examples: [] };
+  }
 }
 
 /** Absolute API URL for an exploration screenshot artifact. */

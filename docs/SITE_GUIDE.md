@@ -8,7 +8,7 @@ from a walkthrough of the production build, including a real scan of Deque's
 
 | Page | Address | What it is for |
 | --- | --- | --- |
-| Home | `/` | Explains the product and starts a website check |
+| Home | `/` | Explains the product, starts a website check, and lists example scans |
 | Scan and results | `/explore/<run>` | Live scan progress, then the 3D tour and full results |
 | Connect code | `/connect?run=<run>&finding=<finding>` | Traces one problem into a repository, read-only |
 | Demo | `/console` | The recorded real repair, plus its original artifacts |
@@ -41,6 +41,18 @@ An address that can't be understood shows the problem under the field, and no sc
 ![An address that could not be understood](site-guide/03-invalid-address.jpg)
 
 Private, loopback, link-local and reserved addresses are refused on a public server.
+
+### Example scans
+
+Below the address field, **Example scans** lists saved results for well-known home pages, so you
+can open a finished result without waiting. On the public site there are 69, scanned on
+3 November 2026 from a list of 100. Each card shows the site, its problem count and how many need
+attention first, and opens that scan's tour. **Find a site** filters the list.
+
+Each example is one home page as the test browser saw it, signed out and sometimes in a regional
+version. It isn't a full audit, and the site may have changed since. Sites that blocked the test
+browser are left out, and so are two that redirected to a page for the scanner's own city. The
+section doesn't appear on a server that has no examples.
 
 ## The scan
 
@@ -184,6 +196,7 @@ The API sits behind the web app at `/backend` on a one-port deployment.
 | Method and path | Purpose |
 | --- | --- |
 | `GET /health` | Status, model configured or not, passcode required, runs left today |
+| `GET /examples` | The saved example scans, limited to those whose evidence is still on disk |
 | `POST /explorations` | Start a scan with `url`, and optionally `maxPages` from 1 to 25 |
 | `GET /explorations/:runId` | Scan state and results |
 | `GET /explorations/:runId/events` | Scan progress as server-sent events |
