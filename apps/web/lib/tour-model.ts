@@ -97,10 +97,13 @@ export function liveTourModel(
       markers: markers.filter((marker) => marker.box.screenshot === shot), focusSteps,
     });
   });
+  // Name the scanned site: scans can be the visitor's own site or a saved example of someone else's.
+  let siteName = "This website";
+  try { siteName = new URL(run.target.entryUrl).hostname.replace(/^www\./, ""); } catch { /* keep the generic name */ }
   return {
     id: run.runId, label: "Live website scan", target: run.target.entryUrl,
     chapters: [
-      chapter({ id: "overview", kind: "overview", title: untested ? "Here’s where the check stopped." : "Your website. A closer look.", eyebrow: untested ? "LIVE WEBSITE SCAN / ACCESS LIMITED" : "LIVE WEBSITE SCAN / CAPTURED EVIDENCE",
+      chapter({ id: "overview", kind: "overview", title: untested ? "Here’s where the check stopped." : `${siteName}. A closer look.`, eyebrow: untested ? "LIVE WEBSITE SCAN / ACCESS LIMITED" : "LIVE WEBSITE SCAN / CAPTURED EVIDENCE",
         body: untested ? accessMessage || "The browser could not complete accessibility checks on this website." : `${problems.length} accessibility ${problems.length === 1 ? "issue" : "issues"} recorded across ${run.pagesVisited.length} ${run.pagesVisited.length === 1 ? "page" : "pages"}. Scroll to inspect what the browser found.`,
         facts: untested ? [overviewUrl === null ? "No page capture is available for this run." : "This capture shows the visible page only. Content beyond it was not tested."] : [],
         imageUrl: overviewUrl, markers: overviewMarkers, pageUrl: firstPage?.pageUrl ?? run.target.entryUrl }),
